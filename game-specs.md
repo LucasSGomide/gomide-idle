@@ -59,6 +59,13 @@ Rules that fall out of this:
 - **Defense alone does not clear a zone.** You can survive everything and still time out.
 - Speed / accuracy / crit / elemental resistances are **deferred** (see §9).
 
+**Every item carries its own attribute spread** — in v1 that means some mix of Attack and Defense,
+not a single "power" number. Two items of the same tier can be a real choice.
+
+**UI requirement:** when an item drops, the player sees it **compared directly against the item
+currently in that slot** — same attributes, side by side, differences marked. No mental arithmetic,
+no opening two screens. This is how the trade-off in §7 actually reaches the player.
+
 ---
 
 ## 3. The run — the unit of play
@@ -145,6 +152,28 @@ is the "you're close, but not there yet" signal. Dying is the "you do not belong
 | Under-leveled | Allowed, with a visible warning (see §4) |
 | Boss | **Gear source only** — it does *not* gate the next zone |
 
+### Zone selection is a boss chase
+
+This is the reason a player picks one zone over another, and it matters more than raw progression:
+
+> **You target-farm.** You want a specific item. You look up which boss drops it. You run that zone
+> until it drops.
+
+Consequences, all of them requirements:
+
+- **Every boss has its own identity and its own loot table.** No shared global drop pool. Boss 3
+  drops *these* items; if you want them, you run zone 3 — even if zone 4 is "better".
+- **Loot tables must be visible to the player.** You cannot target-farm what you cannot see. The
+  boss screen lists what it can drop.
+  - *Show the item list. Do **not** show exact drop rates* — the guide's rule about not sending
+    the client anything it doesn't need to render still holds, and hidden rates keep the chase alive.
+- **Zone choice stops being purely "go as deep as you can".** A level-45 player may deliberately
+  farm zone 2 because that boss holds the weapon their build wants. That's a feature.
+- **This makes free entry (above) matter more.** Wanting an item from a zone you're under-leveled
+  for is exactly the moment a player accepts the de-level risk on purpose.
+- **Content design rule:** items must be *spread* across bosses, not concentrated in the last one.
+  If the deepest boss drops everything good, there is no chase — only a ladder.
+
 Rough shape (all `TBD`, to be set in the spreadsheet):
 
 | Zone | Recommended level | Target run length |
@@ -181,9 +210,12 @@ wall is enforced by consequences (lost XP, lost levels, wasted hours), not by a 
 An idle game where you press start and wait is not a game. The real decisions, in order of how
 often they come up:
 
-1. **Which zone to run.** Safe and certain, or push up and risk levels? Reconsidered constantly.
+1. **Which zone to run — and *why*.** Two reasons pull against each other: *progress* (go as deep
+   as you safely can) and *the chase* (farm the boss that drops the item your build needs, even if
+   it's an "easier" zone). Plus the risk question on top: push up and gamble levels, or stay safe?
 2. **What to equip.** Weapon = Attack, everything else = Defense. Trading a defense piece for a
-   damage piece to beat a timer is the core puzzle.
+   damage piece to beat a timer is the core puzzle. Every drop is presented **side by side with the
+   currently equipped item**, so the trade-off is visible without doing math.
 3. **Where to spend the talent point.** One per level, into a real tree (§8). Reversible only by
    paying gold.
 4. **What to spend gold on.** Refinement (permanent small power) vs. saving for a respec.
@@ -353,6 +385,9 @@ The first minute decides everything. The sequence is fixed:
 - [ ] The ~12 talents themselves — what each one actually does
 - [ ] Wave count per zone and how monsters scale within a run
 - [ ] Is the "Unique" tier a drop, or only reachable through refinement?
+- [ ] **Per-boss loot tables** — which items live behind which boss, spread so that no single boss
+      is the only place worth farming
+- [ ] Exactly how much of a loot table is revealed before you've seen the item drop once
 - [ ] Class name and identity (the guide notes: check the name isn't taken early)
 
 **Engineering follow-ups this document creates:**
