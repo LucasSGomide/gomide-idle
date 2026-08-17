@@ -4,13 +4,15 @@ A build order, not a design doc. Every system named here is already designed (or
 left undesigned) in [`vision.md`](vision.md) or [`design.md`](design.md) — this document only
 answers *in what order* and *what has to be decided first*.
 
-**Status:** this roadmap supersedes the sequencing in `design.md`. `design.md` currently describes
-a 0.1.0 that starts server-authoritative (NestJS + Drizzle + Postgres, auth, three zones,
-Attack/Loot economy) — that was the right target design, but the wrong starting point. Here, the
-server-authoritative stack and the zone/Attack-Loot economy both still happen — as **Step 4** and
-**Step 2** respectively — not as v0. Once this roadmap is accepted, `design.md` should be edited to
-either point at this file for sequencing or be folded into it; don't maintain two conflicting
-build orders.
+**Status:** accepted for sequencing. This roadmap owns build order; `design.md` owns the model,
+content and formulas, and defers here for order. The server-authoritative stack lands at **Step
+4**, zones at **Step 3**.
+
+**Unresolved:** Steps 1-3 build an XP/leveling growth loop (`XpGained`, `LeveledUp`, a level curve
+driving `attack`), while `design.md`'s model has no XP or levels — growth there is buying `attack`
+and `lootMult` directly with gold, and "Attack or Loot?" is *the* first decision. Neither doc
+currently says which one is the real v0 model, or whether Steps 1-3 above should be read as
+superseding `design.md`'s formulas rather than just its sequencing. Resolve before starting Step 1.
 
 ---
 

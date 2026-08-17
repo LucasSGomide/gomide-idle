@@ -1,8 +1,10 @@
 # Design — 0.1.0
 
-The whole game, on one page. Every number here is real and checked by
-[`tools/balance.mjs`](../tools/balance.mjs) — run `node tools/balance.mjs` to re-derive them after
-any change.
+The whole game, on one page: the model, the content, and the two decisions. This page does not say
+*in what order* to build it — that's [`roadmap.md`](roadmap.md), which supersedes any sequencing
+implied below. The economy numbers here were checked by a balance script (`tools/balance.mjs`,
+since removed — see `roadmap.md` Step 3, which calls for its XP-based successor before more than 2
+zones ship); re-derive them by hand or with a new script before changing a formula or a zone row.
 
 Anything not on this page is not in 0.1.0. It's in [`vision.md`](vision.md).
 
@@ -104,8 +106,10 @@ crits, death), offline stops being closed-form and this gets much harder. See `v
 
 ## How it's built
 
-**Server-authoritative from day one** (decided 2026-08-11). The client sends intent, the server
-owns state and the clock.
+**Server-authoritative** is the target architecture, not the v0 starting point — per
+[`roadmap.md`](roadmap.md) Step 4, v0-v3 run this same model client-side (`localStorage`, a browser
+tick loop) behind a `simulate`/`applyCommand` boundary designed so the swap below is additive, not a
+rewrite. The client sends intent, the server owns state and the clock.
 
 | Piece | Choice |
 | --- | --- |
@@ -132,7 +136,9 @@ stream later means paying for it twice.
 
 ## Done when
 
-- [ ] Register, log in, hero persists
+This is the model fully built out, which per [`roadmap.md`](roadmap.md) lands across Steps 0-4, not
+on day one:
+
 - [ ] Gold accrues live while the tab is open
 - [ ] Close the tab, come back hours later, get correct offline gold
 - [ ] Both upgrades purchasable, prices escalate, the trade-off is felt
@@ -140,6 +146,7 @@ stream later means paying for it twice.
 - [ ] Selecting a zone above your attack earns zero, legibly
 - [ ] Playable through ugly HTML buttons — **and I still want to keep playing**
 - [ ] Combat emits events, even though nothing renders them
+- [ ] Register, log in, hero persists server-side (Step 4 — not required before it)
 
 ## Open
 

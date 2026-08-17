@@ -9,3 +9,4 @@ knowledge survives even when the idea never ships.
 
 | # | Idea | Est | Depends on | Verdict |
 |---|---|---|---|---|
+| [01](01-how-baiak-idle-works.md) | How Baiak Idle actually works |  | — | researched, nothing committed to |
