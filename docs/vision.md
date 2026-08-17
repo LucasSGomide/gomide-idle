@@ -31,7 +31,35 @@ build works — a two-handed weapon that still allows a shield, a shield that co
 Attack. *A Unique that's only bigger numbers is a failed Unique.* These were what made zone choice
 a chase rather than a ladder, and they were never designed — five rule-breakers was five systems.
 
-**Set items.** Individually fine, build-defining together. Only means something with lots of gear.
+**Set items.** Individually fine, build-defining together. Only means something with lots of gear. Completing a set will unlock new outfits, this way the item is not needed to be reflected directly on the character. Still need to find a way to display the glow when refining items.
+
+``` md
+                +----------------------------+
+                |   Player Equips an Item    |
+                +--------------+-------------+
+                               |
+                               v
+                +----------------------------+
+                |  Trigger Checking Script   |
+                +--------------+-------------+
+                               |
+            Is the FULL SET equipped? (Helm + Armor + Legs + Boots)
+                               |
+              +----------------+----------------+
+              |                                 |
+           [ YES ]                           [ NO ]
+              |                                 |
+              v                                 v
++----------------------------+    +----------------------------+
+| 1. Force Outfit Change     |    | 1. Revert to standard body |
+|    to "Dragon Set" ID      |    |    or cosmetic outfit      |
+| 2. Apply Custom Set Bonus  |    +----------------------------+
+| 3. (Optional) Spawn Wing   |
+|    visual addon            |
++----------------------------+
+```
+
+**Wings.**
 
 **Talent tree.** ~12 talents, up to 5 ranks each, some gated behind spend-N-points thresholds,
 one point per level to a cap of 50. Talents were meant to be *the ramp* — small, steady, always
@@ -89,6 +117,46 @@ build. The v1 class was going to be a Druid (WYD-inspired) with **Beast Master**
 tanks via shapeshifting), **Shapeshifter** and **Elementalist**. Only Beast Master was ever more
 than a name. Whether every class can fill a tank role was explicitly undecided.
 
+``` md
+                  +----------------------------+
+                  |  Player Uses Transform Skill|
+                  +--------------+-------------+
+                                 |
+                                 v
+                  +----------------------------+
+                  |    Read Skill Level (X)    |
+                  +--------------+-------------+
+                                 |
+         +-----------------------+-----------------------+
+         |                       |                       |
+   [ Level 1-5 ]           [ Level 6-9 ]           [ Level 10+ ]
+         |                       |                       |
+         v                       v                       v
++------------------+    +------------------+    +------------------+
+| 1. Swap Outfit to|    | 1. Swap Outfit to|    | 1. Swap Outfit to|
+|    "Beast_Form"  |    |    "Beast_Form"  |    |    "Beast_Form"  |
+| 2. Set Shader:   |    | 2. Set Shader:   |    | 2. Set Shader:   |
+|    GLOW_OFF      |    |    SILVER_GLOW   |    |    GOLD_FLASHING |
+| 3. Apply Base    |    | 3. Apply Mid     |    | 3. Apply Max     |
+|    Stat Buffs    |    |    Stat Buffs    |    |    Stat Buffs    |
++------------------+    +------------------+    +------------------+
+         |                       |                       |
+         +-----------------------+-----------------------+
+                                 |
+                                 v
+                  +----------------------------+
+                  |   Transformation Timer     |
+                  |         Expires?           |
+                  +--------------+-------------+
+                                 |
+                                 v
+                  +----------------------------+
+                  | 1. Revert to Human Outfit  |
+                  | 2. Remove All Shaders      |
+                  | 3. Strip Stat Buffs        |
+                  +----------------------------+
+``` 
+
 **Per-item attribute spreads,** so two items of the same tier are a genuine choice rather than a
 bigger/smaller comparison. More slots: helmet, boots, gloves, then accessories once there are
 stats worth putting on them.
@@ -120,4 +188,7 @@ Write them here. Don't build them.
 
 | Idea | Date |
 | --- | --- |
-| | |
+| Set items unlock outfits | 12/08/2026 |
+| Shapeshift is an outfit unlocked by skill usage | 12/08/2026 |
+| Wing forging bench unlocks outfit addons | 12/08/2026 |
+
