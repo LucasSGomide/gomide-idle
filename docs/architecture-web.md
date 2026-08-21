@@ -24,3 +24,22 @@ citations, so append rather than reorder.
    server last said, so anything derived from it is a display value, not a
    decision.
 
+
+5. **The renderer owns one element and React never renders inside it.** Two
+   systems writing the same DOM subtree is the failure this boundary exists to
+   prevent.
+
+6. **The arena event stream never enters React state.** React must not re-render
+   at frame rate, so events travel from the transport to the renderer directly.
+
+7. **Render deliberately in the past, behind a small buffer.** Holding both
+   bracketing snapshots is what makes movement smooth instead of jittery, and
+   the player cannot act during a fight, so the delay costs nothing.
+
+8. **Snap rather than replay when far behind.** Playing back hours of hit flashes
+   after a backgrounded tab is worse than showing the result — keep only the
+   events with lasting visual state.
+
+9. **Never invent an event the server did not send.** Extrapolate movement
+   briefly if the buffer starves, then freeze and say so; a fabricated hit
+   breaks the only guarantee the renderer offers.

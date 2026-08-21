@@ -66,3 +66,21 @@ correctness requirement.
     [`alpha.md`](../alpha.md) decision 4 — replay-based offline is impossible
     otherwise.
 
+15. **The simulation package depends on nothing.** An empty dependency list is
+    the only enforcement of rules 1–5 that cannot be forgotten in review.
+
+16. **Use separate PRNG streams for combat and for loot.** One shared stream means
+    adding a single roll to any mechanic silently rerolls every future drop in
+    every existing save.
+
+17. **The simulation has no side effects until one transactional write at the
+    end.** It is what makes a lost optimistic-lock race safe to simply re-run.
+
+18. **Simulation state is plain data, never a domain aggregate.** Aggregates carry
+    identity and invariants for account-shaped state; the sim state is loaded
+    whole, passed to a pure function and written back whole, and giving it
+    methods is what drags the ORM and the framework into the hot path.
+
+19. **A live tick and an offline replay are the same call with a different tick
+    count.** The moment they are two functions, [`alpha.md`](../alpha.md)
+    decision 2 has been abandoned without anyone deciding to.
