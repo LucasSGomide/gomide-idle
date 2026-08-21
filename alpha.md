@@ -35,6 +35,12 @@ pick a hunt → clear monster waves → fight the boss → collect items → hun
 These four are architecturally defining. Changing any of them later is a rewrite, not an
 edit. Decided 2026-08-20.
 
+The rules they imply are written down where the work happens, not here:
+[`docs/architecture-api.md`](docs/architecture-api.md) (the simulation and determinism),
+[`docs/architecture-web.md`](docs/architecture-web.md) (the renderer boundary),
+[`docs/design.md`](docs/design.md) (balance and content) and
+[`docs/process.md`](docs/process.md) (build order and playtesting).
+
 ### 1. Arena, not map
 
 A hunt is a small, wall-free room with a cap on how many monsters are alive at once.

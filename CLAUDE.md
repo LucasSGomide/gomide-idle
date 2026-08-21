@@ -22,6 +22,7 @@ Numbers are permanent IDs. Nothing is ever renumbered or reused.
 - **Web stack** — `docs/stack-web.md`
 - **Auth** — `docs/auth.md`
 - **Design** — `docs/design.md`
+- **Process** — `docs/process.md`
 - **Naming** — `docs/naming.md`
 
 **Commands**
