@@ -7,8 +7,14 @@ replayed, no frame sent.
 
 > This document answers three questions — how Baiak Idle leverages Tibia, what it's built on, and
 > what I'd have to learn to build something like it. It is **research, not a plan.** Nothing here
-> is scheduled and nothing here amends [`design.md`](../design.md). The last section is the one
+> is scheduled and nothing here amends the design. The last section is the one
 > that matters: *most of this must not be imported into 0.1.0.*
+
+> **Note added 2026-08-20.** This document is a dated research record and is left as written.
+> Every reference below to `design.md` and to "0.1.0" points at a design that has since been
+> deleted — three zones, two upgrade buttons, no gear, no boss, closed-form offline. The current
+> spec is [`alpha.md`](../../alpha.md), and §1.5 of this document (targeting shapes, monster
+> ability rolls, autopilot quality as a stat) is the part it draws on directly.
 
 **Companion repo:** much of what follows was already established in
 `~/dev/personal/tibia-idle/docs/`, which is a two-month reverse-engineering effort against this
@@ -546,5 +552,5 @@ Everything else in this document is for later, or for never.
 - `docs/roadmap/46-sprite-images.md` — the sprite manifest as an asset architecture
 - `data/{monsters,hunts,items,spells,bosses}.json` — the content corpus
 
-**In this repo:** [`design.md`](../design.md) · [`vision.md`](../vision.md) ·
+**In this repo:** [`alpha.md`](../../alpha.md) · [`vision.md`](../../vision.md) ·
 [`research/build-guide.md`](../research/build-guide.md)

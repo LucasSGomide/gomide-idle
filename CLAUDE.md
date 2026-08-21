@@ -21,7 +21,7 @@ Numbers are permanent IDs. Nothing is ever renumbered or reused.
 - **API stack** — `docs/stack-api.md`
 - **Web stack** — `docs/stack-web.md`
 - **Auth** — `docs/auth.md`
-- **Design** — `design.md`
+- **Design** — `docs/design.md`
 - **Naming** — `docs/naming.md`
 
 **Commands**

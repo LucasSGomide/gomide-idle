@@ -1,39 +1,40 @@
 # gomide_idle
 
-A browser idle game, built to learn how browser idle games are built.
+A browser idle RPG in the Tibia visual idiom, built to be played by other people.
 
 **Status:** design only. No code yet.
 
 ## The game, in one sentence
 
-> Pick a zone. Your hero kills monsters there forever. Gold accrues. You spend it on Attack or
-> Loot — and the best zone to be in changes as you get stronger.
-
-Three zones, two upgrades, five formulas, no gear, no levels, no death. That's deliberate — see
-the design principles at the bottom of [`design.md`](design.md).
+> Pick a hunt. Your character clears the waves and the boss on its own. You come back to
+> loot — and the thing you actually play is the rule list that decides how it fights.
 
 ## The docs
 
 | File | What it is |
 | --- | --- |
-| [`design.md`](design.md) | **The whole game, one page.** Real numbers, no `TBD`. Start here. |
-| [`roadmap.md`](roadmap.md) | Build order — what to build in what sequence, and what has to be decided first. |
-| [`vision.md`](vision.md) | The parking lot. Everything cut, one bullet each. Nothing here is committed to. |
-| [`docs/research/build-guide.md`](docs/research/build-guide.md) | Research notebook, written before any of this. Reference material, not a spec — parts of it describe a different repo. |
+| [`alpha.md`](alpha.md) | **The closed alpha, one page.** The spec plus the four decisions the build rests on. Start here. |
+| [`vision.md`](vision.md) | The parking lot. Everything wanted but not in the alpha, one bullet each. Nothing here is committed to. |
+| [`docs/`](docs/) | The planning system — roadmap items, task breakdowns, explorations, and one rule doc per area. See [`project.yml`](project.yml) for the map. |
+| [`docs/research/build-guide.md`](docs/research/build-guide.md) | Research notebook, written before any of this. Reference material, not a spec — parts of it describe a different design. |
+| [`docs/explorations/01-how-baiak-idle-works.md`](docs/explorations/01-how-baiak-idle-works.md) | Teardown of a shipped, commercial-scale game in this exact genre. The most useful document in the repo. |
 
-The rule that keeps these apart: **`design.md` is what gets built, `roadmap.md` is in what order,
-`vision.md` is what doesn't (yet).** An idea moves between them by a deliberate edit, never by
-drifting.
+The rule that keeps these apart: **`alpha.md` is what gets built, `docs/roadmap/` is in
+what order, `vision.md` is what doesn't (yet).** An idea moves between them by a deliberate
+edit, never by drifting.
 
-## Checking the balance
+## Superseded
 
-`design.md`'s numbers were checked by a balance script (`tools/balance.mjs`), since removed —
-`roadmap.md` Step 3 calls for its XP-based successor before more than 2 zones ship. Until then,
-re-check by hand after changing any number in `design.md`.
+`design.md` and `roadmap.md` were deleted on 2026-08-20. They described a different and
+much smaller game — three zones, two upgrade buttons, no gear, no boss, no levels, and
+offline progress as a single multiplication. The closed alpha is not a bigger version of
+that design; it is a different one. Full text in git history at commit `8144bf3`.
 
-Two design bugs the original script already caught, both invisible on paper:
+Two design bugs the old balance script caught, both invisible on paper and both still worth
+knowing when the alpha's curve gets tuned:
 
-1. **Linear gains against exponential costs stall.** The first model put Zone 3 at 1.8 million
-   hours.
+1. **Linear gains against exponential costs stall.** The first model put the last zone at
+   1.8 million hours.
 2. **With two multiplicative income tracks, cost growth has to beat gain growth *squared*.**
-   Alternating purchases otherwise outrun the price curve and the game finishes in 85 minutes.
+   Alternating purchases otherwise outrun the price curve and the game finishes in 85
+   minutes.

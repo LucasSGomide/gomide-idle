@@ -22,7 +22,7 @@ areas:
   API stack: docs/stack-api.md
   Web stack: docs/stack-web.md
   Auth: docs/auth.md
-  Design: design.md
+  Design: docs/design.md
   Naming: docs/naming.md
 
 requirementsFile: docs/requirements.md

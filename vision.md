@@ -1,29 +1,33 @@
 # Vision — the parking lot
 
-Everything cut from 0.1.0, and everything wanted beyond it. One bullet each.
+Everything wanted beyond the closed alpha. One bullet each.
 
 **This file exists so that "no" can mean "not yet" without the idea leaking back into
-[`design.md`](design.md).** If you catch yourself designing something here, stop — write the one
+[`alpha.md`](alpha.md).** If you catch yourself designing something here, stop — write the one
 line and go back to building.
 
-Nothing in this document is committed to. Nothing here has a version number. When 0.1.0 is
+Nothing in this document is committed to. Nothing here has a version number. When the alpha is
 actually playtested, the highest-value items get promoted based on what playtesting showed was
 missing — not on what this file wants.
 
+> **Updated 2026-08-20.** The section below was written against the old `design.md` — a much
+> smaller game, since deleted (see [`README.md`](README.md)). Several things it lists as *cut*
+> are now in the closed alpha; those are marked inline. The rest still stands.
+
 ---
 
-## Cut from 0.1.0 (was designed, then removed)
+## Cut from the old 0.1.0 design (was designed, then removed)
 
 These were all fully specified once. The full text is in git history at commit `1e4685c`,
 under `docs/systems/`, if the reasoning is ever needed again.
 
-**Gear.** Three slots — weapon (1H or 2H), shield, armor — where equipping a two-handed weapon
+**Gear.** *(in the alpha, reshaped — six slots with prefix/suffix rolls rather than three slots on a ladder. See [`alpha.md`](alpha.md).)* Three slots — weapon (1H or 2H), shield, armor — where equipping a two-handed weapon
 locks the shield slot. That fork was the one standing build decision. Items as strict ladders
 within a slot; the weapon the only Attack source, shield and armor the only Defense sources.
 → *Constraint:* item stats want to be a `{ attack, defense, … }` bag and `slot` a data field, so
 adding a slot is a content edit plus a migration, not a redesign.
 
-**Item tiers.** Normal → Superior → Perfect → Unique, dropping from bosses and weighted by zone
+**Item tiers.** *(partly in the alpha — Common and Uncommon only.)* Normal → Superior → Perfect → Unique, dropping from bosses and weighted by zone
 depth.
 
 **Uniques.** One per boss, drop-only, ~Perfect stats plus **one rule-breaker** that changes how a
@@ -61,21 +65,21 @@ a chase rather than a ladder, and they were never designed — five rule-breaker
 
 **Wings.**
 
-**Talent tree.** ~12 talents, up to 5 ranks each, some gated behind spend-N-points thresholds,
+**Talent tree.** *(in the alpha, reshaped — one skill point per level spent on class skills, each levellable ten times.)* ~12 talents, up to 5 ranks each, some gated behind spend-N-points thresholds,
 one point per level to a cap of 50. Talents were meant to be *the ramp* — small, steady, always
 something to click — against gear's spikes. Critically, the tree was where all the Attack/Defense
 trade-offs lived, because gear had been deliberately emptied of them. It was never written.
 
-**Defense as a stat.** The whole second axis. Attack decides whether you beat the timer, Defense
+**Defense as a stat.** *(in the alpha — Physical Defence plus Fire and Electric resistances.)* The whole second axis. Attack decides whether you beat the timer, Defense
 decides whether you survive. → *Constraint:* the stat model should extend past `{ attack }`
 without a resolver rewrite.
 
-**Waves, bosses and timers.** A run as `wave 1 → … → wave N → BOSS`, with one timer for the waves
+**Waves, bosses and timers.** *(waves and bosses are in the alpha; timers and the timeout penalty are not. The offline constraint below was answered — offline replays the real ticks, see [`alpha.md`](alpha.md).)* A run as `wave 1 → … → wave N → BOSS`, with one timer for the waves
 and another for the boss, run length growing ~2 min in zone 1 to ~10 min in zone 5. Boss as the
 only gear source. Timeout costing 25% of the run's banked XP.
-→ *Constraint:* this is the thing that breaks closed-form offline progress. See `design.md`'s
-offline section — the moment a run has internal structure, offline stops being one multiplication
-and needs a real rate resolver plus a parity test against the live one.
+→ *Resolved:* this is the thing that broke closed-form offline progress, and the alpha answers it
+by never being closed-form — offline replays the real ticks with a seeded RNG, so there is one
+resolver, not two. See [`alpha.md`](alpha.md).
 → *Constraint:* if monsters get individual attacks (not just a wave-clear timer), give each one a
 tiny data record instead of code — `{element, min, max, chance, interval}`, one independent
 probability roll per tick, no state machine. It costs nothing to leave unread today, and it's the
@@ -87,7 +91,7 @@ guard rail — a player on Retry in a zone they can't beat loses levels overnigh
 Deliberately harsh, MuOnline-flavoured. Required the game to state the risk loudly every time and
 show de-levels first in the login summary.
 
-**XP and levels.** Level cap 50, XP banked per kill, one talent point per level.
+**XP and levels.** *(in the alpha — cap 30, one skill point per level.)* Level cap 50, XP banked per kill, one talent point per level.
 
 **Refinement.** Small permanent power steps paid in gold — the main gold sink. Open: max level,
 whether it can fail or downgrade an item, gold vs. gold+material, whether Uniques can be refined.
@@ -112,7 +116,7 @@ in one loop. Worth rebuilding the moment gear exists.
 **Aesthetic.** MuOnline-inspired. Items visibly worn on the character. Gear glows to signal power,
 and glow intensity scales with refinement level.
 
-**Classes.** Every class has 3 specialization branches, mixable for hybrids or maxable for a pure
+**Classes.** *(one class, one branch — Beastmaster/Shapeshifter — is in the alpha.)* Every class has 3 specialization branches, mixable for hybrids or maxable for a pure
 build. The v1 class was going to be a Druid (WYD-inspired) with **Beast Master** (summons packs,
 tanks via shapeshifting), **Shapeshifter** and **Elementalist**. Only Beast Master was ever more
 than a name. Whether every class can fill a tank role was explicitly undecided.
@@ -168,7 +172,7 @@ durability and repair as a second gold sink.
 **A visual layer.** Sprites, 4-frame animations, floating damage numbers, screen shake, easing on
 every bar, a sound per meaningful event. Rare drops get disproportionate fanfare. The plan was a
 React/DOM layer for everything configurable plus a small canvas viewport that only renders the
-fight from the server's event stream — which is why `design.md` emits events from day one.
+fight from the server's event stream — which is why combat emits events from day one.
 
 ---
 
@@ -191,4 +195,197 @@ Write them here. Don't build them.
 | Set items unlock outfits | 12/08/2026 |
 | Shapeshift is an outfit unlocked by skill usage | 12/08/2026 |
 | Wing forging bench unlocks outfit addons | 12/08/2026 |
+| Support spell - chaining heal (heal all pt but reduces effectiveness on each bump) | 18/08/2026 |
+| Support spell - bend tempo ("paralyze" like effect on mobs, reduce attak speed and mob speed) | 18/08/2026 |
+| Class - Dryad - Foema like class (can be archer, white or dark magic) | 18/08/2026 |
 
+
+# Closed Alpha Vision:
+## The Game
+- Idle browser game inspired by Tibia, MuOnline, Path of Exile 2, WYD.
+- Graphics will be Tibia like.
+      - 32 x 32 Isometric
+      - A character or monster is always placed in 1 tile
+            -  They can never occupy the the same tile at the same time
+
+## Loop
+1. Pick a "Hunt"
+2. Clear monster waves
+3. Fight a boss
+4. Collect items
+5. Hunt again
+
+## Progression
+- Experience Points
+      - Players gain experience points from going through hunt loops
+            - A hunt loop has a pre-defined cap of experience available
+- Level
+      - A player gains levels by accumulating experience points
+      - Level for alpha will be limited to 30
+
+- Skill Points
+      - One skill point is rewarded on every level gained by the player
+      - A skill point is used to increase class skills
+
+## Monsters
+- A single monster with 5 variants
+      - 1. Physical Damage
+      - 2. Physical Damage + Fire Damage
+      - 3. Physical Damage + Electric Damage
+
+## Bosses
+- A single boss with 5 variants
+      - 1. Physical Damage
+      - 2. Physical Damage + Fire Damage
+      - 3. Physical Damage + Electric Damage
+
+## Hunts
+1. Monsters: [1], Boss: [1]
+2. Monsters: [2], Boss: [2]
+3. Monsters: [3], Boss: [3]
+
+## Attributes:
+### Resource
+- Health Points 
+- Mana Points
+- Health Regeneration
+- Mana Regeneration
+
+### Defences
+- Physical Defence
+- Elemental Defence
+      - Fire Resistance
+      - Electric Resistance
+
+### Damage
+- Physical Damage
+- Elemental Damage
+      - Fire Damage
+      - Electric Damage
+- Critical
+      - Critical Chance (Applies for Physical and Elemental)
+            - Unit: Percentage
+      - Critical Damage (Applies for Physical and Elemental)
+            - Unit: Float
+      - Multiplier: 1.5 (configurable)
+      - Math: {elemental-damage || physical damage} * {crit-multiplier}
+            - TBD: How Critical Damage works? Additive damage? Multiplcative Damage?
+- Attack/Cast Speed
+
+## Skills:
+### What is?
+- Active
+      - Configured to be casted under specified conditions by the player
+            - E.g. Self Health Points <= 60 ? Shapeshift into Werebear
+            - E.g. Self Health Points > 60 ? Shapeshift into Werewolf
+      - Have cooldown 
+- Passive
+      - Persistent buff/debuff applied to the character or to others around
+- Buff
+      - Is a positive modifier applied to a character or monster
+            - E.g. A passive skill increases Health Points regeneration
+            - E.g. An active skill increases target critical strike chance for X amount of time
+- Debuff
+      - Is a negative modifier appled to a character or monster
+            - E.g. A passive skill constatly reduces nerby monsters attack speed
+            - E.g. An active skill breaks target armor for X amount of seconds
+- Level
+      - A skill can be improved up to 10 times
+      - On every upgrade the skill performance improves
+## Classes
+### Beastmaster
+- Specialization: Shapeshifter
+- Forms:
+      - Werewolf
+      - Werebear
+
+#### Skills
+- Shapeshifting skills have 5 seconds cooldowns between transformations. Meaning that if one enters Werebear form, it takes at least X seconds to shift into any other.
+
+1. Active - Werewolf Form: When casted player transforms into a Werewolf
+      1.1. Every level increased increases player physical damage by X%
+      1.2. Every level increased increases player life leech by X%
+      1.3. On transformation player looses X% of health points
+            1.3.1. Every level reduces health points loss % (e.g. Base X% - additional Y% based on skill level)
+      1.4. On transformation player gains X% of attack speed
+            1.4.1. Every level increases the extra attack speed % (e.g. Base X% + additional Y% based on skill level)
+2. Werebear Form: When casted player transforms into a Werebear
+      2.1. Every level increased increases player elemental resistances by X%
+      2.2. Every level increased increases health regeneration by X health points per second
+      2.3. On transformation player looses X% of attack speed
+            2.5.1. Every level reduces attack speed loss % (e.g. Base X% - additional Y% based on skill level)
+      2.5. On transformation player gains X% of extra health points
+            2.5.1. Every level increases the extra health points % (e.g. Base X% + additional Y% based on skill level)
+3. Human Form: When casted player transform into human
+4. Active - Claw Strike: Attack 3 monsters that are currently in front of the player
+5. Passive - Effective Killer: Increases critical strike chance by X amount per second up to Y amount while the player is shapeshifted into werewolf.
+      5.1. Buff is lost if player is back into human or werebear form.
+6. Passive - Bear Presence: Deal fire damage to all enemies on X tile radius by X amount per second up to Y amount while the player is shapeshifted into Werebear.
+      6.1. Buff is lost if player is back into human form or if entered Werewolf form
+6. Passive - Human in the Loop: Accumulates damage taken and dealt up to X amount.
+      6.1. When in human form a barrier activates absorbing Y amount of damage
+      6.2. Any damage that exceeds the barrier is reduced by 50%.
+      6.3. Every level reduces the shifting cooldown by 0.25 seconds
+
+## Items
+### Tiers:
+1. Common: 
+      - Has item base defence
+2. Uncommon:
+      - Has item base defence
+      - Has one prefix and one suffix
+
+### Attributes:
+#### Prefixes:
+1. Critical Chance
+2. Critical Damage
+3. Attack/Cast Speed
+4. Extra Healing Power
+5. Life Leech
+6. Mana Leech
+
+#### Suffixes:
+1. Elemental Resistance
+      1.1. All Resistances
+      1.2. Fire
+      1.3. Electric
+2. Extra Health Percentage
+3. Extra Mana Percentage
+4. Extra Drop Rate
+5. Extra Exp Rate
+
+### Helmet
+- Base Attribute: Physical Defence
+- Uncommon:
+      - Prefix: [1,2,3,4,5,6]
+      - Suffix: [1,2,3,4,5]
+
+### Armor
+- Base Attribute: Physical Defence
+- Uncommon:
+      - Prefix: [1,2,3,4,5,6]
+      - Suffix: [1,2,3,4,5]
+
+### Legs
+- Base Attribute: Physical Defence
+- Uncommon:
+      - Prefix: [1,2,3,4,5,6]
+      - Suffix: [1,2,3,4,5]
+
+### Gloves
+- Base Attribute: Physical Defence
+- Uncommon:
+      - Prefix: [1,2,3,4,5,6]
+      - Suffix: [1,2,3,4,5]
+
+### Boots
+- Base Attribute: Physical Defence
+- Uncommon:
+      - Prefix: [1,2,3,4,5,6]
+      - Suffix: [1,2,3,4,5]
+
+### Weapon:
+- Claw
+- Uncommon:
+      - Prefix: [1,2,3,4,5,6]
+      - Suffix: [1,2,3,4,5]
