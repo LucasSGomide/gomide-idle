@@ -24,7 +24,7 @@ rooms (see [`01-how-baiak-idle-works.md`](01-how-baiak-idle-works.md) §2.1).
 
 Against that, four frictions specific to this project:
 
-1. **Sync wants a second copy of the state.** `libs/sim` has an empty dependency
+1. **Sync wants a second copy of the state.** `libs/simulation` has an empty dependency
    list and no decorators, which is what makes
    [`architecture-api.md`](../architecture-api.md) rules 1–5 self-enforcing.
    Getting Colyseus sync means either decorating the simulation state — which
@@ -46,6 +46,14 @@ Against that, four frictions specific to this project:
 And the counter, which is real: if party hunts are coming and Colyseus is the
 validated answer, hand-building a room abstraction may be building something to
 throw away.
+
+> **Amended 2026-08-22 by [02](02-domain-model.md).** Two of this spike's
+> assumptions moved. `architecture-api.md` rule 21 makes a dropped socket *end*
+> the live hunt, so **reconnection is no longer a capability arm A has to
+> match** — it is a capability the design rejects. And rule 18 means there is no
+> save blob, so friction 1's "welds the save blob to the wire format" is now
+> only "welds the run header to the wire format", which is a much smaller
+> objection. Re-read the bar below before running the spike.
 
 ## The question the spike actually decides
 
@@ -75,13 +83,13 @@ Timebox: one day. Build the smallest honest version of both, not a toy.
 
 - [ ] How large the sim-state-to-schema mapping layer is in arm B, and whether it
       needs touching every time a mechanic is added.
-- [ ] Whether anything in arm B tempts a decorator into `libs/sim`, and what it
+- [ ] Whether anything in arm B tempts a decorator into `libs/simulation`, and what it
       would cost to refuse.
 - [ ] What arm B's `Room` gives up from the `backend-standards` layering — DI,
       `LoggerPort`, `ApiError` — and whether that is bridgeable or just accepted.
 - [ ] What arm A does not have that party hunts would need, stated as a list of
-      work rather than a feeling. Reconnection and room lifecycle are the
-      suspects.
+      work rather than a feeling. Room lifecycle is the suspect; reconnection
+      is not, per the amendment above.
 - [ ] Whether the event stream survives Colyseus's patch interval intact, or
       whether ordering and timing get reshaped by it. Ordering is a correctness
       requirement here ([`architecture-api.md`](../architecture-api.md) rule 4).

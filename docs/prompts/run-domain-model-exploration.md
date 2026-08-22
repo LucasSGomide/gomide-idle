@@ -1,6 +1,6 @@
 # Goal: Run exploration 02 to a verdict — the game's bounded contexts, modules, and the line between aggregate state and simulation state
 
-**Status:** not yet executed
+**Status:** executed 2026-08-22 — verdict written, rule 18 replaced
 **Rating:** —
 **Run:** standalone — can run before or after the exploration 03 Colyseus spike
 

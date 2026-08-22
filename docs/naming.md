@@ -22,3 +22,12 @@ citations, so append rather than reorder.
 3. **Repositories serve use cases that write; DAOs serve use cases that read.**
    The split survives the loss of the command/query buses because it was always
    about return shape — aggregates versus whatever the screen needs.
+
+4. **Name packages in full: `libs/simulation`, never `libs/sim`.** The
+   abbreviation reads as jargon to anyone who has not built a game, and the
+   package name is the word every other doc uses for the thing.
+
+5. **A hunt run's stored row is its *header*, and the word is reserved for it.**
+   It names the inputs a run was sealed with — seed, content version, start
+   tick, frozen character — and never the world inside the fight, which is not
+   stored at all.

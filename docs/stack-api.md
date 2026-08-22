@@ -41,7 +41,7 @@ file carries the rule, that file carries the argument.
 
 ## The simulation package
 
-7. **No NestJS, no decorators and no DI inside `libs/sim`.** The determinism
+7. **No NestJS, no decorators and no DI inside `libs/simulation`.** The determinism
    suite must be runnable without booting a framework, or it will eventually be
    skipped.
 
@@ -85,29 +85,34 @@ file carries the rule, that file carries the argument.
 
 ## Persistence
 
-16. **Postgres, with the schema hybrid: real columns for anything queried, one
-    JSONB blob for simulation state.** Positions, buffs, cooldowns, the modifier
-    source list and the PRNG state are never queried by the database, and
-    modelling them relationally buys no query capability and costs a migration
-    per mechanic.
+16. **Postgres, real columns throughout — equipment ids and skill levels
+    included; JSONB only for the run header's frozen rule list.** No simulation
+    state is stored at all (`architecture-api.md` rule 18), so the hybrid
+    schema's blob has nothing left to hold, and the rule list is the one input
+    whose length varies.
 
 17. **MikroORM.** At six tables the differentiators between ORMs evaporate, so the
     tiebreaker is the migration workflow already trusted.
 
-18. **`state_version` is a real column, never a key inside the JSON.** Finding
-    un-migrated rows is a query.
+18. **Migrate the run header like any other table.** It is one row per player
+    currently offline, so a shape change is an ordinary migration and the schema
+    stays strict — tolerating optional fields forever costs more, in every
+    reader, than paying once.
 
-19. **Migrate saved state lazily on read, one version step at a time.** A save
-    untouched for months still loads, and no maintenance window is ever needed.
+19. **Never store a fight in order to resume it; re-run it from its header.** A
+    sealed offline session is replayed exactly once at the next login and a live
+    hunt dies with its socket, so there is no world state to version, migrate or
+    lazily upgrade.
 
 20. **Pin the content-pack version in every persisted hunt.** A replay is only
     reproducible against the content it ran with, so rebalancing a monster
     otherwise breaks every stored hunt log the first time it happens.
 
-21. **Guard a replay with an advisory lock and a version compare-and-swap.** The
-    lock avoids the wasted work of two concurrent replays, the CAS is what
-    guarantees correctness when the lock is lost — and retry is free only because
-    the simulation has no side effects until the final write.
+21. **Guard a catch-up with an advisory lock and a compare-and-swap on the run's
+    status.** Two tabs logging in at once must not bank the same outcome twice;
+    the lock avoids the wasted work, the CAS is what guarantees correctness when
+    the lock is lost — and retry is free only because the simulation has no side
+    effects until the final write.
 
 ## Deployment
 
@@ -146,8 +151,8 @@ file carries the rule, that file carries the argument.
     means the caching would be caching a build that takes seconds.
 
 30. **`apps/` for deployables, `libs/` for shared code, per the existing
-    standards.** `packages/sim` and `packages/content` are `libs/` in that
-    vocabulary.
+    standards.** `libs/simulation` and `libs/content` are the two shared
+    packages; `apps/api` divides into `character`, `hunt` and `auth`.
 
 31. **`libs/content` exports the JSON and the validator together.** Shape and
     referential integrity are checked in one place used by both apps, which is
@@ -158,6 +163,6 @@ file carries the rule, that file carries the argument.
     one set of conventions across the repo beats a per-package optimum, and the
     `backend-standards` testing rules are already written against Jest.
 
-33. **Configure Jest for ESM in `libs/sim` rather than compiling it down.**
-    `libs/sim` is ESM-native so it survives the NestJS 12 migration untouched,
-    and the runner is the thing that should bend.
+33. **Configure Jest for ESM in `libs/simulation` rather than compiling it down.**
+    `libs/simulation` is ESM-native so it survives the NestJS 12 migration
+    untouched, and the runner is the thing that should bend.

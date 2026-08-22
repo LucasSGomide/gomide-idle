@@ -73,6 +73,18 @@ approximation.
 - **Randomness is seeded** from day one — same seed, same rolls, same outcome. A replay is
   reproducible and refreshing cannot reroll it.
 - The server owns the clock and the seed. Never `Date.now()` from the browser.
+- **Offline hunting is a mode you enter on purpose.** You go to the offline screen, pick a
+  hunt, and log out. That *seals* the session: gear, skill levels and rule list are frozen
+  at that moment and cannot change until you come back.
+- A sealed session is replayed **exactly once**, at your next login, and then it is over.
+  That is what keeps catch-up cheap — there is no fight that gets longer every time you
+  log in.
+- Closing the tab while watching a live hunt is not offline hunting. The fight ends and
+  banks whatever it earned.
+- **Nothing about a fight is ever written to the database.** What is stored is the
+  session's inputs (hunt, seed, content version, start time, the frozen character) and the
+  XP and loot it banks. Positions, HP, cooldowns and buffs are rebuilt by replay and thrown
+  away — see [`docs/explorations/02-domain-model.md`](docs/explorations/02-domain-model.md).
 
 *Why:* one combat system instead of two. Every mechanic works offline the day it is built,
 with no second set of "on average" formulas to keep in sync and no parity test to maintain.
@@ -238,6 +250,9 @@ a stat block and an ability list — not a code change.
 ---
 
 ## Items
+
+Loot never lands on the ground. A kill resolves straight into your inventory — no item to
+walk over, no pickup, no despawn timer.
 
 ### Tiers
 
