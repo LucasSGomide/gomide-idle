@@ -3,6 +3,14 @@
 Researched 2026-08-22. Written for someone who has never built a game and knows
 backend TypeScript well. Every game term is defined the first time it is used.
 
+> **Amended 2026-08-22 by [`explorations/02-domain-model.md`](../explorations/02-domain-model.md).**
+> This guide assumes the game's own state is what gets written to the database —
+> the shape almost every engine tutorial assumes. That is not this project's
+> design. Nothing about a fight is ever persisted: the character is *projected*
+> into components when a run starts, mutated freely, and thrown away
+> (`architecture-api.md` rules 18 and 24). Two places say otherwise and carry
+> in-place corrections: §6 and §9.2. Everything else in this guide stands.
+
 The pattern under study is **component-based composition in the Unity / Godot
 sense**: an entity owns a bag of components, and each component carries both its
 own data and its own behaviour. ECS is not in the main body; it gets a fair
@@ -673,6 +681,23 @@ Three rules that keep this from rotting:
    component's shape changes, write a migration from version *n* to *n+1*. You
    will need this in month three; adding it in month three is much worse.
 
+> **Correction.** Rule 3 does not apply to this project and rules 1–2 apply for a
+> different reason than the one given.
+>
+> There is no save. A fight is never written to the database
+> (`architecture-api.md` rule 18), so there is no version integer, no migration
+> from *n* to *n+1*, and no month three in which you need one. What survives a
+> logout is the run *header* — hunt, seed, content version, start tick, and the
+> frozen character — and that is ordinary columns migrated ordinarily
+> (`stack-api.md` rule 18).
+>
+> The codecs above still get built, as **test infrastructure**. `stack-api.md`
+> rule 11 requires a JSON round-trip mid-stream as one of the four determinism
+> tests: serialise the world at tick *n*, read it back, keep running, and assert
+> the event stream is byte-identical. That test is what catches a component
+> holding state it never declared. So rules 1 and 2 stand — exhaustive by type,
+> transients excluded — but the thing they protect is a test, not a save file.
+
 ---
 
 ## 7. How the real engines do it
@@ -959,7 +984,8 @@ Purity at the boundary is straightforward. `runTicks(state, content, ticks)`
 mutates the state object it was handed and returns it. That is a pure function
 from the caller's point of view as long as (a) `content` is never mutated, (b)
 nothing outside `state` is touched, and (c) the caller passes state it owns. In
-practice: load the row, hydrate to `SimState`, run, serialise, write once. Deep
+practice: build `SimState` from the run header and the projected character
+(§9.2's correction), run, and write once — the outcome only, never the world. Deep
 in-place mutation is also *much* faster than rebuilding immutable state 360,000
 times, and at these tick counts that is the difference between a fast catch-up
 and a slow one.
@@ -1065,19 +1091,38 @@ for free. Despawning is a filter that preserves order.
 
 **Player character**
 
-| Component | Fields | Saved? | Why it is its own component |
-| --- | --- | --- | --- |
-| `Position` | `x`, `y` | yes | tile identity, and the arena cares |
-| `Health` | `current`, `max` | yes | survives waves; nothing else has its lifetime |
-| `Stats` | `base`, `mods[]`, `effective` | base+mods yes, effective no | the modifier list is the character sheet |
-| `Equipment` | `slots: Record<Slot, ItemId>` | yes | persists across hunts, unlike buffs |
-| `Skillbook` | `skills: SkillId[]` | yes | replaced wholesale on shapeshift |
-| `Cooldowns` | `readyAt: Map<SkillId, tick>` | yes | dies with the skillbook, not with HP |
-| `Gambits` | `rows: GambitRow[]` | yes | the thing the player actually authors |
-| `Buffs` | `active: BuffInstance[]` | yes | expiry is per-instance |
-| `Form` | `current: FormId \| null`, `until` | yes | shapeshift; grants and revokes components |
-| `Targeting` | `current: EntityId \| null` | **no** | recomputed every tick |
-| `Aura` | `buffId`, `radius` | **no** | granted by `Form`, so it is derived |
+> **Correction — the third column originally read "Saved?".** It does not mean
+> that here. Nothing in this table is written to the database. The column means
+> *does this survive from one tick to the next, or is it rebuilt every tick* —
+> which is a real and useful distinction for the phase list, and the only one the
+> original column was actually carrying.
+>
+> The fourth column adds where each one **comes from**, because that is the part
+> the original table left implicit and the part that matters most: three of these
+> are copies of the `Character` aggregate, made once when the run starts and
+> discarded when it ends. If you treat them as the save, you have two copies of
+> the player's gear that can disagree.
+
+| Component | Fields | Survives a tick? | Comes from | Why it is its own component |
+| --- | --- | --- | --- | --- |
+| `Position` | `x`, `y` | yes | the arena's spawn layout | tile identity, and the arena cares |
+| `Health` | `current`, `max` | yes | `Stats` at run start | survives waves; nothing else has its lifetime |
+| `Stats` | `base`, `mods[]`, `effective` | base+mods yes, effective no | **projected from `Character`** | the modifier list is the character sheet |
+| `Equipment` | `slots: Record<Slot, ItemId>` | yes | **projected from `Character`** | persists for the whole run, unlike buffs — ids only, never item objects (`architecture-api.md` rule 23) |
+| `Skillbook` | `skills: SkillId[]` | yes | **projected from `Character`** | replaced wholesale on shapeshift |
+| `Cooldowns` | `readyAt: Map<SkillId, tick>` | yes | empty at run start | dies with the skillbook, not with HP |
+| `Gambits` | `rows: GambitRow[]` | yes | **projected from `Character`** | the thing the player actually authors |
+| `Buffs` | `active: BuffInstance[]` | yes | empty at run start | expiry is per-instance |
+| `Form` | `current: FormId \| null`, `until` | yes | human at run start | shapeshift; grants and revokes components |
+| `Targeting` | `current: EntityId \| null` | **no** | rebuilt each tick | recomputed every tick |
+| `Aura` | `buffId`, `radius` | **no** | granted by `Form` | granted by `Form`, so it is derived |
+
+The four rows marked **projected from `Character`** are the boundary between the
+two halves of the system. They are read out of the aggregate once, by the
+factory in §9.9, and **nothing is ever written back** — a run hands back an
+outcome (XP, drops) and a use case applies it to the `Character`
+(`architecture-api.md` rule 24). `Loot` on a monster is the same idea: it names a
+table id, not the items themselves.
 
 **Monster** — same vocabulary, different subset:
 
@@ -1839,9 +1884,11 @@ Any two of these together mean it is time to reconsider:
 4. **You write "all entities with X and Y" more than three or four times per
    tick and it shows up in a profile.** That is ECS's core query, and wanting it
    repeatedly is the honest signal to want ECS.
-5. **A single `SimState` serialises to more than a few hundred kB.** The write at
-   the end of `runTicks` is your bottleneck, not the ticks; you would need to
-   split hot and cold state, which is an ECS-adjacent restructuring.
+5. **A single `SimState` serialises to more than a few hundred kB.** *Not a
+   signal for this project — the world is never written.* Its account-side twin
+   is: loading a `Character` to spend one skill point means loading hundreds of
+   items. That is the trigger to split `Inventory` out
+   ([`explorations/02-domain-model.md`](../explorations/02-domain-model.md)).
 6. **One entity type has more than about fifteen components.** Something in there
    is a sub-entity — a pet, a totem, a summon — that wants to be its own entity.
 
@@ -1863,7 +1910,9 @@ is worth engineering for now because it is nearly free:
 - Content files do not change at all.
 - The blast radius is the simulation package only, because `runTicks(state,
   content, ticks)` is the entire public surface. Nothing in NestJS, nothing in
-  React, nothing in the database schema except the state blob's shape.
+  React, and — since there is no state blob — nothing in the database schema at
+  all. The projection in §9.9 and the outcome a run returns are the only two
+  shapes the rest of the system sees.
 
 Realistically that is a focused rewrite of one package with a golden-hash test
 already in place to prove the behaviour did not move — which is a much better
