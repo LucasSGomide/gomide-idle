@@ -73,11 +73,12 @@ file carries the rule, that file carries the argument.
     calls.** Two code paths for combat is exactly what `alpha.md` decision 2
     exists to prevent, and a live tick is a replay with a small `ticks` argument.
 
-14. **What runs on top of the socket is unsettled — see
-    [`explorations/03-colyseus-spike.md`](explorations/03-colyseus-spike.md).**
-    Colyseus is free and validated by Baiak Idle, but its value is synchronized
-    state while this design carries an event stream, so the spike decides it
-    rather than an argument.
+14. **A room is a map from run id to connections, owned by the NestJS gateway —
+    no Colyseus.** Synchronization exists to make several writers converge, and
+    a hunt has exactly one writer (`runTicks`) whose output is already an
+    ordered event stream; see
+    [`explorations/03-colyseus-spike.md`](explorations/03-colyseus-spike.md)
+    for the reopen conditions.
 
 15. **Version the socket protocol as an integer the client hard-codes.** A stale
     client that silently renders nonsense costs more to diagnose than one that
