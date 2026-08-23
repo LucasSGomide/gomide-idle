@@ -34,7 +34,8 @@ citations, so append rather than reorder.
 
 7. **Render deliberately in the past, behind a small buffer.** Holding both
    bracketing snapshots is what makes movement smooth instead of jittery, and
-   the player cannot act during a fight, so the delay costs nothing.
+   the player never issues a combat command — editing gear or a gambit is not
+   timing-sensitive — so the delay costs nothing.
 
 8. **Snap rather than replay when far behind.** Playing back hours of hit flashes
    after a backgrounded tab is worse than showing the result — keep only the
@@ -43,3 +44,8 @@ citations, so append rather than reorder.
 9. **Never invent an event the server did not send.** Extrapolate movement
    briefly if the buffer starves, then freeze and say so; a fabricated hit
    breaks the only guarantee the renderer offers.
+
+10. **The gambit and targeting editors live in React, outside the renderer's
+    element.** The player edits while the fight runs, so the two write to the
+    same screen at the same time and must never share a DOM subtree — rule 5,
+    with a live editor sitting on top of it.

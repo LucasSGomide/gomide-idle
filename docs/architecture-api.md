@@ -53,9 +53,10 @@ correctness requirement.
 10. **Cap how much elapsed time a single catch-up will replay.** Without a cap, a
     player returning after six months times out the request on login.
 
-11. **Persist the seed and the inputs for each hunt.** It makes "why did my
-    character die at 3am" answerable by replaying that exact hunt, rather than by
-    guessing.
+11. **Persist the seed and the inputs for each *offline* session.** A sealed
+    session is the only fight reproducible from its record; a live hunt takes
+    input continuously and is not replayed — see
+    [`explorations/04-the-live-hunt.md`](explorations/04-the-live-hunt.md).
 
 12. **Content is data, validated at load — never constants in code.** A new
     monster, item or hunt should be a content edit; only a new *dimension* should
@@ -93,19 +94,22 @@ correctness requirement.
     is replayed exactly once, at the next login, which is what stops catch-up
     cost from growing with every logout.
 
-21. **A dropped socket ends the live hunt and banks what it earned.** Anything
-    else makes the server guess whether closing a tab was intent.
+21. **A dropped socket is a leave: the character stays in the arena five
+    seconds, then exits and banks.** Quitting and crashing become the same event,
+    so pulling a network cable cannot rescue a character about to die.
 
-22. **Freeze the character's equipment, skill levels and rule list into the run
-    header when a run starts.** It is what keeps rule 11's "replay that exact
-    hunt" true after the player re-gears.
+22. **Freeze the character's equipment, skill levels and rule list when an
+    *offline* session is sealed.** Freezing is what makes a sealed session
+    reproducible, so it applies exactly where nobody can change anything; a live
+    run takes all three as continuous input instead.
 
 23. **The simulation refers to items by id, never by an item object.** It is what
     keeps the fight independent of every account-side shape.
 
 24. **Project the character into the fight; never write the fight back.** A run
     returns an outcome and a use case applies it — two copies of equipment that
-    can disagree is the bug this prevents.
+    can disagree is the bug this prevents. A live edit is a fresh projection
+    *into* the arena, never a write out of it.
 
 25. **The character sheet is the simulation's modifier collection run with zero
     ticks.** One implementation of "additive within a stat, multiplicative
@@ -118,3 +122,27 @@ correctness requirement.
 27. **Decide where new state goes by asking whether replaying the current run
     from its header reproduces it.** Yes means simulation state. No means it is a
     run input or a banked outcome, and belongs to an aggregate.
+
+28. **An arena exists only in memory, and only while a player stands in it.**
+    Created on first entry and destroyed when the last player leaves, so wave
+    progress needs no schema, no migration and no cleanup job.
+
+29. **Scale monster count and the alive-cap by the number of players in the
+    arena.** It is what makes an even XP split neutral rather than punitive, and
+    it keeps a party economically identical to the same people hunting alone.
+
+30. **Bank XP per kill, never at the end of a run.** With no unbanked progress
+    there is nothing for leaving, crashing or dying to take, so each needs one
+    rule instead of two.
+
+31. **Store outcomes and death records; never the world.** "Which element, which
+    monster, which wave" is a balance question needing queryable rows — the one
+    bounded exception to rule 18, and it stays bounded.
+
+32. **A live edit lands on a tick boundary, like any other input.** Gear,
+    gambits, skill points and targeting all arrive as intent and take effect on
+    the next tick, which keeps one ordering rule rather than four.
+
+33. **Tier, density and party size are multipliers over one hunt definition.**
+    Eighteen hand-authored combinations drift apart from each other; five numbers
+    cannot.

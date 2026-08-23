@@ -43,3 +43,11 @@ citations, so append rather than reorder.
    cooldown, a timer — buying the same stat pays off forever and there is no
    regime where a different choice becomes correct.
 
+10. **One player-hour produces one player's worth of XP and loot** — whatever the
+    density, whatever the party size. Tier changes what drops and density changes
+    which build wins; neither changes the rate, and party size changes nothing at
+    all. Run every balance change against this before shipping it.
+
+11. **Two modes promising equal XP per hour must also clear at equal speed.**
+    Boss loot scales with clear time, so a slower mode would be punished twice
+    for being slower.

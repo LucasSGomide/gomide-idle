@@ -13,6 +13,15 @@
 > argument.** Simulation state is not merely "not an aggregate" — it is never
 > persisted at all.
 
+> **Amended 2026-08-23 by [04](04-the-live-hunt.md).** Three things moved. A live
+> fight is now continuously edited, so a run's inputs are no longer frozen at
+> start — freezing is offline's property alone. An **arena** appeared underneath
+> the run: an in-memory room, holding several players, with its own lifetime and
+> its own wave counter, which this exploration never modelled because nothing then
+> outlived a single player's run. And *"party hunts would make a run belong to
+> several characters"* is answered: a **Run stays per-player**, and it is the
+> arena that is shared. The findings below hold otherwise.
+
 ## The question
 
 What are the bounded contexts of this game, what modules follow from them, and

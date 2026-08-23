@@ -47,6 +47,12 @@ And the counter, which is real: if party hunts are coming and Colyseus is the
 validated answer, hand-building a room abstraction may be building something to
 throw away.
 
+> **Amended 2026-08-23 by [04](04-the-live-hunt.md).** The player now edits gear,
+> gambits, skill points and targeting *during* the fight, which reads like it
+> should overturn this exploration and does not — see the reopen conditions in
+> the findings for why input is not the trigger. What did change: the live room
+> is now an **arena**, it holds several players, and it scales with them.
+>
 > **Amended 2026-08-22 by [02](02-domain-model.md).** Two of this spike's
 > assumptions moved. `architecture-api.md` rule 21 makes a dropped socket *end*
 > the live hunt, so **reconnection is no longer a capability arm A has to
@@ -120,14 +126,15 @@ have measured a choice that had already been made elsewhere.
 > When party hunts arrive, will four players share one server-synced state
 > object — or will each client receive the same event stream, filtered?
 
-**The same event stream, and not even filtered.** A hunt is one deterministic
-simulation over a frozen header: every input is fixed at run start
-([`architecture-api.md`](../architecture-api.md) rule 22), the player cannot act
-during the fight ([`architecture-web.md`](../architecture-web.md) rule 7), and
-nothing is ever written back into it (`architecture-api.md` rule 24). A party
-hunt projects four characters into the run instead of one — it does not add a
-second writer. Four players watching one fight see identical events for the same
-reason two of one player's tabs would.
+**The same event stream, and not even filtered.** An arena is one deterministic
+simulation with exactly one writer — `runTicks`, on the server. Players do send
+intent, continuously: a swapped helmet, a reordered gambit. The server applies it
+on a tick boundary and the consequence comes back down the stream everyone is
+already receiving ([`architecture-api.md`](../architecture-api.md) rules 14, 24
+and 32). No browser ever changes the world itself. A party projects four
+characters into the arena instead of one; it does not add a second writer. Four
+players watching one fight see identical events for the same reason two of one
+player's tabs would.
 
 State synchronization is the answer to *several clients are changing one world
 and must converge*. Nothing changes this world but `runTicks`: single-writer,
@@ -166,7 +173,7 @@ event stream *inside* the sync channel.
 | --- | --- |
 | Automatic state synchronization | Not wanted — the wire format is a versioned event stream |
 | Client SDK with change callbacks | Wrong shape — rule 7 wants two bracketing snapshots keyed by tick, not a mutated object |
-| Reconnection | Rejected by design — `architecture-api.md` rule 21 ends the hunt with the socket |
+| Reconnection | Rejected by design — `architecture-api.md` rule 21 makes a dropped socket a leave, not a pause |
 | Matchmaking and seat reservation | Account-shaped, therefore HTTP — `stack-api.md` rule 12 |
 | Room lifecycle | Real, and it is a `Map<runId, Set<connection>>` |
 | Multi-process presence via Redis | The thing `stack-api.md` rule 24 deliberately defers |
@@ -183,9 +190,10 @@ it is short, and none of it is what Colyseus is for:
    when it banks its outcome.
 2. Authorization on join: is this character a member of this run.
 3. Per-connection write backpressure — one slow client must not stall the tick.
-4. A policy decision for party hunts that rule 21 currently answers for one
-   player: whose dropped socket ends a shared hunt. Colyseus would not have
-   answered this either.
+4. A policy decision for parties that rule 21 currently answers for one player:
+   whose dropped socket ends a shared arena — or, per [04](04-the-live-hunt.md),
+   whether it ends anything at all while others are still inside. Colyseus would
+   not have answered this either.
 
 That is the thing the exploration worried about throwing away. It is bounded, and
 it is smaller than arm B's mapping layer alone.
@@ -203,11 +211,14 @@ load are unmeasured — and neither is what the bar asked about.
 
 Reopen if any of these becomes true:
 
-- **The player can act during a live fight.** `architecture-web.md` rule 7 is
-  load-bearing for this whole finding: the moment input arrives mid-fight, two
-  clients can diverge and convergence becomes a real problem.
-- **A party hunt needs per-player state a shared replay cannot derive** — private
-  loot rolls, per-player visibility, anything where "filtered" stops being a
-  no-op.
-- **Rule 21 softens** to allow reconnecting into a hunt still running on the
-  server.
+- **A browser changes the arena locally before the server confirms it.** Player
+  input is *not* the trigger — [04](04-the-live-hunt.md) made editing continuous
+  and this finding survived it, because intent still travels up as a message and
+  consequences still come down as events. What breaks it is client-side
+  prediction: a browser applying a change to its own copy and reconciling
+  afterwards. That is when copies drift and convergence becomes a real problem.
+- **Two players in one arena need to see different worlds** — loot rolls resolved
+  client-side, per-player visibility, anything that makes "everyone gets the same
+  stream" false.
+- **Rejoining a running arena** becomes a feature. Rule 21's five-second window is
+  not reconnection; a mid-fight rejoin is, and it is deferred with the party UI.

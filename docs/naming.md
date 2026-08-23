@@ -31,3 +31,8 @@ citations, so append rather than reorder.
    It names the inputs a run was sealed with — seed, content version, start
    tick, frozen character — and never the world inside the fight, which is not
    stored at all.
+
+6. **`Hunt` is the content, `Arena` is the live room, `Run` is one player's stint
+   in it.** Three things with three lifetimes wore one word; splitting them is
+   what stops "the hunt" meaning a JSON file in one function and an in-memory
+   room in the next.
