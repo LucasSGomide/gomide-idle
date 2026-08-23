@@ -32,8 +32,9 @@ file carries the rule, that file carries the argument.
    better command bus.
 
 5. **Never route simulation events through an async in-process bus.** Combat
-   events must arrive in a deterministic order (`architecture-api.md` rule 4), and
-   a bus is the one place that ordering silently stops being guaranteed.
+   events must arrive in a deterministic order (`architecture-api.md`'s
+   determinism section), and a bus is the one place that ordering silently stops
+   being guaranteed.
 
 6. **Keep every other rule in the `backend-standards` skill.** The layering, the
    ports, the repository mapping, the `ApiError` hierarchy and the `LoggerPort`
@@ -88,9 +89,9 @@ file carries the rule, that file carries the argument.
 
 16. **Postgres, real columns throughout — equipment ids and skill levels
     included; JSONB only for the run header's frozen rule list.** No simulation
-    state is stored at all (`architecture-api.md` rule 18), so the hybrid
-    schema's blob has nothing left to hold, and the rule list is the one input
-    whose length varies.
+    state is stored at all (`architecture-api.md`'s simulation-boundary
+    section), so the hybrid schema's blob has nothing left to hold, and the rule
+    list is the one input whose length varies.
 
 17. **MikroORM.** At six tables the differentiators between ORMs evaporate, so the
     tiebreaker is the migration workflow already trusted.
@@ -157,8 +158,8 @@ file carries the rule, that file carries the argument.
 
 31. **`libs/content` exports the JSON and the validator together.** Shape and
     referential integrity are checked in one place used by both apps, which is
-    what makes `architecture-api.md` rules 12–13 enforceable rather than
-    aspirational.
+    what makes `architecture-api.md`'s content-is-data rule and `alpha.md`'s
+    referential-integrity requirement enforceable rather than aspirational.
 
 32. **Jest everywhere, including the framework-free packages.** One runner and
     one set of conventions across the repo beats a per-package optimum, and the
