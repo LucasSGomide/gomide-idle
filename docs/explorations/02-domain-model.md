@@ -5,9 +5,10 @@
 > Opened because settling the stack surfaced a question the stack cannot answer.
 > [`docs/stack-api.md`](../stack-api.md) kept the `backend-standards` layering
 > (aggregates, ports, repository mapping) while
-> [`docs/architecture-api.md`](../architecture-api.md) rule 18 pushed simulation
-> state the other way, into a plain JSONB blob passed to a pure function. Rule 18
-> was a ruling made to unblock the stack docs, not a modelled decision.
+> [`docs/architecture-api.md`](../architecture-api.md)'s simulation-boundary
+> rule (simulation state is plain data, never persisted) pushed simulation
+> state the other way, into a plain JSONB blob passed to a pure function. That
+> rule was a ruling made to unblock the stack docs, not a modelled decision.
 >
 > **It was replaced, and the replacement is stronger than either side of the
 > argument.** Simulation state is not merely "not an aggregate" — it is never
@@ -31,9 +32,9 @@ which state is an aggregate versus plain simulation data?
 
 Three things pulled in different directions and none was obviously wrong: the
 `backend-standards` position (aggregates own invariants), the determinism
-position (`architecture-api.md` rules 1–5 make combat a pure function over plain
-data), and the alpha's actual size (one class, three hunts, six slots, thirty
-levels).
+position (`architecture-api.md`'s determinism rules make combat a pure
+function over plain data), and the alpha's actual size (one class, three
+hunts, six slots, thirty levels).
 
 The question that dissolved it was not a modelling question. It was: *why is any
 of the fight persisted?* Once offline hunting became a mode the player enters
@@ -50,13 +51,14 @@ deliberately, the answer was "it isn't", and most of the tension went with it.
 - [x] **The line, as a test.** *Can you recompute it by replaying the current run
       from its header?* Yes → simulation state. No → it is a run input or a
       banked outcome, and belongs to an aggregate. Now
-      `architecture-api.md` rule 27.
+      `architecture-api.md`'s simulation-boundary section.
 - [x] **What owns a hunt run.** A `HuntRun` row that is a **header only** —
       character, hunt, seed, content version, start tick, and the frozen
       equipment, skill levels and rule list. It never holds the world. The
       predicted failure point did not occur, because the thing that spanned both
       sides of the line turned out not to exist.
-- [x] **Rule 18 is replaced**, not amended. See below.
+- [x] **The "simulation state is never persisted" rule is replaced**, not
+      amended. See below.
 - [x] **Deferrals**, listed at the end.
 
 ## The answers to the open questions
@@ -71,14 +73,16 @@ deliberately, the answer was "it isn't", and most of the tension went with it.
   one level down, on content.
 - **Items exist in two states, not three.** A roll result the run hands back, and
   an owned thing inside the Character. There is no ground item and no pickup
-  phase — `architecture-api.md` rule 26.
+  phase — `alpha.md`'s Functional Requirements table (loot resolves straight
+  into the inventory).
 - **Content is a shared kernel.** It gets no context and no aggregate. It is
   loaded, validated, frozen, and shared by both apps —
   `stack-api.md` rule 31.
 - **The character sheet is `libs/simulation` with zero ticks.** Project the
   Character into a player entity, call `collectModifiers`, run nothing. The sheet
   and the fight are the same code, so they cannot disagree —
-  `architecture-api.md` rule 25.
+  `architecture-api.md`'s simulation-boundary section (the character sheet is
+  the simulation's modifier collection run with zero ticks).
 
 ## The model
 
@@ -106,13 +110,15 @@ them.
 **The translation point is a one-way projection.** The Character is projected into
 components at run start; the fight mutates them 36,000 times; nothing is written
 back. The run returns an outcome and a use case applies it —
-`architecture-api.md` rule 24. This is the correction the research doc needs:
+`architecture-api.md`'s simulation-boundary section (project the character
+into the fight, never write the fight back). This is the correction the
+research doc needs:
 §9.2 marks `Equipment`, `Skillbook` and `Gambits` as **saved**, which is written
 for a game where the entity *is* the save file. Here the Character is the only
 truth, and following §9.2 literally ships two copies of your gear that can
 disagree.
 
-## What happened to rule 18
+## What happened to the "simulation state is never persisted" rule
 
 **Replaced.** The old text said simulation state is plain data rather than an
 aggregate. The new text says it is never persisted:
@@ -123,10 +129,10 @@ aggregate. The new text says it is never persisted:
 
 Everything that depended on it moved in the same pass:
 
-| Rule | Was | Now |
+| Doc | Was | Now |
 | --- | --- | --- |
-| `architecture-api.md` 1, 2, 5, 7, 8, 16 | "the saved state", "every existing save" | retargeted to the run header and runs in flight |
-| `architecture-api.md` 20–27 | — | appended: sealed sessions, dropped sockets, the frozen header, items by id, one-way projection, the sheet, no ground loot, the test |
+| `architecture-api.md`'s determinism and server-authority rules (RNG seed/counter, PRNG algorithm pinning, fixed-point integers, migration-commit timing, separate PRNG streams) | "the saved state", "every existing save" | retargeted to the run header and runs in flight |
+| `architecture-api.md`'s simulation boundary, plus `alpha.md`'s Functional Requirements | — | appended: sealed sessions, dropped sockets, the frozen header, items by id, one-way projection, the sheet, no ground loot, the replay test |
 | `stack-api.md` 16 | hybrid schema, JSONB blob for simulation state | real columns throughout; JSONB only for the frozen rule list |
 | `stack-api.md` 18 | `state_version` is a real column | migrate the run header like any other table |
 | `stack-api.md` 19 | migrate saved state lazily on read | never store a fight to resume it; re-run it from its header |
@@ -152,7 +158,7 @@ Everything that depended on it moved in the same pass:
 
 ## Findings
 
-Rule 18 was replaced, not defended. The productive question was not "aggregate or
+The "simulation state is never persisted" rule was replaced, not defended. The productive question was not "aggregate or
 plain data" but "why is any of the fight persisted at all" — and once offline
 hunting became a mode the player deliberately enters, sealing gear and rules at
 logout, the answer was: it is not. A sealed session replays exactly once, so no

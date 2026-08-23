@@ -40,11 +40,15 @@ to a number of runs per day. See **Hunts** below.
 These four are architecturally defining. Changing any of them later is a rewrite, not an
 edit. Decided 2026-08-20.
 
-The rules they imply are written down where the work happens, not here:
-[`docs/architecture-api.md`](docs/architecture-api.md) (the simulation and determinism),
-[`docs/architecture-web.md`](docs/architecture-web.md) (the renderer boundary),
-[`docs/design.md`](docs/design.md) (balance and content) and
-[`docs/process.md`](docs/process.md) (build order and playtesting).
+The architecture principles they imply are written down where the work
+happens, not here: [`docs/architecture-api.md`](docs/architecture-api.md) (the
+simulation and determinism) and [`docs/architecture-web.md`](docs/architecture-web.md)
+(the renderer boundary). Everything else those principles imply — functional
+requirements, the player and operator needs behind them, and tuning notes —
+is staged in this doc's own Functional Requirements, User Needs and Notes
+tables below, until [`docs/requirements.md`](docs/requirements.md) formalizes
+it. [`docs/design.md`](docs/design.md) is UI/UX guidelines and has no content
+yet.
 
 ### 1. Arena, not map
 
@@ -336,8 +340,9 @@ Potions are **items, not skills** — free in the alpha, so paid potions can arr
 without a model change. Tiers unlock by level: inferior from the start, common at 10,
 superior at 30. Gambits drink them like any other conditional action.
 
-> **Open.** A free unlimited heal has no bottleneck, which
-> [`docs/design.md`](docs/design.md) rule 9 forbids. Potions need a cooldown.
+> **Open.** A free unlimited heal has no bottleneck, which this doc's
+> Functional Requirements table forbids ("every rate mechanic needs a stated
+> bottleneck"). Potions need a cooldown.
 
 ### Loot
 
@@ -392,3 +397,77 @@ walk over, no pickup, no despawn timer.
 - **The potion cooldown** (see Items above).
 - **The numbers.** Wave depth per tier, alive-cap escalation per wave, the boss loot curve
   against clear time, and the tier and density multipliers.
+
+---
+
+## Functional Requirements
+
+An informal staging area — extracted from `architecture-api.md`,
+`architecture-web.md` and the old `design.md`, sorted out from the
+architecture principles they used to sit next to. Not the formal, append-only
+log; that's [`docs/requirements.md`](docs/requirements.md), populated later by
+the `msg-pre-roadmap` skill.
+
+| Area | Requirement |
+| --- | --- |
+| Front-end | Version the event stream, and fail loudly on an unknown version. |
+| Front-end | Render deliberately in the past, behind a small buffer, holding both bracketing snapshots. |
+| Front-end | Snap rather than replay when far behind on catch-up; keep only the events with lasting visual state. |
+| Front-end | Never invent an event the server did not send; extrapolate movement briefly if the buffer starves, then freeze and indicate the stall. |
+| Back-end | Assert that a repeated seed produces a byte-identical event stream, in CI. |
+| Back-end | Fix the tick rate once and treat it as permanent. |
+| Back-end | Cap how much elapsed time a single catch-up will replay. |
+| Back-end | Persist the seed and the inputs for each offline session. |
+| Back-end | Validate content for referential integrity, not just shape — every skill, prefix and monster a table names must exist, checked at load. |
+| Back-end | Offline hunting is a mode the player enters deliberately; a sealed session is replayed exactly once, at the next login. |
+| Back-end | A dropped socket is a leave: the character stays in the arena five seconds, then exits and banks. |
+| Back-end | Freeze the character's equipment, skill levels and rule list when an offline session is sealed. |
+| Back-end | Loot resolves straight into the inventory; nothing is ever an item on the ground. |
+| Back-end | An arena exists only in memory, and only while a player stands in it — created on first entry, destroyed when the last player leaves. |
+| Back-end | Scale monster count and the alive-cap by the number of players in the arena. |
+| Back-end | Bank XP per kill, never at the end of a run. |
+| Back-end | Tier, density and party size are multipliers over one hunt definition, never eighteen hand-authored combinations. |
+| Design | Item variety comes from roll ranges, not affix combinations. |
+| Design | When two income sources multiply, cost growth must beat gain growth squared. |
+| Design | Every rate mechanic needs a stated bottleneck — a spawn cap, a cooldown, a timer. |
+| Design | One player-hour produces one player's worth of XP and loot — whatever the density, whatever the party size. |
+| Design | Two modes promising equal XP per hour must also clear at equal speed. |
+
+## User Needs
+
+The player- or operator-facing motivation behind requirements above, where
+the original rule stated or implied one.
+
+| Area | Need |
+| --- | --- |
+| Front-end | A stale or version-mismatched client's failure must be immediately visible, not a silent rendering of nonsense that's hard to diagnose. |
+| Front-end | Players watching a fight need to see smooth motion, not jitter, even though they never issue combat commands directly. |
+| Front-end | A player reopening a backgrounded tab needs to see the current result quickly, not sit through a replay of everything that happened while away. |
+| Front-end | Players need confidence that everything rendered actually happened in the fight — a fabricated hit would break that guarantee. |
+| Back-end | A player must not be able to see a boss's future loot by reading the RNG seed. |
+| Back-end | A player returning after months away must not have their login hang or time out. |
+| Back-end | A player must not be able to escape death by disconnecting — quitting and crashing must be the same event. |
+| Back-end | A party must not be economically worse off than the same players hunting alone. |
+| Back-end | A player must never lose experience already earned by leaving, crashing or dying. |
+
+## Notes
+
+Reasoning worth keeping that isn't an architecture principle, a functional
+requirement, or a user need — tuning heuristics and the history behind them.
+
+| Area | Note |
+| --- | --- |
+| Front-end | Placeholder art is acceptable at any stage; only a renderer that owns a rule is not — art has lead time and can be swapped late. |
+| Back-end | Write a run header's migration in the same commit as the shape change that needs it — a migration written later is written against a shape you no longer remember. |
+| Back-end | Sealing an offline session exactly once at login, rather than resuming a running one, is what keeps catch-up cost from growing with every logout. |
+| Back-end | Ground loot is deferred until a feature actually needs spatial loot. |
+| Back-end | Eighteen hand-authored tier/density/party combinations would drift apart from each other; five multiplier numbers cannot. |
+| Design | A thing with no decision attached is filler — this test is what removed gear, talents and tiers from the design that preceded the alpha. |
+| Design | Complexity lives in one system at a time — two half-built systems teach you nothing about either one. |
+| Design | Every "no" is a "not yet" — cuts go to `vision.md` with the constraint they imply. |
+| Design | Tune against a headless run of the simulator, never by playing — tuning by playing costs real hours per iteration; the same answer from a harness costs seconds. |
+| Design | Get one slot's numbers feeling right before generating the rest — six slots × six prefixes × five suffixes is 360 combinations you would otherwise be balancing blind. |
+| Design | Linear gains against exponential costs stall — an early model of the preceding design put its last zone at 1.8 million hours, a curve that was wrong in a way invisible on paper. |
+| Design | The roll-range approach to item variety costs far less to balance than affix combinations — an affix rolling +5% to +15% creates more chase than thirty distinct affix pairings. |
+| Design | The income-multiplier squared-cost rule was a real bug, not a hypothetical — an earlier model let alternating purchases outrun the price curve and the game finished in 85 minutes. |
+| Design | Two equal-XP modes must clear at equal speed because boss loot scales with clear time — a slower mode would otherwise be punished twice for being slower. |

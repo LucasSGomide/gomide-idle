@@ -26,13 +26,15 @@ Against that, four frictions specific to this project:
 
 1. **Sync wants a second copy of the state.** `libs/simulation` has an empty dependency
    list and no decorators, which is what makes
-   [`architecture-api.md`](../architecture-api.md) rules 1–5 self-enforcing.
+   [`architecture-api.md`](../architecture-api.md)'s determinism rules
+   self-enforcing.
    Getting Colyseus sync means either decorating the simulation state — which
    also welds the save blob to the wire format, so a rendering change becomes a
    save migration — or maintaining a parallel schema and copying into it.
 2. **Sync and events are different paradigms.** The renderer rules
-   ([`architecture-web.md`](../architecture-web.md) 7–9) are built on an event
-   stream with an interpolation buffer. Sync says HP went 400→160; it does not
+   (now `alpha.md`'s Functional Requirements table — render deliberately
+   behind a small buffer, snap rather than replay when far behind, never
+   invent an event) are built on an event stream with an interpolation buffer. Sync says HP went 400→160; it does not
    say it was a crit. Damage numbers, hit flashes and cast telegraphs are events
    and would travel by `room.send()` regardless — using Colyseus as a message bus
    and ignoring the feature it was adopted for.
@@ -54,12 +56,14 @@ throw away.
 > is now an **arena**, it holds several players, and it scales with them.
 >
 > **Amended 2026-08-22 by [02](02-domain-model.md).** Two of this spike's
-> assumptions moved. `architecture-api.md` rule 21 makes a dropped socket *end*
-> the live hunt, so **reconnection is no longer a capability arm A has to
-> match** — it is a capability the design rejects. And rule 18 means there is no
-> save blob, so friction 1's "welds the save blob to the wire format" is now
-> only "welds the run header to the wire format", which is a much smaller
-> objection. Re-read the bar below before running the spike.
+> assumptions moved. `alpha.md`'s Functional Requirements table (a dropped
+> socket is a leave) makes a dropped socket *end* the live hunt, so
+> **reconnection is no longer a capability arm A has to match** — it is a
+> capability the design rejects. And the "simulation state is never
+> persisted" rule means there is no save blob, so friction 1's "welds the save
+> blob to the wire format" is now only "welds the run header to the wire
+> format", which is a much smaller objection. Re-read the bar below before
+> running the spike.
 
 ## The question the spike actually decides
 
@@ -103,7 +107,8 @@ Timebox: one day. Build the smallest honest version of both, not a toy.
       is not, per the amendment above.
 - [ ] Whether the event stream survives Colyseus's patch interval intact, or
       whether ordering and timing get reshaped by it. Ordering is a correctness
-      requirement here ([`architecture-api.md`](../architecture-api.md) rule 4).
+      requirement here ([`architecture-api.md`](../architecture-api.md)'s
+      determinism section — sort by stable entity id).
 - [ ] Deployment shape of each: one process or two.
 
 ## Bar
@@ -130,8 +135,10 @@ have measured a choice that had already been made elsewhere.
 simulation with exactly one writer — `runTicks`, on the server. Players do send
 intent, continuously: a swapped helmet, a reordered gambit. The server applies it
 on a tick boundary and the consequence comes back down the stream everyone is
-already receiving ([`architecture-api.md`](../architecture-api.md) rules 14, 24
-and 32). No browser ever changes the world itself. A party projects four
+already receiving ([`architecture-api.md`](../architecture-api.md)'s
+server-authority and simulation-boundary rules: the server owns state and the
+client sends intent, the character is projected into the fight, and a live
+edit lands on a tick boundary). No browser ever changes the world itself. A party projects four
 characters into the arena instead of one; it does not add a second writer. Four
 players watching one fight see identical events for the same reason two of one
 player's tabs would.
@@ -147,14 +154,18 @@ The bar said Colyseus loses if the mapping layer grows with every mechanic **or*
 if the event stream ends up travelling by `room.send()` anyway. Both halves are
 already true, before a line is written:
 
-- **The mapping layer grows with every mechanic that has a visual.** Rule 15 and
-  [`stack-api.md`](../stack-api.md) rule 7 keep decorators out of
+- **The mapping layer grows with every mechanic that has a visual.**
+  `architecture-api.md`'s dependency rule (`libs/simulation` depends on
+  nothing) and [`stack-api.md`](../stack-api.md) rule 7 keep decorators out of
   `libs/simulation`, so arm B's schema is necessarily a parallel class maintained
   by hand, plus a per-tick copy. Every new component with a rendered
   consequence — a shield, a status effect, a second resource bar — is an edit in
   two places, forever.
-- **The stream travels by `room.send()` regardless.** `architecture-web.md`
-  rules 1, 8 and 9 make the renderer a consumer of *discrete* events: crit, cast
+- **The stream travels by `room.send()` regardless.** `architecture-web.md`'s
+  renderer-boundary rule (the renderer reads state and consumes events, it
+  never computes a rule) plus `alpha.md`'s Functional Requirements (snap
+  rather than replay when far behind; never invent an event the server did
+  not send) make the renderer a consumer of *discrete* events: crit, cast
   telegraph, spawn, death, and the distinction between events with lasting visual
   state and events without it. A schema diff says HP went 400→160; it cannot say
   it was a crit, and it cannot say what to drop when the tab was backgrounded.
@@ -162,8 +173,9 @@ already true, before a line is written:
 
 There is also a third failure the spike would have found and the plan only half
 suspected: **two clocks.** Colyseus patches on its own interval; the simulation
-has one permanently fixed tick rate (rule 7) and event ordering is a correctness
-requirement (rule 4). Making patches usable by the interpolation buffer means
+has one permanently fixed tick rate (`alpha.md`'s Functional Requirements
+table) and event ordering is a correctness requirement (`architecture-api.md`'s
+determinism section — sort by stable entity id). Making patches usable by the interpolation buffer means
 stamping the tick number into the schema and buffering on that — rebuilding the
 event stream *inside* the sync channel.
 
@@ -172,14 +184,14 @@ event stream *inside* the sync channel.
 | What it offers | Verdict here |
 | --- | --- |
 | Automatic state synchronization | Not wanted — the wire format is a versioned event stream |
-| Client SDK with change callbacks | Wrong shape — rule 7 wants two bracketing snapshots keyed by tick, not a mutated object |
-| Reconnection | Rejected by design — `architecture-api.md` rule 21 makes a dropped socket a leave, not a pause |
+| Client SDK with change callbacks | Wrong shape — the render-buffer requirement wants two bracketing snapshots keyed by tick, not a mutated object |
+| Reconnection | Rejected by design — `alpha.md`'s Functional Requirements table (a dropped socket is a leave) makes a dropped socket a leave, not a pause |
 | Matchmaking and seat reservation | Account-shaped, therefore HTTP — `stack-api.md` rule 12 |
 | Room lifecycle | Real, and it is a `Map<runId, Set<connection>>` |
 | Multi-process presence via Redis | The thing `stack-api.md` rule 24 deliberately defers |
 
-Reconnection was the strongest item on that list when the spike was written. Rule
-21 removed it.
+Reconnection was the strongest item on that list when the spike was written.
+The dropped-socket-is-a-leave requirement removed it.
 
 ### What we own instead, stated as work
 
@@ -190,10 +202,11 @@ it is short, and none of it is what Colyseus is for:
    when it banks its outcome.
 2. Authorization on join: is this character a member of this run.
 3. Per-connection write backpressure — one slow client must not stall the tick.
-4. A policy decision for parties that rule 21 currently answers for one player:
-   whose dropped socket ends a shared arena — or, per [04](04-the-live-hunt.md),
-   whether it ends anything at all while others are still inside. Colyseus would
-   not have answered this either.
+4. A policy decision for parties that the dropped-socket-is-a-leave
+   requirement currently answers for one player: whose dropped socket ends a
+   shared arena — or, per [04](04-the-live-hunt.md), whether it ends anything
+   at all while others are still inside. Colyseus would not have answered this
+   either.
 
 That is the thing the exploration worried about throwing away. It is bounded, and
 it is smaller than arm B's mapping layer alone.

@@ -21,9 +21,11 @@ losing cost, and what does a second player change about any of it.
 Every doc in the tree was written against a solo, sealed, non-interactive fight.
 The intended game is a live, shared, continuously-tuned one. That is not a
 detail — it is a different set of load-bearing assumptions, and each doc had
-absorbed the old ones in a different place. `architecture-web.md` rule 7 justified
-its render delay with "the player cannot act during a fight".
-`architecture-api.md` rule 22 froze the character at run start.
+absorbed the old ones in a different place. The render-buffer functional
+requirement (`alpha.md`'s Functional Requirements table, originally
+`architecture-web.md`) justified its render delay with "the player cannot act
+during a fight". The freeze-on-seal requirement (same table, originally
+`architecture-api.md`) froze the character at run start.
 `alpha.md` capped the experience available in a hunt loop, which only makes sense
 if a loop ends. None of them were wrong; all of them were downstream of a premise
 nobody had revisited.
@@ -41,13 +43,13 @@ lifetimes, so they get three different words. This is now
 | **Run** | One player's stint inside an arena | Starts on entry, ends on exit, banks continuously |
 
 *Arena* is not a new coinage — `alpha.md` decision 1 is titled *"Arena, not map"*
-and `architecture-web.md` rule 6 already says *"the arena event stream"*. The word
+and `architecture-web.md`'s renderer-boundary section already says *"the arena event stream"*. The word
 was already doing this job.
 
 ## The invariant
 
-Everything below holds together because of one rule, now
-[`design.md`](../design.md) rule 10:
+Everything below holds together because of one rule, now in
+[`alpha.md`](../../alpha.md)'s Functional Requirements table:
 
 > **One player-hour produces one player's worth of XP and loot** — whatever the
 > density, whatever the party size.
@@ -112,7 +114,8 @@ It is the test to run against any future balance change.
 16. **XP banks continuously, per kill.** There is no unbanked progress, so
     leaving, crashing or dying never costs XP already earned.
 17. **Death costs XP and one random gear piece.** The piece is destroyed —
-    nothing lands on the ground, per `architecture-api.md` rule 26.
+    nothing lands on the ground, per `alpha.md`'s Functional Requirements
+    table (loot resolves straight into the inventory).
 18. **No de-levelling in the alpha.** XP loss stops at the floor of the current
     level.
 19. **Leaving takes five seconds, and a dropped connection is a leave.** The
@@ -176,7 +179,9 @@ than a sealed consequence of it.
 
 **Decision 2 — "Offline is replay".** Survives, scope narrowed. Sealing, freezing
 and exactly-once replay are now explicitly properties of *offline*, not of every
-hunt. `architecture-api.md` rules 11 and 22 move with it.
+hunt. The persist-offline-inputs and freeze-on-seal functional requirements
+(`alpha.md`'s Functional Requirements table, originally `architecture-api.md`
+rules 11 and 22) move with it.
 
 **Decisions 1 and 4** — Arena, and server-authoritative — are untouched and are
 what makes all of the above cheap.
@@ -191,12 +196,12 @@ what makes all of the above cheap.
 | `alpha.md` progression | a hunt loop has a pre-defined XP cap | hunts have no cap; Easy and Medium never end |
 | `alpha.md` "Still open" → Death | undecided, may not exist | XP plus one destroyed gear piece; Stop/Retry setting |
 | `alpha.md` persistence | nothing about a fight is stored | plus a bounded exception for outcome and death records |
-| `architecture-api.md` 11, 22 | persist inputs, freeze at run start | offline only |
-| `architecture-api.md` 21 | a dropped socket ends the hunt | a dropped socket is a leave: five seconds, then exit and bank |
-| `architecture-api.md` 24 | project in, never write back | still true; live edits are inputs *into* the arena, never writes out of it |
-| `architecture-web.md` 7 | "the player cannot act during a fight" | the delay is justified by the player never issuing combat commands |
+| `alpha.md`'s Functional Requirements (persist offline-session seed & inputs; freeze equipment/skills/rules at seal) | persist inputs, freeze at run start | offline only |
+| `alpha.md`'s Functional Requirements (a dropped socket is a leave) | a dropped socket ends the hunt | a dropped socket is a leave: five seconds, then exit and bank |
+| `architecture-api.md`'s simulation-boundary section (project in, never write back) | project in, never write back | still true; live edits are inputs *into* the arena, never writes out of it |
+| `alpha.md`'s Functional Requirements (render buffer) | "the player cannot act during a fight" | the delay is justified by the player never issuing combat commands |
 | `naming.md` | — | rule 6: Hunt / Arena / Run |
-| `design.md` | — | rule 10: one player-hour, one player's worth |
+| `alpha.md`'s Functional Requirements | — | one player-hour, one player's worth |
 | `explorations/02` | `HuntRun` hangs off one Character | a Run is per-player; Arena is a new in-memory concept it never modelled |
 | `explorations/03` | reopen if the player can act | reopen if a client changes the world locally, or players need different views |
 
@@ -219,7 +224,7 @@ what makes all of the above cheap.
 ## Still open
 
 - Whose daily Hard count is spent in a party, and when the count resets.
-- The potion cooldown. `design.md` rule 9 requires a stated bottleneck for every
+- The potion cooldown. `alpha.md`'s Functional Requirements table requires a stated bottleneck for every
   rate mechanic, and a free unlimited heal has none.
 - The exp/hour display window — whole run, or a rolling few minutes.
 - The numbers: wave depth per tier, cap escalation per wave, the boss-loot curve
