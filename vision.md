@@ -85,11 +85,15 @@ tiny data record instead of code — `{element, min, max, chance, interval}`, on
 probability roll per tick, no state machine. It costs nothing to leave unread today, and it's the
 difference between a new monster being a content edit later versus a code change.
 
-**Death and de-leveling.** Losing a % of gold and XP on death, enough XP loss dropping a level and
+**Death and de-leveling.** *(partly in the alpha — death costs XP and one destroyed gear piece, and
+the Stop/Retry setting ships. De-levelling does not, and "gear never lost" was overturned. See
+[`alpha.md`](alpha.md) § Death.)* Losing a % of gold and XP on death, enough XP loss dropping a level and
 taking the talent point with it. Gear never lost. A per-account **Stop or Retry** setting, with no
 guard rail — a player on Retry in a zone they can't beat loses levels overnight, by choice.
 Deliberately harsh, MuOnline-flavoured. Required the game to state the risk loudly every time and
 show de-levels first in the login summary.
+→ *Constraint:* store XP as one absolute total and derive the level from it. Stored as "level plus
+progress within level", de-levelling later is a data migration; derived, it is a balance change.
 
 **XP and levels.** *(in the alpha — cap 30, one skill point per level.)* Level cap 50, XP banked per kill, one talent point per level.
 
@@ -98,7 +102,9 @@ whether it can fail or downgrade an item, gold vs. gold+material, whether Unique
 
 **Respec.** Paid in gold, price escalating per respec, competing with refinement for the same pool.
 
-**The login summary screen.** Time away, runs completed, runs timed out, deaths, XP, gold, gear
+**The login summary screen.** *(in the alpha — offline honours Stop/Retry, so a session can cost
+several levels and several gear pieces overnight, and the player has to be told. See
+[`alpha.md`](alpha.md) § Death.)* Time away, runs completed, runs timed out, deaths, XP, gold, gear
 dropped — with de-levels shown loudly and first, and rare drops given disproportionate fanfare.
 *This screen is the reward of an idle game and deserves real design attention.* 0.1.0 has a
 degenerate version of it: "you earned N gold."
@@ -178,11 +184,43 @@ fight from the server's event stream — which is why combat emits events from d
 
 ## Explicitly not wanted, so far
 
-PvP, chat, guilds, trading, friends — anything social. Crafting. Prestige / reset-for-multiplier
+*(Amended 2026-08-22. **Parties are in** — an arena holds several players and scales monsters by
+headcount from day one, though the invite and join UI ships after the alpha. The rest of this list
+stands.)*
+
+PvP, chat, guilds, trading, friends — anything else social. Crafting. Prestige / reset-for-multiplier
 loops. Achievements, daily quests, events.
 
 These were framed as scope cuts rather than permanent rulings, but none of them has ever had a
 reason to exist beyond "other idle games have it." That's not a reason.
+
+---
+
+## Deferred by the live-hunt design
+
+Added 2026-08-22 by [`docs/explorations/04-the-live-hunt.md`](docs/explorations/04-the-live-hunt.md).
+Each carries the constraint that keeps it cheap to add later.
+
+**Paid potions and the supply economy.** The Tibia loop — potions cost gold, profit is loot minus
+supplies, and "waste" is the number players optimise against. The alpha gives potions away free.
+→ *Constraint:* potions are **items** from day one, never skills. A skill has no quantity, no price
+and no inventory slot, and retrofitting all three is the migration this avoids.
+
+**Items and buffs that prevent gear loss on death.** A second gold sink, and the thing that makes
+Hard tier survivable to gamble on.
+→ *Constraint:* gear loss on death runs through exactly **one** code path that an item can veto.
+Scattered across three call sites, the item becomes a bug hunt instead of a feature.
+
+**A city, world bosses, and arenas bigger than one party.** Players seeing each other outside a
+fight; shared open-world encounters.
+→ *Constraint:* nothing may hard-code "one arena per party". The arena holds a list of players and
+a membership rule; both are data.
+
+**Party UI** — invites, a party screen, joining and rejoining a friend's arena mid-hunt.
+→ *Constraint:* the arena holds a list of players, splits XP by headcount and scales monsters by
+headcount from the first line of code — with a headcount that happens to be 1 during the alpha.
+
+**De-levelling.** See *Death and de-leveling* above for its constraint.
 
 ---
 
@@ -201,6 +239,12 @@ Write them here. Don't build them.
 
 
 # Closed Alpha Vision:
+
+> **Superseded.** These are the original raw notes the closed alpha was written
+> from, kept for provenance. [`alpha.md`](alpha.md) is the spec; where the two
+> disagree, `alpha.md` wins. Notably this section still says a hunt loop has a
+> capped experience pool, which stopped being true on 2026-08-23.
+
 ## The Game
 - Idle browser game inspired by Tibia, MuOnline, Path of Exile 2, WYD.
 - Graphics will be Tibia like.

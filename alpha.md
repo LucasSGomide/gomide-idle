@@ -14,10 +14,11 @@ Anything wanted but not in the alpha lives in [`vision.md`](vision.md).
 ## What it is
 
 A browser idle RPG in the Tibia visual idiom. You pick a hunt, your character clears waves
-and a boss on its own, you come back to loot.
+and a boss on its own, and you keep it alive by rewriting how it fights.
 
-The play is **not** in watching the fight. It is in authoring how your character fights —
-an ordered rule list — and in the gear and skill points that make those rules pay off.
+The play is **not** in controlling the fight — you never issue a combat command. It is in
+authoring how your character fights: two ordered rule lists, the gear and skill points that
+make those rules pay off, and the tuning you do **while watching it happen**.
 
 **Goal:** ship a game people play. **Audience, staged:** friends in a closed alpha →
 MuOnline/Tibia/WYD nostalgics → general idle players.
@@ -25,8 +26,12 @@ MuOnline/Tibia/WYD nostalgics → general idle players.
 ## The loop
 
 ```
-pick a hunt → clear monster waves → fight the boss → collect items → hunt again
+pick a hunt, a tier and a density → enter an arena → clear escalating waves
+  → (Hard tier) fight the boss → collect items → keep going or leave
 ```
+
+Easy and Medium loop forever and have no boss. Hard ends at a boss and is limited
+to a number of runs per day. See **Hunts** below.
 
 ---
 
@@ -79,8 +84,12 @@ approximation.
 - A sealed session is replayed **exactly once**, at your next login, and then it is over.
   That is what keeps catch-up cheap — there is no fight that gets longer every time you
   log in.
-- Closing the tab while watching a live hunt is not offline hunting. The fight ends and
-  banks whatever it earned.
+- Closing the tab while watching a live hunt is not offline hunting. Your character
+  stays in the arena for five seconds — long enough that it can still die — then
+  exits and banks. Crashing and quitting are the same event.
+- **Sealing applies to offline only.** A live hunt takes gear, gambit, skill-point
+  and targeting changes continuously, and is never replayed. See
+  [`docs/explorations/04-the-live-hunt.md`](docs/explorations/04-the-live-hunt.md).
 - **Nothing about a fight is ever written to the database.** What is stored is the
   session's inputs (hunt, seed, content version, start time, the frozen character) and the
   XP and loot it banks. Positions, HP, cooldowns and buffs are rebuilt by replay and thrown
@@ -97,10 +106,15 @@ work here.
 
 ### 3. The player authors behaviour
 
-The player never presses a button during a fight, so the fight is not where the decisions
-are. The decisions are in the rule list.
+The player never issues a combat command — the character fights itself. The decisions are
+in the rule lists, and the player edits them **while watching the fight**, which is what
+makes the arena a feedback loop rather than a sealed consequence of one.
 
 - Skills go into an **ordered priority list**.
+- Monster targeting is a **second ordered list**, authored the same way — "kill the fire
+  variant first", "lowest health first".
+- **Everything is editable mid-fight and takes effect on the next tick:** gear, both rule
+  lists, and skill points. No cost, no cooldown, no window to wait for.
 - Each row carries one condition from a **fixed vocabulary**: my HP below X%, enemy count
   above X, I am in form Y, buff Z active, and so on.
 - Each tick, the first row whose condition is true and whose cooldown is ready fires.
@@ -139,10 +153,27 @@ and monster sprites are undecided.
 
 ---
 
+## Death
+
+Death exists, and it is not free.
+
+- **You lose experience** — but never a level. Loss stops at the floor of your current
+  level; de-levelling is `vision.md` territory.
+- **You lose one random gear piece**, destroyed. Nothing lands on the ground, so nobody
+  picks it up. Items that prevent this are a post-alpha gold sink.
+- **You choose Stop or Retry** per account. Stop leaves the arena; Retry respawns you and
+  keeps going.
+- **Offline honours the same setting.** On Retry a sealed session can cost you several
+  levels and several gear pieces overnight, by choice — so sealing must state the risk every
+  time, and the login summary must show losses first and loudest.
+
+---
+
 ## Progression
 
-**Experience.** Gained by running hunt loops. Each hunt loop has a pre-defined cap on the
-experience available in it.
+**Experience.** Gained by killing monsters in an arena, and **banked per kill** — there is
+no unbanked progress, so leaving, crashing and dying never take XP already earned. Hunts
+have no experience cap; Easy and Medium never end.
 
 **Level.** Accumulated experience. Capped at **30** for the alpha.
 
@@ -247,14 +278,73 @@ a stat block and an ability list — not a code change.
 | 2 | Variant 2 | Variant 2 |
 | 3 | Variant 3 | Variant 3 |
 
+### Tiers
+
+Each hunt runs at three tiers. **Tier sets monster strength and how deep the wave program
+goes** — nothing else.
+
+| Tier | Waves | Boss | Purpose |
+| --- | --- | --- | --- |
+| Easy | loops forever | no | experience and low-tier items |
+| Medium | loops forever | no | experience and low-tier items |
+| Hard | ends at a final wave | yes | high-tier items, capped per day |
+
+**Hard is limited to N runs per day.** While the count lasts a player or party may loop it;
+when it is spent they are returned to the menu. This is the primary brake on high-tier
+items entering the world — which is why boss loot is *not* divided between party members.
+
+### Density
+
+Independently of tier, the player picks **High** or **Low Density**.
+
+- **High Density** — more monsters alive at once, individually weaker. Rewards area damage:
+  Werebear and Bear Presence.
+- **Low Density** — fewer monsters, each with more health and more damage. Rewards
+  single-target damage: Werewolf.
+
+Both must produce **equal experience per hour**, and therefore equal clear time — boss loot
+scales with clear speed, so a slower mode would otherwise be punished twice.
+
+### Scaling
+
+Tier, density and party size are **multipliers over one hunt definition**, never eighteen
+hand-authored tables.
+
+- Monster count and the alive-cap **scale with the number of players** in the arena, so a
+  party is economically identical to the same people hunting alone.
+- Experience **splits evenly** across the party, which with scaled monsters is exactly
+  neutral.
+- Every player spends their own daily Hard run and **rolls their own loot, undivided**.
+
+### The arena
+
+An arena is created when the first player enters and destroyed when the last one leaves.
+Wave progress lives in memory and dies with it, so every session starts at wave 1. Alpha
+arenas are **private to one party** — no city, no strangers, no shared world. Outside a
+hunt the player sees configuration UI and inventory, nothing else.
+
+**Leaving takes five seconds**, during which the character is still in the fight and can
+still die. A dropped connection is a leave.
+
 ---
 
 ## Items
 
+### Potions
+
+Potions are **items, not skills** — free in the alpha, so paid potions can arrive later
+without a model change. Tiers unlock by level: inferior from the start, common at 10,
+superior at 30. Gambits drink them like any other conditional action.
+
+> **Open.** A free unlimited heal has no bottleneck, which
+> [`docs/design.md`](docs/design.md) rule 9 forbids. Potions need a cooldown.
+
+### Loot
+
 Loot never lands on the ground. A kill resolves straight into your inventory — no item to
 walk over, no pickup, no despawn timer.
 
-### Tiers
+### Rarity
 
 1. **Common** — base defence only.
 2. **Uncommon** — base defence, plus one prefix and one suffix.
@@ -297,5 +387,8 @@ walk over, no pickup, no despawn timer.
 - **Character and monster art** (see Graphics above) — arenas are settled with an
   open-source set; characters are not. Changes zero lines of code, but has lead time.
 - **The XP curve to level 30**, and whether three hunts are enough to carry it.
-- **Death.** Nothing here says what happens when the character loses. `vision.md` wants it
-  harsh and MuOnline-flavoured; the alpha has not decided whether it exists at all.
+- **Daily Hard runs.** Whose counter is spent when a party runs Hard together, and when the
+  count resets.
+- **The potion cooldown** (see Items above).
+- **The numbers.** Wave depth per tier, alive-cap escalation per wave, the boss loot curve
+  against clear time, and the tier and density multipliers.
