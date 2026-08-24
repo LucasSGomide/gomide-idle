@@ -1,5 +1,9 @@
 # Goal: Research component-based game architecture and write a beginner's guide that ends with a concrete plan for applying it to a browser idle RPG
 
+**Status:** executed 2026-08-22 — guide written to `docs/research/component-architecture-2026-08.md`
+**Rating:** —
+**Run:** standalone — no other prompt depends on it
+
 ## Context
 
 I am building **gomide_idle**, a browser idle RPG in the Tibia visual idiom. You pick a
