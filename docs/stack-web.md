@@ -13,6 +13,11 @@ Settled 2026-08-21. The comparisons behind these choices are in
 [`docs/research/web-stack-2026-08.md`](research/web-stack-2026-08.md);
 this file carries the rule, that file carries the argument.
 
+Rules 6–9, 34 and 35 were revised 2026-08-24 after Three.js, PixiJS and the
+DOM plan were compared head to head — see
+[`docs/research/renderer-2026-08.md`](research/renderer-2026-08.md). The
+renderer no longer starts on DOM.
+
 ## Shell
 
 1. **React 19 and Vite 8, TypeScript.** There is no React 20; Vite 8 ships
@@ -38,24 +43,25 @@ this file carries the rule, that file carries the argument.
 
 ## The renderer
 
-6. **Start on DOM plus CSS transforms, behind a small imperative
-   `RendererPort`.** A dozen sprites is nowhere near a DOM limit, and the
-   projection, depth sort and frame-index logic are renderer-agnostic — so the
-   port is the entire switch cost.
+6. **Render the arena with PixiJS v8 from the first sprite.** A red hit flash, a
+   form-change glow and additive fire on Bear Presence are one property each in
+   Pixi and impossible in DOM without a compositor-layer promotion per node — so
+   a DOM stage is a detour with a scheduled end date, not a deferred dependency.
 
-7. **Port to PixiJS v8 the first time a per-sprite tint or blend is needed.** A
-   red hit flash, a form-change glow or additive fire on Bear Presence is one
-   line in Pixi and a compositor-layer promotion per node in DOM — and this is the
-   signal that will actually fire.
+7. **Keep the renderer behind a small imperative `RendererPort` anyway.** With
+   one implementation the port stops being a migration plan and becomes the wall
+   that keeps game rules out of the renderer, and the seam that lets the
+   projection, depth sort and frame-index logic be tested without a browser.
 
-8. **Never switch renderers because of sprite count.** The secondary signals are
-   style-recalc above ~4ms per frame or more than ~150 live nodes in the
-   viewport, and neither is reached by monsters alone — damage floaters get there
-   first.
+8. **Never choose or reject a renderer on sprite count.** Every candidate is
+   comfortable at 20–150 entities; the DOM ceiling — ~150 live nodes, or
+   style-recalc above ~4ms per frame — is reached by damage floaters rather than
+   monsters, and decides nothing here.
 
-9. **Do not adopt Phaser.** It is a framework that wants to own the game loop and
-   input, and the server owns the loop while the player presses nothing during a
-   fight.
+9. **Do not adopt Three.js or Phaser.** Three.js is a 3D engine, so a
+   permanently 2D game pays its whole vocabulary and still writes the sprite
+   sheet, drawing order and text layers itself; Phaser is a framework that wants
+   to own the game loop and input, and the server owns the loop.
 
 10. **Write the isometric projection and depth sort once, outside the renderer.**
     `screenX = (x - y) * TILE_W/2`, `screenY = (x + y) * TILE_H/2`, `depth = x + y`
@@ -163,12 +169,13 @@ this file carries the rule, that file carries the argument.
     manifest.** A name missing from the manifest then renders nothing instead of
     crashing, and the CDN base URL stays a config value.
 
-34. **Keep sprite sheets as uniform grids while the DOM renderer is in use.** A
-    packed atlas trims margins and may rotate frames, which is fine for Pixi and
-    fatal for `background-position`.
+34. **Use packed atlases from the start — sprite sheets need not be uniform
+    grids.** Pixi reads trimmed and rotated frames straight from the atlas JSON;
+    the uniform-grid constraint existed only to keep CSS `background-position`
+    workable, and no DOM renderer is being built.
 
-35. **Adopt AssetPack the same day Pixi is adopted, not before.** Same vendor,
-    same JSON format — one migration instead of two.
+35. **Adopt AssetPack alongside Pixi, not later.** Same vendor, same JSON
+    format — one pipeline instead of two.
 
 36. **Record every third-party asset under the REUSE specification, with a
     human-readable `CREDITS.md` reachable from inside the game.** CC-BY and

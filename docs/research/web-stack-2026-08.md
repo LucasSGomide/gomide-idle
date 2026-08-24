@@ -23,6 +23,13 @@ single bundler; Vite's own 19k-module benchmark went 40.1 s → 1.6 s.
 
 ## Renderer
 
+> **Superseded 2026-08-24.** The staged plan below — start on DOM, move to
+> Pixi when a tint is needed — was re-examined against Three.js, which this
+> pass never considered. The conclusion is now PixiJS v8 from the first
+> sprite; see [`renderer-2026-08.md`](renderer-2026-08.md). Everything else
+> in this section, including the DOM limits and the projection formulas,
+> still holds.
+
 The load-bearing data point is already in this repo:
 `docs/explorations/01-how-baiak-idle-works.md` §2 records that Baiak Idle ships
 **PixiJS v8 for the fight viewport and plain HTML/DOM for everything else** —
