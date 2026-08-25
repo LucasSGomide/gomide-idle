@@ -10,6 +10,17 @@
 > **Two of the four foundational decisions moved.** Decision 3's premise is
 > replaced; decision 2 survives with its scope narrowed to offline.
 
+> **Amended 2026-08-24 by the alpha scope audit.** Five decisions below moved, and
+> the Still open list at the end is closed. #13 *"skill points, any tick, no cost"*
+> is narrowed: **spending** a newly earned point is a mid-fight action, **reallocating**
+> a spent one is not. #20 *"potions are free"* keeps a **single cooldown shared across
+> health and mana**, and mana now matters because active skills cost it. #25 offline is
+> **Easy and Medium only, at reduced experience and drop rates**, and **one sealed session
+> per account** rather than per character. #11's loot now lands in a **capacity-capped**
+> backpack that forfeits drops when full rather than ending the run. The exp/hour window
+> is a **rolling five minutes**, and the daily Hard count **refills at a fixed UTC hour**.
+> All of it is in [`alpha.md`](../../alpha.md); the findings below hold otherwise.
+
 ## The question
 
 What is a live hunt? Specifically: what exists on the server, how long does it
@@ -223,10 +234,10 @@ what makes all of the above cheap.
 
 ## Still open
 
-- Whose daily Hard count is spent in a party, and when the count resets.
-- The potion cooldown. `alpha.md`'s Functional Requirements table requires a stated bottleneck for every
-  rate mechanic, and a free unlimited heal has none.
-- The exp/hour display window — whole run, or a rolling few minutes.
+*Closed 2026-08-24 except the numbers.* Whose daily Hard count is spent was already
+answered by #22 (each player's own); when it resets, the potion cooldown and the exp/hour
+window are all settled in [`alpha.md`](../../alpha.md).
+
 - The numbers: wave depth per tier, cap escalation per wave, the boss-loot curve
   against clear time, and the tier and density multipliers.
 

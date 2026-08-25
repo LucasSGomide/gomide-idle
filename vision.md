@@ -100,7 +100,12 @@ progress within level", de-levelling later is a data migration; derived, it is a
 **Refinement.** Small permanent power steps paid in gold — the main gold sink. Open: max level,
 whether it can fail or downgrade an item, gold vs. gold+material, whether Uniques can be refined.
 
-**Respec.** Paid in gold, price escalating per respec, competing with refinement for the same pool.
+**Respec.** *(in the alpha, free — see [`alpha.md`](alpha.md) § Progression. Reallocating skill
+points costs nothing and is allowed outside an arena, because the alpha has no gold to price it
+in.)* Paid in gold, price escalating per respec, competing with refinement for the same pool.
+→ *Constraint:* respec is one of the clearest **gold sinks** the game has — a recurring,
+player-initiated cost on a decision players want to make repeatedly. When gold arrives, pricing
+the existing free respec is a balance change, not a feature.
 
 **The login summary screen.** *(in the alpha — offline honours Stop/Retry, so a session can cost
 several levels and several gear pieces overnight, and the player has to be told. See
@@ -193,6 +198,48 @@ loops. Achievements, daily quests, events.
 
 These were framed as scope cuts rather than permanent rulings, but none of them has ever had a
 reason to exist beyond "other idle games have it." That's not a reason.
+
+---
+
+## Deferred by the alpha scope audit
+
+Added 2026-08-24 by [`docs/prompts/audit-alpha-scope-and-seed-the-feature-list.md`](docs/prompts/audit-alpha-scope-and-seed-the-feature-list.md).
+Each carries the constraint that keeps it cheap to add later.
+
+**A monetization surface.** Nothing is being built for this and nothing is committed to. It is
+recorded because two alpha decisions happen to leave the door open, and it costs nothing to
+notice: a **backpack expansion** and an **automatic item sale** are the natural relief for the
+inventory cap, and a **priced respec** is the natural gold sink (above).
+→ *Constraint:* the backpack capacity is a number on the character, never a constant in code,
+and forfeiting a drop when full runs through exactly one code path.
+
+**Animated sprites.** The alpha ships static ones. Walk cycles and attack frames are pure art.
+→ *Constraint:* the renderer drives the frame index from the render loop rather than from CSS
+(`stack-web.md` 12), and the packed-atlas pipeline is in place from the first sprite
+(`stack-web.md` 34 and 35), so animation is an atlas swap.
+
+**Commissioned character art.** The alpha uses a CC0 pack.
+→ *Constraint:* content references a sprite by filename through one manifest
+(`stack-web.md` 33), so replacing the art is a manifest edit.
+
+**Onboarding.** Seven skills and two rule lists arrive at once with nothing explaining them. See
+*Onboarding* above; the alpha has no tutorial at all.
+→ *Constraint:* skill points both unlock and raise, so a guided first spend is a UI overlay
+rather than a second progression system.
+
+**A rolling daily-Hard recharge.** The alpha refills the count at a fixed UTC hour and accepts
+that a player awake at the boundary can double one night's high-tier income.
+→ *Constraint:* spending a Hard run writes a timestamp, so switching to a rolling 24-hour
+recharge is a query change rather than a schema change.
+
+**Splitting the potion cooldown by family.** The alpha shares one cooldown across health and
+mana potions, which is the harshest option and can produce death spirals.
+→ *Constraint:* the cooldown is a content value, not a code branch.
+
+**Offline Hard tier.** Offline runs Easy and Medium only, so a player who only plays offline
+never fights a boss.
+→ *Constraint:* the daily Hard count and offline sealing never touch each other today; keep it
+that way until a deliberate decision joins them.
 
 ---
 

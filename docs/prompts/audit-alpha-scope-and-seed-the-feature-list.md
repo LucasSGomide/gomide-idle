@@ -1,6 +1,6 @@
 # Goal: Audit `alpha.md` for gaps, settle every open question with me, then seed `docs/requirements.md` with the alpha's full feature list
 
-**Status:** not executed — `docs/requirements.md` still holds only its header row
+**Status:** executed 2026-08-24 — 12 open questions settled and written into `alpha.md`, 30 features seeded into `docs/requirements.md`; `stack-web.md` rule 10 corrected to an orthogonal projection, explorations 02 and 04 amended
 **Rating:** —
 **Run:** before the first `msg-pre-roadmap` run — that skill needs the feature list this prompt seeds
 

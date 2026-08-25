@@ -14,6 +14,14 @@
 > argument.** Simulation state is not merely "not an aggregate" — it is never
 > persisted at all.
 
+> **Amended 2026-08-24 by the alpha scope audit.** One invariant below is now
+> wrong. *"skill points ≤ level − 1"* became **skill points = level**: a character
+> gets their first point at level 1, and skill points now both *unlock* a skill and
+> raise it. `Character` also stops being one-per-account — an account holds several,
+> though at most one may be sealed offline at a time. Neither changes the model: the
+> invariants still all cross the same aggregate. See [`alpha.md`](../../alpha.md)
+> § Progression and § Account and characters.
+
 > **Amended 2026-08-23 by [04](04-the-live-hunt.md).** Three things moved. A live
 > fight is now continuously edited, so a run's inputs are no longer frozen at
 > start — freezing is offline's property alone. An **arena** appeared underneath

@@ -63,10 +63,14 @@ renderer no longer starts on DOM.
    sheet, drawing order and text layers itself; Phaser is a framework that wants
    to own the game loop and input, and the server owns the loop.
 
-10. **Write the isometric projection and depth sort once, outside the renderer.**
-    `screenX = (x - y) * TILE_W/2`, `screenY = (x + y) * TILE_H/2`, `depth = x + y`
-    — correct for the whole alpha because one entity per tile means no multi-tile
-    sprite ever needs a correction.
+10. **Write the projection and depth sort once, outside the renderer.**
+    `screenX = x * TILE_W`, `screenY = y * TILE_H`, `depth = y` — an orthogonal
+    top-down grid at 32×32, correct for the whole alpha because one entity per
+    tile means no multi-tile sprite ever needs a correction. *Corrected
+    2026-08-24:* this rule previously carried the isometric diamond projection,
+    `screenX = (x - y) * TILE_W/2`. `alpha.md` said "32×32 isometric", which is
+    two incompatible things — Tibia is an orthogonal top-down grid and a real
+    isometric tile is 64×32. `alpha.md` § Graphics settled it as orthogonal.
 
 11. **Break depth-sort ties by entity id.** The server's ordering and the
     renderer's must agree, and stable ties are how that stays true.
