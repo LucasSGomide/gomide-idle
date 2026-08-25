@@ -155,7 +155,36 @@ in a roadmap item's own Key Areas section, not here.
 
 | Module | Feature | User Need Code | User Need Details | Functional Requirement Code | Functional Requirement Details | Addition Date |
 | ------ | ------- | --------------- | ------------------ | ---------------------------- | -------------------------------- | -------------- |
-| Account | Account sign-up and login | TODO | TODO | TODO | TODO | 2026-08-24 |
+| Account | Account sign-up and login | UN.1 | A player needs an account that outlives the browser tab, so characters, gear and progress are still there when they come back. | — | — | 2026-08-25 |
+| Account | Account sign-up and login | UN.1 | — | FR.1.1 | Sign-up creates an account from an e-mail address and a password, and signs the player in. | 2026-08-25 |
+| Account | Account sign-up and login | UN.1 | — | FR.1.2 | The e-mail address is an identifier only — never verified and never sent to. The alpha has no outbound e-mail of any kind. | 2026-08-25 |
+| Account | Account sign-up and login | UN.1 | — | FR.1.3 | A password is 8 to 128 characters with no composition rules, and is stored hashed, never in plain text. | 2026-08-25 |
+| Account | Account sign-up and login | UN.1 | — | FR.1.4 | Sign-up is refused when the e-mail address already has an account. | 2026-08-25 |
+| Account | Account sign-up and login | UN.1 | — | FR.1.5 | There is no self-service password reset; recovering a forgotten password is a manual database operation by the operator. | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | A player needs to stay signed in between play sessions, and auth must never be the reason they lose a fight. | — | — | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | — | FR.2.1 | A session is a server-side row in the project's own Postgres, not a stateless token, so ending one is a delete. | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | — | FR.2.2 | A session lasts 30 days, and its expiry is extended while the player is active. | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | — | FR.2.3 | Session expiry never terminates a running hunt; only a game rule ends a fight. | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | — | FR.2.4 | Signing out destroys that device's session on the server; other signed-in devices keep their own. | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | — | FR.2.5 | Signing out while hunting runs the same five-second leave as any other disconnect. | 2026-08-25 |
+| Account | Account sign-up and login | UN.3 | A player needs "online" and "away" to be unambiguous, because the game pays out differently for each. | — | — | 2026-08-25 |
+| Account | Account sign-up and login | UN.3 | — | FR.3.1 | An open socket connection is what "online" means; it opens when a character is selected, and the hunt runs over it. | 2026-08-25 |
+| Account | Account sign-up and login | UN.3 | — | FR.3.2 | The socket handshake is authenticated against the same server-side session as ordinary requests, and the server checks the request's Origin on every connection. | 2026-08-25 |
+| Account | Account sign-up and login | UN.3 | — | FR.3.3 | The server detects a dead socket itself, by heartbeat and timeout, rather than trusting the client to close it. | 2026-08-25 |
+| Account | Account sign-up and login | UN.3 | — | FR.3.4 | Losing the socket takes the character offline; if it was hunting, the five-second leave runs first and its result is banked. | 2026-08-25 |
+| Account | Account sign-up and login | UN.4 | A player must not be able to corrupt or duplicate their own progress by opening a second tab. | — | — | 2026-08-25 |
+| Account | Account sign-up and login | UN.4 | — | FR.4.1 | An account has at most one character online at a time. | 2026-08-25 |
+| Account | Account sign-up and login | UN.4 | — | FR.4.2 | A connection for an account that already has a character online is refused with a stated reason, and nothing already running is interrupted. | 2026-08-25 |
+| Account | Account sign-up and login | UN.4 | — | FR.4.3 | Claiming the online slot is atomic, so two connections arriving together cannot both succeed. | 2026-08-25 |
+| Account | Account sign-up and login | UN.4 | — | FR.4.4 | Switching characters requires explicitly leaving the current one, which runs the same five-second leave and so offers no escape from an imminent death. | 2026-08-25 |
+| Account | Account sign-up and login | UN.4 | — | FR.4.5 | The online-slot check sits behind one named component, so moving it off single-process memory later does not touch its callers. | 2026-08-25 |
+| Account | Account sign-up and login | UN.5 | Alpha players need the game to stay closed once the unlisted URL is pasted somewhere public. | — | — | 2026-08-25 |
+| Account | Account sign-up and login | UN.5 | — | FR.5.1 | Sign-in attempts are rate-limited, per source address and per account. | 2026-08-25 |
+| Account | Account sign-up and login | UN.5 | — | FR.5.2 | Registration can be closed by configuration, refusing new sign-ups while existing accounts continue to work. | 2026-08-25 |
+| Account | Account sign-up and login | UN.5 | — | FR.5.3 | Rate-limit counters are held in process memory, which is correct only while the API runs as a single process; a second process requires shared storage first. | 2026-08-25 |
+| Account | Account sign-up and login | UN.6 | A player returning after a long absence needs signing in to be immediate, however long they were away. | — | — | 2026-08-25 |
+| Account | Account sign-up and login | UN.6 | — | FR.6.1 | Signing in never runs an offline replay and never blocks on one, however much time has elapsed. | 2026-08-25 |
+| Account | Account sign-up and login | UN.6 | — | FR.6.2 | A sealed offline session is replayed when its character comes online, not when the account signs in. | 2026-08-25 |
 | Account | Character creation and selection | TODO | TODO | TODO | TODO | 2026-08-24 |
 | Simulation | Arena grid and movement | TODO | TODO | TODO | TODO | 2026-08-24 |
 | Simulation | Automatic combat | TODO | TODO | TODO | TODO | 2026-08-24 |
