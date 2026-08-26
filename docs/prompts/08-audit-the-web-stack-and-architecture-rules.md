@@ -1,6 +1,6 @@
 # Goal: Audit `docs/stack-web.md` and `docs/architecture-web.md`, then extend them so the front-end has rules for how ordinary application code is organized — injected ports, a router, a folder structure, tests and failure states
 
-**Status:** not executed
+**Status:** executed 2026-08-26 — `docs/architecture-web.md` numbered and extended to 27 rules, `docs/stack-web.md` rule 3 reversed and rules 38–52 appended, `docs/design.md` and the web-stack research doc repaired. Portuguese and English i18n was added to the scope mid-run at Lucas's instruction, which reversed the copy question and superseded the research doc's rejection of an i18n library
 **Rating:** —
 **Run:** standalone, but must run before any web code is written — these are the standards that code will be judged against. Read `docs/architecture-api.md` first; the back-end went through this exact pass on 2026-08-26 (prompt 07) and the web rules should reuse its vocabulary rather than invent a parallel one.
 

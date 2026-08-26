@@ -18,6 +18,13 @@ DOM plan were compared head to head — see
 [`docs/research/renderer-2026-08.md`](research/renderer-2026-08.md). The
 renderer no longer starts on DOM.
 
+Rules 38–52 were added 2026-08-26, and rule 3 was reversed in the same pass —
+the router, the test runner, the token pipeline and the language rules, written
+before the code they govern. Structure and dependency direction live in
+[`architecture-web.md`](architecture-web.md), which was numbered on the same
+day; where a rule needs both halves it is written once and cited from the other
+file by number.
+
 ## Shell
 
 1. **React 19 and Vite 8, TypeScript.** There is no React 20; Vite 8 ships
@@ -28,9 +35,19 @@ renderer no longer starts on DOM.
    truth is server-side by `alpha.md` decision 4, so a second client-side store
    holding the same data would be a cache of a cache.
 
-3. **Add a router only when a screen needs a shareable URL.** Six screens and no
-   SSR means a tab value is enough, and TanStack Router is a one-afternoon
-   addition when that stops being true.
+3. **TanStack Router from the first screen, with file-based routes.** Every
+   screen is a URL, so a reload, the back button and a pasted link all land
+   where the player was, and a typed `$huntId` is a checked value rather than a
+   string that happens to parse. *Revised 2026-08-26; this rule previously said
+   "add a router only when a screen needs a shareable URL", reasoning that six
+   screens and no SSR meant a tab value was enough and that TanStack Router was
+   a one-afternoon addition when that stopped being true. The afternoon is real
+   and the arithmetic was right, but it was an argument for deferring a decision
+   whose answer was already known — and it did not count what the deferral
+   costs: a screen written before the router is a screen with no URL, so
+   retrofitting one is not adding a file, it is revisiting that screen's state,
+   its loading behaviour and every link into it.* Rule 38 names what going in
+   now costs.
 
 4. **Do not add Next.js, Redux, GraphQL, Server Components, a form library, a
    state-machine library, or the React Compiler.** Each solves a problem this app
@@ -188,3 +205,151 @@ renderer no longer starts on DOM.
 37. **`OGA-BY` is not a valid SPDX identifier — record it as
     `LicenseRef-OGA-BY-3.0`.** A lint that fails two years later, when the source
     is forgotten, is the exact failure `alpha.md` warns about.
+
+## The router
+
+Added 2026-08-26, alongside rule 3's reversal.
+
+38. **Generate the route tree from the files in `routes/` with
+    `@tanstack/router-plugin`, commit `routeTree.gen.ts`, and never hand-edit
+    it.** A route that exists because its file exists cannot be forgotten in a
+    registration list, and the generated tree is what makes a link's target and
+    its params typed. The price is a codegen step in the build: this is the
+    second generated file in the repo after Orval's client, rule 45 adds a
+    third, and none of the three can be trusted until the generator has run —
+    so a fresh clone type-checks against a stale tree until `pnpm dev` or the
+    generate script has run once.
+
+39. **Name route files by TanStack Router's own conventions: `__root.tsx` for
+    the shell, a leading underscore for a layout that adds no path segment, `$`
+    for a parameter.** The file path is the URL, so "what is at `/hunt/42`" is
+    answered by listing a directory instead of reading a configuration file.
+    `architecture-web.md` rule 22 is why the guard is one `_authed.tsx` rather
+    than a check repeated per route.
+
+    ```
+    routes/
+      __root.tsx
+      _authed.tsx                # guard
+      _authed/characters.tsx
+      _authed/hunt.$huntId.tsx
+    ```
+
+40. **Pass the `QueryClient` into the router's context so a loader can reach
+    it.** `architecture-web.md` rule 21 lets a loader prefetch but never fetch,
+    and `ensureQueryData` is how that is written — which needs the client the
+    app already has rather than a second one built for the router.
+
+    ```ts
+    export const Route = createFileRoute('/hunt/$huntId')({
+      loader: ({ context, params }) =>            // prefetch only
+        context.queryClient.ensureQueryData(huntQuery(params.huntId)),
+      component: HuntScreen,
+    });
+    ```
+
+## Testing
+
+Added 2026-08-26. `architecture-api.md` rules 70–86 are the back end's testing
+rules; these are the web's, and they are shorter because there is less here that
+can be silently wrong.
+
+41. **Vitest and React Testing Library on the web — and this is a second test
+    runner in one repository, deliberately.** Vitest reads the same
+    `vite.config.ts` the app builds with, so path aliases, the TSX transform and
+    `import.meta.env` are already correct and the test config is a few lines;
+    reaching the same place with Jest means a second transform pipeline plus a
+    hand-written module map that drifts silently the day `vite.config.ts`
+    changes. `stack-api.md` rule 32 keeps Jest for `apps/api` and the `libs/`
+    packages and is unchanged — so the repo runs two runners, with two mocking
+    vocabularies (`vi.fn()` here, `jest.fn()` there) and two configurations to
+    keep current. That is the price, and it is paid because the web's runner
+    should be the one that already understands the web's build.
+
+42. **Test the ports seam, the projection and depth sort from rule 10, the event
+    buffer from rules 18–21, and every feature hook.** These are the parts that
+    go wrong quietly: a projection off by half a tile still looks like a game, a
+    starved buffer renders something rather than nothing, and a feature hook is
+    where the query key and the port meet — the two things
+    `architecture-web.md` rules 14 and 20 exist to keep straight.
+
+43. **Never assert on the canvas; assert on the calls made to the
+    `RendererPort`.** Reading pixels back out of a WebGL context to prove a
+    sprite moved is slow, flaky, and tests PixiJS rather than this project —
+    rule 7's port is a list of instructions, and a list of instructions is a
+    thing you can compare.
+
+44. **Give the pure logic no DOM at all, and use jsdom only where a component or
+    a hook renders.** Rule 7 keeps the projection, the depth sort and the frame
+    index outside the renderer precisely so they are plain functions; handing
+    those files a jsdom they never touch is startup cost per test file, forever.
+
+## Design tokens
+
+45. **Generate `apps/web/src/theme.css` from
+    [`docs/design-tokens.json`](design-tokens.json), commit the output, and have
+    CI regenerate it and fail on any difference.** `design.md` already declares
+    the JSON correct and the prose stale when the two disagree, so the Tailwind
+    v4 theme should be derived from it rather than typed a second time. The
+    price: a third generated file nobody may hand-edit (after Orval's client and
+    rule 38's route tree), and the JSON-path-to-custom-property mapping —
+    `color.accent.default` → `--color-accent`, `spacing.5` → `--spacing-5` — is
+    a convention that lives in the generator and has to be read to be known.
+
+46. **Never write a raw colour, size, radius or duration in a component; use the
+    theme's utilities.** A hex typed into a component survives the next token
+    change, and `design.md` §3's contrast table is only true of the values in
+    the token file.
+
+47. **Edit a copied-in primitive in place; do not wrap it.** Rule 25 copies the
+    file in exactly so a default can be deleted instead of overridden, and a
+    wrapper re-adds the layer the copy removed. `architecture-web.md` rule 9 is
+    the one limit on that editing: a primitive in `ui/` may not learn about a
+    feature.
+
+## Language
+
+Added 2026-08-26. English and Portuguese both ship in the alpha.
+[`docs/research/web-stack-2026-08.md`](research/web-stack-2026-08.md) lists an
+i18n library among the things rejected — that line is superseded by the rules
+below, and the research file carries a note saying so.
+
+48. **react-i18next 17 and i18next 26, with English and Portuguese from the
+    first screen.** Two languages from the start is what avoids a retrofit pass
+    over every string ever rendered, and this is the option with by far the
+    deepest ecosystem — language detection and lazy catalogue loading are
+    configuration rather than code. Its failure mode is the price and it is the
+    opposite of what rule 23 buys elsewhere: keys are ordinary strings, so a
+    typo renders the key on screen instead of failing a build. Rules 49 and 50
+    are how that is bought back.
+
+49. **Type the catalogue — declare `CustomTypeOptions['resources']` as
+    `typeof en`, and set `returnNull: false`.** The declaration is the only
+    thing that turns rule 48's runtime miss back into a compile error, and it
+    costs one `react-i18next.d.ts`; `returnNull: false` makes a key's type
+    `string` rather than `string | null` at every call site, which is the
+    difference between a label and a `??` at each one. The catalogues live in
+    `lib/i18n/` — they are chrome only, because rule 51 keeps every content name
+    out of them.
+
+50. **Declare the Portuguese catalogue `satisfies typeof en`, with English as
+    the source.** react-i18next's fallback would otherwise put an English string
+    on a Portuguese screen and never say so — found by a player rather than by
+    the build.
+
+51. **Take a hunt, monster, skill, prefix or suffix name from the content pack's
+    locale map, never from the i18n catalogue.** Those names are authored data,
+    and `architecture-api.md` rule 11 requires that adding a monster be a
+    content edit — putting its Portuguese in the client's catalogue would make
+    every new monster a code change in a second package. `libs/content`
+    validates the map at load, so a missing language fails exactly where a
+    missing skill id already does.
+
+52. **Keep the active language on the account and out of the URL, mirrored into
+    `localStorage`.** The route tree stays as rule 39 describes it with no locale
+    segment and no param on every link, and a link pasted between friends opens
+    in the reader's own language rather than the sender's. The price is the
+    first paint: nothing on the client knows the language until the account query
+    resolves, so the `localStorage` mirror is read synchronously at startup and
+    is the only reason a returning Portuguese player does not see one English
+    frame.

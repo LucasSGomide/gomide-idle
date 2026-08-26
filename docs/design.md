@@ -15,8 +15,8 @@ two.
 
 Every literal value below (color, type scale, spacing, radius, motion) is
 also published as a token file: [`docs/design-tokens.json`](design-tokens.json).
-That file is the thing a developer pastes into the codebase; this file is the
-reasoning behind each value in it. If the two ever disagree, the JSON file is
+That file is what the Tailwind theme is generated from (`docs/stack-web.md`
+rule 45); this file is the reasoning behind each value in it. If the two ever disagree, the JSON file is
 correct and this doc is stale — fix the doc.
 
 Decided 2026-08-26, after walking the open questions in
@@ -38,15 +38,14 @@ What sits in the navigation slot changes with where the player is:
 | --- | --- |
 | Account / login | Wordmark + nothing else — there's no character yet. |
 | Character select | Wordmark + account menu only. No character-scoped tabs, because no character is active yet. |
-| Hunt selection, Character sheet, Inventory | Wordmark + tabs (Hunt · Character · Inventory) + account menu. Tabs are a plain state value, not routes — `docs/stack-web.md` rule 3 says a router is added only once a screen needs a shareable URL, and none of these six do yet. |
+| Hunt selection, Character sheet, Inventory | Wordmark + tabs (Hunt · Character · Inventory) + account menu. Each tab is a link to a route, and the active one is derived from the current URL — `docs/stack-web.md` rule 3 puts the router in from the first screen, so every one of these screens is a real, reloadable, shareable URL. |
 | Live-hunt (arena + HUD) | Wordmark + a compact icon rail replacing the text tabs (Character sheet and Inventory open as slide-over panels without leaving the fight) + account menu. The arena is the point of this screen, so the chrome shrinks to make room for it. |
 
 **Live-hunt layout.** The arena canvas takes the majority of the viewport
 width. A fixed `380px` column sits to its right, holding the status panel
 (HP/mana/buffs) stacked above the gambit trace (a scrollable rule list). This
 column is ordinary DOM/React, not part of the PixiJS canvas — see
-`docs/architecture-web.md`'s renderer-boundary rule (the two must never share
-a DOM subtree).
+`docs/architecture-web.md` rule 3 (the two must never share a DOM subtree).
 
 **Whitespace rhythm.** Vertical spacing between major page sections is
 `32px` (`space-6`). Between related items inside one block, `16px`
@@ -443,8 +442,8 @@ underneath it. Press (`active`) darkens the fill one step further than
 hover, applied instantly (no transition on press-down, `fast` transition on
 release).
 
-**Screen transitions.** Since navigation is a state value, not a route,
-switching screens is a `base`-duration cross-fade — no slide, no shared-element
+**Screen transitions.** Navigation is a route change (`docs/stack-web.md`
+rule 3), rendered as a `base`-duration cross-fade — no slide, no shared-element
 animation. The live-hunt view (entering/leaving a hunt) gets the `slow`
 duration since it's a bigger visual change (the arena mounting/unmounting).
 
@@ -579,6 +578,9 @@ light/dark token pair. See §3.
 
 **Token format:** literal values are published as JSON —
 [`docs/design-tokens.json`](design-tokens.json) — covering color, type
-scale, spacing scale, radii, and motion durations/easing, ready to paste into
-the codebase once the front-end scaffold exists (there isn't one yet, per
-`docs/prompts/06-define-the-ui-design-specification.md`'s Output section).
+scale, spacing scale, radii, and motion durations/easing. It is not pasted into
+the codebase by hand: `docs/stack-web.md` rule 45 generates the Tailwind v4
+theme from this file and fails CI when the two disagree, which is what makes
+this doc's "the JSON file is correct" claim above enforceable rather than
+aspirational. There is no front-end scaffold yet, per
+`docs/prompts/06-define-the-ui-design-specification.md`'s Output section.

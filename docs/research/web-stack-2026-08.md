@@ -142,6 +142,14 @@ what most Tibia-like clients actually do.
 
 ## Shell
 
+> **Two lines below are superseded 2026-08-26.** The router paragraph
+> ("a tab value is defensible") was reversed: TanStack Router goes in from the
+> first screen with file-based routes — `docs/stack-web.md` rules 3 and 38–40.
+> And **an i18n library is no longer rejected**: English and Portuguese both
+> ship in the alpha, on react-i18next, per `docs/stack-web.md` rules 48–52.
+> Everything else in this section, including the arena-stream-is-not-Query
+> nuance, still holds.
+
 TanStack Query is the state manager, because all truth is server-side. The
 nuance that matters: **the arena stream must not live in Query.** Query is
 request/response cache semantics; the arena is a continuous stream the renderer
