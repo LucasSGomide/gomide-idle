@@ -3,6 +3,10 @@
 Researched 2026-08-21. The rules live in [`docs/stack-api.md`](../stack-api.md);
 this file is the argument, so that file can stay one line per rule.
 
+*Rule-number citations to `architecture-api.md` were repointed 2026-08-26, when
+that file was numbered. It was unnumbered prose when this was written, so the
+numbers below were citing rules that had none.*
+
 ## The measurement that reframed everything
 
 A representative arena tick was benchmarked before anything was priced: one
@@ -27,8 +31,11 @@ Two consequences:
 
 - Decision 2 is dominant for **correctness** and irrelevant for **capacity**. Do
   not choose infrastructure to serve it.
-- `architecture-api.md` rule 10's catch-up cap is still right, but it is a
-  game-balance number (24–72 h), not a timeout defence.
+- The catch-up cap is still right, but it is a game-balance number (24–72 h),
+  not a timeout defence. *Repointed 2026-08-26: the cap left
+  `architecture-api.md` in the 2026-08-24 split of principles from requirements,
+  and is now a Back-end row in [`alpha.md`](../../alpha.md)'s Functional
+  Requirements — "Cap how much elapsed time a single catch-up will replay."*
 
 Thirty players logging in simultaneously after ten hours away is about 30
 CPU-seconds in total.
@@ -93,11 +100,15 @@ The command bus was dropped and replaced with use cases. The argument:
 - The one interesting operation is already `(state, ticks) → (state, events)`.
   A pure function is a better command bus than a command bus.
 - A bus is a natural home for *events*, and combat events must arrive in a
-  deterministic order (`architecture-api.md` rule 4). Two things called "events"
-  that must never touch is a trap worth not building.
+  deterministic order ([`architecture-api.md`](../architecture-api.md) rule 4 —
+  sort by stable entity id before any order-sensitive loop). Two things called
+  "events" that must never touch is a trap worth not building.
 - Adding `@nestjs/cqrs` later is a couple of hours. Removing it is a refactor.
 
-Everything else in the `backend-standards` skill was kept.
+Everything else in the `backend-standards` skill was kept. *Superseded
+2026-08-26: the skill was disabled for this project and its rules were adapted
+into [`architecture-api.md`](../architecture-api.md) rules 19–86 — see
+`stack-api.md` rule 6 for what changed and why.*
 
 ## Persistence
 
@@ -173,8 +184,8 @@ three orders of headroom. Order of operations is part of the contract.
 2. **One pass of 100k ticks equals 100 resumed chunks of 1k.** This is what
    actually proves the call counter is saved and no clock is read.
 3. **A JSON round-trip mid-stream continues identically.** The only test that
-   catches rule 4 — a live `Map` iterates in insertion order, the same state
-   rebuilt from JSON does not. Never appears in a single-process test, always
+   catches [`architecture-api.md`](../architecture-api.md) rule 4 — a live `Map`
+   iterates in insertion order, the same state rebuilt from JSON does not. Never appears in a single-process test, always
    appears in production.
 4. A committed golden hash, so a deliberate change tells you it changed and you
    consciously decide whether to bump the state version.

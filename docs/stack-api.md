@@ -36,9 +36,15 @@ file carries the rule, that file carries the argument.
    determinism section), and a bus is the one place that ordering silently stops
    being guaranteed.
 
-6. **Keep every other rule in the `backend-standards` skill.** The layering, the
-   ports, the repository mapping, the `ApiError` hierarchy and the `LoggerPort`
-   are unaffected by dropping the bus — only the dispatch mechanism changed.
+6. **Keep the layering, the ports, the repository mapping, the `ApiError`
+   hierarchy and the `LoggerPort` — they are written out in
+   [`architecture-api.md`](architecture-api.md) rules 19–86.** Dropping the bus
+   changed the dispatch mechanism and nothing else. *Revised 2026-08-26; this
+   rule previously deferred to a personal `backend-standards` skill. That skill
+   lived in a global Claude config outside this repository, was written for
+   another project, and encoded MikroORM concretely — so it could not be a
+   dependency of this one. Its rules were adapted into `architecture-api.md`,
+   which is where they now live.*
 
 ## The simulation package
 
@@ -175,8 +181,15 @@ file carries the rule, that file carries the argument.
     referential-integrity requirement enforceable rather than aspirational.
 
 32. **Jest everywhere, including the framework-free packages.** One runner and
-    one set of conventions across the repo beats a per-package optimum, and the
-    `backend-standards` testing rules are already written against Jest.
+    one set of conventions across the repo beats a per-package optimum, and Jest
+    is what NestJS 11 ships and documents — rule 2 already declined the v12
+    preview that swaps it for Vitest, so picking Vitest now would mean running
+    two runners until that migration lands. *Revised 2026-08-26; this rule
+    previously rested on the `backend-standards` skill's testing rules already
+    being written against Jest. Those rules are now
+    [`architecture-api.md`](architecture-api.md) rules 70–86 and are still
+    written against Jest, but a rule doc citing a rule doc is not a reason — the
+    reason is the framework's own default.*
 
 33. **Configure Jest for ESM in `libs/simulation` rather than compiling it down.**
     `libs/simulation` is ESM-native so it survives the NestJS 12 migration

@@ -36,3 +36,43 @@ citations, so append rather than reorder.
    in it.** Three things with three lifetimes wore one word; splitting them is
    what stops "the hunt" meaning a JSON file in one function and an in-memory
    room in the next.
+
+Rules 7–12 were added 2026-08-26, moved out of `architecture-api.md` when the
+back-end standards were written there — that doc keeps the port, repository and
+DAO *structure* and cites this one for what things are called.
+
+7. **Suffix every port interface with `Port`: `CharacterRepositoryPort`,
+   `GetInventoryDaoPort`.** Rule 2 already puts `.port.ts` on the file; the type
+   name has to say it too, because the import site is where the mistake —
+   depending on the implementation instead of the interface — actually gets made.
+
+8. **Declare a data shape as `type FooType = { … }`, never a bare
+   `interface Foo { … }`.** The suffix tells you at the import site that this is
+   a shape and not a behaviour, and two `interface` declarations of one name
+   merge silently where two `type` aliases collide loudly.
+
+9. **Name a use case's input `<Verb><Resource>InputType`.** `stack-api.md` rule 4
+   dropped the command bus, so `CreateCharacterCommand` would name a mechanism
+   that is not there; rule 1 already named the use case and the input just
+   follows it.
+
+10. **Name a repository implementation `<Entity>Repository` in
+    `infrastructure/database/repository/<entity>.repository.ts`, and a DAO
+    `<Verb><Resource>Dao` in
+    `infrastructure/database/dao/<verb>-<resource>.dao.ts`.** The ORM does not
+    appear in the name: the folder already says this is the adapter, there is
+    exactly one adapter per port, and this project swapped ORM once before
+    writing a line of code — `*.mikro-orm.repository.ts` would already have been
+    a rename.
+
+11. **Name a Drizzle table for its singular `snake_case` table name and export it
+    as the plural camelCase symbol — `export const characters = pgTable('character', …)`
+    — in `infrastructure/database/schema/<entity>.schema.ts`.** A join reads
+    singular and a `select` reads plural, and settling it once is worth more than
+    either convention is on its own.
+
+12. **Name an injection token in `SCREAMING_SNAKE_CASE` after the port it
+    satisfies: `CHARACTER_REPOSITORY`, `GET_INVENTORY_DAO`.** A port is a type
+    and disappears at runtime, so the token is the only thing DI can see — and a
+    token that does not match its port is the one mismatch the compiler cannot
+    catch.
