@@ -203,7 +203,7 @@ reason to exist beyond "other idle games have it." That's not a reason.
 
 ## Deferred by the alpha scope audit
 
-Added 2026-08-24 by [`docs/prompts/audit-alpha-scope-and-seed-the-feature-list.md`](docs/prompts/audit-alpha-scope-and-seed-the-feature-list.md).
+Added 2026-08-24 by [`docs/prompts/05-audit-alpha-scope-and-seed-the-feature-list.md`](docs/prompts/05-audit-alpha-scope-and-seed-the-feature-list.md).
 Each carries the constraint that keeps it cheap to add later.
 
 **A monetization surface.** Nothing is being built for this and nothing is committed to. It is

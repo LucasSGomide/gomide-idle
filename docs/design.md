@@ -20,7 +20,7 @@ reasoning behind each value in it. If the two ever disagree, the JSON file is
 correct and this doc is stale — fix the doc.
 
 Decided 2026-08-26, after walking the open questions in
-`docs/prompts/define-the-ui-design-specification.md` with Lucas.
+`docs/prompts/06-define-the-ui-design-specification.md` with Lucas.
 
 ## 1. Layout & structure
 
@@ -581,4 +581,4 @@ light/dark token pair. See §3.
 [`docs/design-tokens.json`](design-tokens.json) — covering color, type
 scale, spacing scale, radii, and motion durations/easing, ready to paste into
 the codebase once the front-end scaffold exists (there isn't one yet, per
-`docs/prompts/define-the-ui-design-specification.md`'s Output section).
+`docs/prompts/06-define-the-ui-design-specification.md`'s Output section).
