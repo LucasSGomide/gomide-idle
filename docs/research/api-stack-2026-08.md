@@ -123,6 +123,15 @@ on a container. At six tables the differentiators evaporate and the tiebreaker
 is migration confidence — which rule 8 makes the single most valuable ORM
 property here.
 
+> **Superseded 2026-08-26.** `stack-api.md` rule 17 now names **Drizzle**. The
+> reasoning above still holds — at six tables the differentiators do evaporate —
+> but it weighed a tiebreaker that turned out not to be the binding one. Better
+> Auth ships a supported Drizzle adapter and none for MikroORM, so MikroORM meant
+> hand-authoring the auth entities from generated SQL and re-doing that by hand on
+> every Better Auth schema change. One migration tool for the whole schema beat
+> familiarity with a second one. Left in place because it is the argument as it
+> stood on 2026-08-21.
+
 **Concurrency.** Two tabs, or a poll firing while a slow one is in flight, both
 replay from tick T and one write is lost. `SELECT … FOR UPDATE` is correct but
 holds a transaction open across the whole replay. Optimistic compare-and-swap on

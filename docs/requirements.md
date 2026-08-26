@@ -172,6 +172,8 @@ in a roadmap item's own Key Areas section, not here.
 | Account | Account sign-up and login | UN.3 | — | FR.3.2 | The socket handshake is authenticated against the same server-side session as ordinary requests, and the server checks the request's Origin on every connection. | 2026-08-25 |
 | Account | Account sign-up and login | UN.3 | — | FR.3.3 | The server detects a dead socket itself, by heartbeat and timeout, rather than trusting the client to close it. | 2026-08-25 |
 | Account | Account sign-up and login | UN.3 | — | FR.3.4 | Losing the socket takes the character offline; if it was hunting, the five-second leave runs first and its result is banked. | 2026-08-25 |
+| Account | Account sign-up and login | UN.3 | — | FR.3.5 | Reconnecting within the five-second leave cancels the leave and resumes the hunt, so a brief network blip does not cost a player their fight. | 2026-08-26 |
+| Account | Account sign-up and login | UN.3 | — | FR.3.6 | The heartbeat is tuned so a client that vanishes without closing cleanly is detected in seconds rather than tens of seconds; detection can never be instant, but the gap must stay proportionate to the five-second leave. | 2026-08-26 |
 | Account | Account sign-up and login | UN.4 | A player must not be able to corrupt or duplicate their own progress by opening a second tab. | — | — | 2026-08-25 |
 | Account | Account sign-up and login | UN.4 | — | FR.4.1 | An account has at most one character online at a time. | 2026-08-25 |
 | Account | Account sign-up and login | UN.4 | — | FR.4.2 | A connection for an account that already has a character online is refused with a stated reason, and nothing already running is interrupted. | 2026-08-25 |

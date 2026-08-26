@@ -66,9 +66,15 @@ file carries the rule, that file carries the argument.
 
 ## Transport
 
-12. **WebSocket for the live hunt, HTTP for everything account-shaped.**
-    Characters, inventory, the priority list and hunt selection are
-    request/response; combat is a stream, and mixing them makes both worse.
+12. **The socket is presence: it opens at character select and the hunt runs
+    over it. HTTP for everything account-shaped.** An open socket is what
+    "online" means — sign-up, sign-in, the character sheet, inventory and the
+    rule lists stay request/response, but a character is in the world for as
+    long as its socket lives. *Revised 2026-08-26; this rule previously said the
+    socket was the hunt itself.* Presence has to outlive a single fight because
+    a city and world chat are coming, and because an account's
+    one-character-online limit (rule 35) needs something to hang off that a
+    between-hunts player still holds.
 
 13. **The socket pushes the output of the same `runTicks` the offline replay
     calls.** Two code paths for combat is exactly what `alpha.md` decision 2
@@ -93,8 +99,15 @@ file carries the rule, that file carries the argument.
     section), so the hybrid schema's blob has nothing left to hold, and the rule
     list is the one input whose length varies.
 
-17. **MikroORM.** At six tables the differentiators between ORMs evaporate, so the
-    tiebreaker is the migration workflow already trusted.
+17. **Drizzle, and `drizzle-kit` owns every migration in the repo.** At six
+    tables the differentiators between ORMs evaporate, so the tiebreaker is
+    whichever one Better Auth supports directly — and that is Drizzle, not
+    MikroORM. *Revised 2026-08-26; this rule previously named MikroORM, whose
+    tiebreaker was migration confidence.* Better Auth's `generate` emits a
+    Drizzle schema for the auth tables, `drizzle-kit` diffs and applies it
+    alongside the game tables, and Better Auth's own `migrate` command is never
+    run. The alternative was hand-authoring auth entities from generated SQL and
+    re-doing it by hand on every Better Auth schema change.
 
 18. **Migrate the run header like any other table.** It is one row per player
     currently offline, so a shape change is an ordinary migration and the schema
@@ -168,3 +181,44 @@ file carries the rule, that file carries the argument.
 33. **Configure Jest for ESM in `libs/simulation` rather than compiling it down.**
     `libs/simulation` is ESM-native so it survives the NestJS 12 migration
     untouched, and the runner is the thing that should bend.
+
+## Presence
+
+Added 2026-08-26, settled while writing the requirements for **Account sign-up
+and login**. Rule 12 was revised in the same pass.
+
+34. **Socket.IO, not raw `ws`.** Three things this project needs are
+    configuration rather than code with it: the heartbeat rule 36 requires,
+    reconnection for the grace window in rule 37, and rooms, which are exactly
+    the run-id-to-connections map rule 14 already describes. It is also NestJS's
+    default gateway transport, so it is the path with the least wiring.
+
+35. **An account has at most one character online at a time, and the claim is
+    made synchronously.** A second connection is refused rather than allowed to
+    kick the first, so nothing already running is ever interrupted by something
+    the player did in another tab. Check-and-claim must happen in one
+    synchronous block with no `await` between the check and the write, or two
+    connections arriving together both pass the check. Keep it behind one named
+    component: it is correct only in a single process, and rule 24 means that
+    assumption expires the day a second one is added.
+
+36. **Tune the heartbeat down from Socket.IO's defaults.** `pingInterval: 25000`
+    and `pingTimeout: 20000` mean a vanished client goes unnoticed for about 45
+    seconds — nine times the five-second leave the game promises, during which
+    the character is still fighting and can still die with nobody watching. A
+    cleanly closed tab sends a close frame and is instant; the heartbeat only
+    governs the half-open case, which is exactly the mobile case. Detection can
+    never be instant, so the goal is proportion, not perfection.
+
+37. **Reconnecting inside the five-second leave cancels the leave.** The window
+    the game already grants for quitting doubles as the reconnect grace, so a
+    brief blip stops costing a hunt. This is what makes rule 36's aggressive
+    timeouts safe: a false disconnect is cheap when reconnecting resumes the
+    fight, so the heartbeat can be tuned for fast detection rather than for
+    avoiding false positives.
+
+38. **Authenticate the socket handshake against the same server-side session,
+    and check `Origin` on every connection.** The cookie rides along on the
+    upgrade request automatically, which is also why cross-site WebSocket
+    hijacking exists — CORS does not govern the handshake, so `Origin`
+    validation is the check that replaces it.
