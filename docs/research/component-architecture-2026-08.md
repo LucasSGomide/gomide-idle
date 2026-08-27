@@ -2154,7 +2154,7 @@ Things I am not fully certain of, flagged rather than smoothed over:
 - **The GDC Vault link for the Overwatch talk** may require membership. The same
   talk is on the free GDC YouTube channel.
 - **The performance numbers in §10.1** are extrapolated from this repository's own
-  benchmark in `docs/research/api-stack-2026-08.md`, not from a benchmark of the
+  benchmark recorded in `docs/stack-api.md`'s header, not from a benchmark of the
   component dispatch itself. The claim that component dispatch is a rounding error
   against the work already measured is an argument, not a measurement. If it ever
   matters, measure it.

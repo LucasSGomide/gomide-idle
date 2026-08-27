@@ -83,11 +83,13 @@ apps/web/src/
 ```
 
 6. **Give `apps/web/src` those seven folders, and put nothing beside them but
-   the entry point and the two generated files — `stack-web.md` rule 38's route
-   tree and rule 45's theme.** Every folder above answers "what
-   belongs here" in one line, which is what a `components/` and a `utils/` stop
-   doing about a week in — they become the two folders everything lands in when
-   nowhere else is obviously right.
+   the entry point and the three generated files — `stack-web.md` rule 38's
+   route tree and rules 45 and 54's two theme outputs.** Every folder above
+   answers "what belongs here" in one line, which is what a `components/` and a
+   `utils/` stop doing about a week in — they become the two folders everything
+   lands in when nowhere else is obviously right. *Revised 2026-08-27; this rule
+   read "the two generated files" before rule 54's `theme.ts` existed. Both
+   theme outputs sit at the root, so one generator has one destination.*
 
 7. **Never import one feature from another.** Two features that import each
    other are one feature with a boundary drawn through the middle of it, and
@@ -272,7 +274,7 @@ bitmap font and the atlas that carries them.
     sit over an entity's head is positioned by the HUD from coordinates the
     renderer hands out, rather than drawn where it belongs.
 
-30. **Take a colour, size or duration from the generated `lib/theme.ts`
+30. **Take a colour, size or duration from the generated `theme.ts`
     (`stack-web.md` rule 54) anywhere CSS cannot reach it — `renderer/`
     included.** `stack-web.md` rule 46 forbids a raw colour in a component, and
     the arena is the one place that ban had no mechanism behind it, because a
@@ -281,12 +283,46 @@ bitmap font and the atlas that carries them.
     keeps React and every game rule out of there, and a generated token module is
     neither.
 
+## The content pack
+
+Added 2026-08-27. `stack-web.md` rule 51 takes a hunt, monster, skill or affix
+name from the content pack and `architecture-api.md` rule 87 keeps that name
+untranslated — but nothing said where the browser reads it from.
+
+31. **Import `libs/content` in `lib/`, and resolve a name from the id the server
+    sent.** The gambit editor lists every skill the player could pick, including
+    ones no payload has ever mentioned, so the client needs names that no
+    response carries — and `stack-web.md` rule 33 already resolves a sprite
+    filename from that same pack, so an entity's picture and its word come from
+    one place. It is an import rather than a port (rule 14): a port stands in
+    front of something the app does not control, and a JSON file compiled into
+    the bundle is not that. The price is size and exposure — the whole pack
+    ships to the browser, so monster stats and loot tables are readable in
+    devtools, which is acceptable only because [`alpha.md`](../alpha.md)
+    decision 4 makes the server authoritative and nothing in the pack is a
+    secret.
+
+32. **Do not version-check the browser's content pack against the server's, and
+    render a name that will not resolve as its raw id.** `apps/web` and
+    `apps/api` ship from one repository and deploy together, so the only window
+    where the two disagree is between a deploy and a tab reload — too narrow to
+    earn a second version integer beside `stack-api.md` rule 15's protocol one,
+    which is the deliberate gap. What the player sees inside that window is the
+    price: `ashfen-ghoul` where "Ashfen Ghoul" belongs, which is never an empty
+    label and is searchable in a bug report, for the same reason rule 27 renders
+    an error from its type rather than from a message.
+
 ## Deferred, deliberately
 
 **Client auth** has no rules here beyond rule 22's "the guard lives in one layout
 route". What the guard reads, how a session is held on the client and how it is
 refreshed belong with [`auth.md`](auth.md), which `project.yml` points the
-**Auth** area at and which holds no rules yet.
+**Auth** area at and which holds no rules yet. One more question waits there,
+added 2026-08-27: `stack-web.md` rule 53 puts a language switcher on the
+signed-out screens, so the sign-up request has to carry that local choice onto
+the account it creates.
+[`docs/prompts/10-write-the-auth-rules.md`](prompts/10-write-the-auth-rules.md)
+is the pass that settles it.
 
 **Runtime configuration** — how environment variables are declared, validated and
 reached — has no rules here either. Rule 11 says the generated client is touched

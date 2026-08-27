@@ -627,6 +627,10 @@ the `msg-pre-roadmap` skill.
 | Front-end | Display a recommended level per hunt on the selection screen, and never enforce it. |
 | Design | Offline is the one stated exception to the one-player-hour invariant, and it is deliberate. |
 | Design | Every source of raw damage must be either equipped or chosen; nothing grants damage for free. |
+| Front-end | Ship every developer-written string in English and Portuguese, from the first screen. |
+| Front-end | Hold the active language on the account, out of the URL, with a switcher on the signed-out screens as well as in the account menu. |
+| Back-end | Keep every content name — hunt, monster, skill, prefix, suffix — as one authored English string; the content pack has no per-language field. |
+| Front-end | Size every fixed-width component against the Portuguese string, and never truncate a translated one. |
 
 ## User Needs
 
@@ -651,6 +655,8 @@ the original rule stated or implied one.
 | Back-end | A player must not be forced to end a run early for a housekeeping reason. |
 | Back-end | A player must always have a way back to human form, whatever their mana or skill spend. |
 | Operator | An operator must be able to change any balance number without a schema change. |
+| Front-end | A Brazilian player must be able to read the interface in Portuguese, including the login screen they hit before any account exists. |
+| Front-end | A player reading about the game elsewhere — a wiki, a chat, a bug report — must find a monster called the same thing there as in the client. |
 
 ## Notes
 
@@ -681,3 +687,6 @@ requirement, or a user need — tuning heuristics and the history behind them.
 | Front-end | "32×32 isometric" was a contradiction — Tibia is an orthogonal top-down grid, a real isometric tile is 64×32, and free 32×32 art is overwhelmingly top-down. |
 | Front-end | CC0 rather than open-source generally: CC-BY and OGA-BY oblige credit in the medium, and CC-BY-SA is viral — much of the LPC set in particular. |
 | Front-end | Static sprites are enough for the alpha, but they must be real sprites — an invisible form change makes the whole shapeshifting build unreadable. |
+| Front-end | Two languages were added 2026-08-26, mid-way through the web rules pass; the chrome is translated and content names are not, so a Portuguese screen deliberately carries English proper nouns. |
+| Front-end | Portuguese runs about 40% longer than English on short labels — "Start Hunt" against "Iniciar Caçada" — which is why nothing translated truncates and why the live-hunt column is sized for the longer of the two. |
+| Front-end | The arena draws numbers and never words, which is what keeps the renderer out of the translation layer entirely. |

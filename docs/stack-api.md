@@ -9,9 +9,21 @@ preference, and the next person will not know whether to keep it.
 Numbered, because roadmap items cite them by number — renumbering breaks the
 citations, so append rather than reorder.
 
-Settled 2026-08-21. The measurements and comparisons behind these choices are in
-[`docs/research/api-stack-2026-08.md`](research/api-stack-2026-08.md); this
-file carries the rule, that file carries the argument.
+Settled 2026-08-21, after a representative arena tick was benchmarked and the
+runtime, the transport, the database, auth and the monorepo were each compared.
+Those measurements lived in `docs/research/api-stack-2026-08.md`, removed
+2026-08-27 — `git log --full-history -- docs/research/api-stack-2026-08.md`
+finds them. The one number to keep in front of you: one player plus twenty
+monsters, ten hours at 10 Hz — 360,000 ticks — replayed in 261 ms on one core,
+or 344 ms in a deliberately pessimistic variant that rebuilds a modifier-source
+list per entity per tick and allocates an event object per hit. That is roughly
+one to four million ticks a second, so a ten-hour catch-up is sub-second and
+thirty players returning at once costs about thirty CPU-seconds in total.
+
+It reframed everything below. [`alpha.md`](../alpha.md) decision 2 is dominant
+for **correctness** and irrelevant for **capacity**, so nothing here is chosen
+to serve it — and the catch-up cap is a game-balance number rather than a
+timeout defence.
 
 ## Runtime and framework
 

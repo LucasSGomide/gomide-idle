@@ -9,14 +9,43 @@ preference, and the next person will not know whether to keep it.
 Numbered, because roadmap items cite them by number — renumbering breaks the
 citations, so append rather than reorder.
 
-Settled 2026-08-21. The comparisons behind these choices are in
-[`docs/research/web-stack-2026-08.md`](research/web-stack-2026-08.md);
-this file carries the rule, that file carries the argument.
+Settled 2026-08-21, after the shell, the renderer, the priority list, the look
+and the asset host were each compared candidate by candidate. That comparison
+lived in `docs/research/web-stack-2026-08.md`, removed 2026-08-27 —
+`git log --full-history -- docs/research/web-stack-2026-08.md` finds it. What
+decided each one:
 
-Rules 6–9, 34 and 35 were revised 2026-08-24 after Three.js, PixiJS and the
-DOM plan were compared head to head — see
-[`docs/research/renderer-2026-08.md`](research/renderer-2026-08.md). The
-renderer no longer starts on DOM.
+- **TanStack Query, with the arena stream deliberately outside it.** Query is
+  request/response cache semantics and the arena is a continuous stream, so the
+  socket writes `setQueryData` for the meta state it invalidates and hands arena
+  events straight to the renderer (rules 2, 5 and 17).
+- **Copied-in primitives over an installed component library.** Every library
+  ships one opinion — rounded corners, soft shadows, generous padding — and
+  owning the file means deleting a default instead of overriding it through a
+  theme engine (rule 25).
+- **No drag-and-drop library.** `@dnd-kit`'s stable line had not shipped since
+  December 2024 and its maintainer's current work is a pre-1.0 rewrite, while
+  `react-beautiful-dnd` has been deprecated since 2022 — so no version of either
+  was both current and stable (rules 29–31).
+- **Sprites from the app's own origin.** Cloudflare R2 is $0.015/GB-month with
+  no egress charge against S3's $0.023 plus $0.09/GB and a CDN layer on top, so
+  R2 is the obvious pick the day the set outgrows git — and that day is not yet
+  (rule 32).
+- **Rejected outright:** Next.js, Redux, GraphQL, Server Components, a
+  state-machine library, a form library and the React Compiler (rule 4). tRPC
+  was deferred rather than rejected, because it competes with the OpenAPI and
+  Orval workflow the back end already assumes.
+
+Rules 6–9, 34 and 35 were revised 2026-08-24, when Three.js, PixiJS and the DOM
+plan were compared head to head. That argument lived in
+`docs/research/renderer-2026-08.md`, removed on the same day as the other and
+recoverable the same way. PixiJS v8 won three of the six jobs the arena needs
+and tied the rest: a red hit flash and additive fire are one property each in
+Pixi and force a compositor-layer promotion per node in DOM; Pixi ships
+sprite-sheet playback, painter's-order drawing and text in the box, where
+Three.js ships none of the three and needs a third-party package to print a
+number; and throughput decided nothing, because all three are comfortable at
+20–150 entities. The renderer no longer starts on DOM.
 
 Rules 38–52 were added 2026-08-26, and rule 3 was reversed in the same pass —
 the router, the test runner, the token pipeline and the language rules, written
@@ -348,10 +377,10 @@ can be silently wrong.
 
 ## Language
 
-Added 2026-08-26. English and Portuguese both ship in the alpha.
-[`docs/research/web-stack-2026-08.md`](research/web-stack-2026-08.md) lists an
-i18n library among the things rejected — that line is superseded by the rules
-below, and the research file carries a note saying so.
+Added 2026-08-26. English and Portuguese both ship in the alpha. The 2026-08-21
+comparison had rejected an i18n library outright, alongside Redux and GraphQL;
+the rules below reverse that, which is why rule 4's do-not-add list does not
+name one.
 
 48. **react-i18next 17 and i18next 26, with English and Portuguese from the
     first screen.** Two languages from the start is what avoids a retrofit pass
@@ -416,7 +445,7 @@ and 46 cannot reach and rules 48–52 do not translate.
 [`architecture-web.md`](architecture-web.md) rules 28–30 are the structural half:
 what may be drawn there, and what `renderer/` is allowed to import.
 
-54. **Generate `apps/web/src/lib/theme.ts` from
+54. **Generate `apps/web/src/theme.ts` from
     [`docs/design-tokens.json`](design-tokens.json) with rule 45's generator and
     on rule 45's terms — committed, regenerated in CI, failing on any
     difference.** A Pixi text style takes a number (`0xF97316`), not a Tailwind
@@ -426,9 +455,9 @@ what may be drawn there, and what `renderer/` is allowed to import.
     ban on raw colours exactly where the game's most-read numbers are drawn. The
     price: a fourth generated file nobody may hand-edit, after Orval's client,
     rule 38's route tree and rule 45's `theme.css`, plus a hex-to-`0x`
-    conversion the generator now owns. It is emitted into `lib/` rather than
-    beside the folders, which is what keeps `architecture-web.md` rule 6's count
-    of root files true.
+    conversion the generator now owns. Both outputs sit beside the folders at
+    the source root, which is why `architecture-web.md` rule 6 was revised to
+    count three generated files rather than two.
 
 55. **Draw arena text with a bitmap font — a font shipped as an image of
     pre-drawn characters — through Pixi's `BitmapText`, never `Text`.** `Text`

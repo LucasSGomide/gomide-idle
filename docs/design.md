@@ -83,7 +83,11 @@ damage numbers are drawn in a pixel bitmap font baked into the sprite atlas
 32×32 pixel art is the one place the meta UI's type would visibly fight the
 arena's idiom, and a bitmap sheet also costs one texture rather than one per
 distinct number. The canvas draws numbers only; every *word* belongs to the HUD
-beside it (`docs/architecture-web.md` rules 28 and 29).
+beside it (`docs/architecture-web.md` rules 28 and 29). Its family name is the
+`typography.fontFamily.arena` token, so the generated module in
+`docs/stack-web.md` rule 54 hands it to the renderer instead of the renderer
+typing a string. There is no fallback stack, because a bitmap font either loaded
+from the atlas or did not.
 
 **Type scale** (1.25 ratio off a `16px` body — token names on the left):
 
@@ -602,8 +606,9 @@ Firefox, Edge, and Safari. No IE11, no legacy Edge.
 light/dark token pair. See §3.
 
 **Token format:** literal values are published as JSON —
-[`docs/design-tokens.json`](design-tokens.json) — covering color, type
-scale, spacing scale, radii, and motion durations/easing. It is not pasted into
+[`docs/design-tokens.json`](design-tokens.json) — covering color, font
+families (the arena's included), type scale, spacing scale, radii, and motion
+durations/easing. It is not pasted into
 the codebase by hand: `docs/stack-web.md` rule 45 generates the Tailwind v4
 theme from this file and fails CI when the two disagree, which is what makes
 this doc's "the JSON file is correct" claim above enforceable rather than

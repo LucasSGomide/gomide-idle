@@ -153,6 +153,13 @@ in a roadmap item's own Key Areas section, not here.
     cleared, net experience, items gained, and — first and loudest — everything lost. Deaths,
     destroyed gear, and drops forfeited to a full backpack.
 
+31. **Language and localisation** — the interface reads in English or Portuguese, chosen by
+    the player and remembered on their account, and switchable before they even have one.
+    The names of things in the game world — hunts, monsters, skills, item prefixes and
+    suffixes — stay English in both, so a monster is called the same thing in the client, in
+    a wiki and in a bug report. *Load-bearing underneath it:* Portuguese runs roughly 40%
+    longer than English on short labels, so nothing translated truncates.
+
 | Module | Feature | User Need Code | User Need Details | Functional Requirement Code | Functional Requirement Details | Addition Date |
 | ------ | ------- | --------------- | ------------------ | ---------------------------- | -------------------------------- | -------------- |
 | Account | Account sign-up and login | UN.1 | A player needs an account that outlives the browser tab, so characters, gear and progress are still there when they come back. | — | — | 2026-08-25 |
@@ -216,3 +223,11 @@ in a roadmap item's own Key Areas section, not here.
 | Hunts | Daily Hard-run cap | TODO | TODO | TODO | TODO | 2026-08-24 |
 | Offline | Sealed offline session | TODO | TODO | TODO | TODO | 2026-08-24 |
 | Offline | Login summary | TODO | TODO | TODO | TODO | 2026-08-24 |
+| Client | Language and localisation | UN.7 | A player needs to read the interface in their own language, including on the login screen they reach before any account exists. | — | — | 2026-08-27 |
+| Client | Language and localisation | UN.7 | — | FR.7.1 | Every developer-written string — labels, buttons, validation messages, empty states, gambit skip reasons — ships in both English and Portuguese from the first screen. | 2026-08-27 |
+| Client | Language and localisation | UN.7 | — | FR.7.2 | The active language is held on the account and never in the URL, mirrored locally so a returning player does not see a frame in the wrong language. | 2026-08-27 |
+| Client | Language and localisation | UN.7 | — | FR.7.3 | A signed-out player can switch language on the login and sign-up screens, and that choice is carried onto the account they create. | 2026-08-27 |
+| Client | Language and localisation | UN.7 | — | FR.7.4 | A component with a fixed width is sized against the Portuguese string, and no translated string is ever truncated. | 2026-08-27 |
+| Client | Language and localisation | UN.8 | A player needs a monster, hunt or skill to be called the same thing in the client, in a wiki, in chat and in a bug report. | — | — | 2026-08-27 |
+| Client | Language and localisation | UN.8 | — | FR.8.1 | Hunt, monster, skill, prefix and suffix names are one authored English string, identical in both languages, and adding one stays a single content edit. | 2026-08-27 |
+| Client | Language and localisation | UN.8 | — | FR.8.2 | A name the client cannot resolve renders as its raw id rather than as an empty label. | 2026-08-27 |

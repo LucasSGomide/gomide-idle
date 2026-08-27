@@ -313,9 +313,8 @@ load-bearing rather than housekeeping.
 
 One schema per payload, three consumers: request validation on the server, the
 OpenAPI document Orval reads, and the socket message types. The alternative —
-class-validator decorators — is the thing NestJS 12 ends
-(`docs/research/api-stack-2026-08.md`), so writing them now is writing a
-migration.
+class-validator decorators — is the thing NestJS 12 ends, so writing them now is
+writing a migration.
 
 56. **Define one schema per payload in `libs/contracts` and feed all three
     consumers from it.** Three hand-kept copies of a payload drift, and the copy
@@ -363,9 +362,11 @@ the outbound tick stream is ours and constant.
 
 64. **Do not validate the per-tick arena event stream — type it and version
     it.** A parse per event is a cost paid at the tick rate forever, the stream
-    is produced by our own `runTicks`, `stack-web.md` rule 17 keeps it out of
-    React state entirely, and `stack-web.md` rule 23's exhaustive `never` switch
-    already fails the build on a shape the client does not know.
+    is produced by our own `runTicks`, `architecture-web.md` rule 4 keeps it out
+    of React state entirely, and `stack-web.md` rule 23's exhaustive `never`
+    switch already fails the build on a shape the client does not know.
+    *Citation repointed 2026-08-27; this rule cited `stack-web.md` rule 17,
+    which became a pointer to that rule when the boundary moved to one file.*
 
 65. **Validate a socket push on the client before it enters the TanStack Query
     cache.** `stack-web.md` rule 5 writes those payloads straight in, and

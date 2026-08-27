@@ -30,6 +30,13 @@ much smaller game — three zones, two upgrade buttons, no gear, no boss, no lev
 offline progress as a single multiplication. The closed alpha is not a bigger version of
 that design; it is a different one. Full text in git history at commit `8144bf3`.
 
+The three "research behind the rules" docs — `docs/research/api-stack-2026-08.md`,
+`web-stack-2026-08.md` and `renderer-2026-08.md` — were deleted on 2026-08-27. Each argued
+for decisions that the rule docs already carry, so the two drifted apart every time a rule
+was revised. What decided each choice now sits in the header of the rule doc that owns it
+(`docs/stack-api.md`, `docs/stack-web.md`), and the full arguments are recoverable with
+`git log --full-history -- docs/research/<file>`.
+
 Two design bugs the old balance script caught, both invisible on paper and both still worth
 knowing when the alpha's curve gets tuned:
 
