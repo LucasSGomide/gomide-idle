@@ -478,3 +478,30 @@ test asserts against.
 86. **Test `libs/simulation` by constructing it directly — no NestJS testing
     module, no DI container, no mocks.** There is nothing to inject (rule 66);
     a pure function's test is an input and an expected output.
+
+## Content and language
+
+Added 2026-08-26. `stack-web.md` rules 48–52 ship the client in English and
+Portuguese, and rule 51 takes a hunt, monster, skill or affix name from the
+content pack rather than from the client's catalogues — which made the pack's
+shape a back-end question that nothing here had answered.
+
+87. **Keep a content name as one authored English string; the content pack holds
+    no per-language field and no locale map.** A monster is called the same thing
+    in both languages, so a name means one thing in chat, in a wiki page and in a
+    bug report, and rule 11's promise holds unchanged — adding a monster stays a
+    single content edit rather than a content edit plus two catalogue files in
+    another package. The price is on screen and is deliberate: a Portuguese
+    player reads "Você morreu para o chefe de Ashfen Ruins", with an English
+    proper noun inside a Portuguese sentence. The second price is the exit — if
+    this is ever reversed, every existing name becomes a migration, because a
+    plain string has no room to put the second language in.
+
+88. **Translate the chrome, never the content: a string the developer wrote is
+    `stack-web.md` rule 48's catalogue, a string an author wrote is the content
+    pack.** The two are edited by different people at different times, and the
+    split is what keeps `libs/content` free of an i18n dependency and the
+    catalogues free of game data. The line to watch is a description rather than
+    a name — a hunt's blurb or a skill's tooltip text is authored *and* wants
+    translating, and nothing in the alpha has one yet, so the day one appears
+    this rule is what has to be revisited rather than worked around.

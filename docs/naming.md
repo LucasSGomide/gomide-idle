@@ -76,3 +76,13 @@ DAO *structure* and cites this one for what things are called.
     and disappears at runtime, so the token is the only thing DI can see — and a
     token that does not match its port is the one mismatch the compiler cannot
     catch.
+
+Rule 13 was added later on 2026-08-26, when `architecture-api.md` rules 87 and
+88 settled that a content name is not translated.
+
+13. **Name a content pack's display field `name`, holding a plain string — never
+    `nameEn`, `name_pt`, or a `{ en, pt }` map.** `architecture-api.md` rule 87
+    keeps content names untranslated, and a language-suffixed field is how that
+    decision gets reversed by accident: one file at a time, with nobody ever
+    arguing against it. The price is rule 87's own — adopting translation later
+    renames the field in every content file rather than adding a key beside it.

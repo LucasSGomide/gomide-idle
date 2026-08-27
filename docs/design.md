@@ -11,7 +11,9 @@ primitives, using [shadcn/ui](https://ui.shadcn.com) as the structural
 baseline for each component's states. The pixel-art arena — sprites,
 animation, the PixiJS canvas — is a different visual language and is out of
 scope here; see `docs/stack-web.md` rules 24–28 for the boundary between the
-two.
+two. One exception, added 2026-08-26: the *text* drawn inside the canvas is
+specified in §2 and §9, because it is user-facing type and nothing else covered
+it.
 
 Every literal value below (color, type scale, spacing, radius, motion) is
 also published as a token file: [`docs/design-tokens.json`](design-tokens.json).
@@ -30,13 +32,14 @@ with `32px` page margins and `24px` gutters. Desktop only — see §10.
 **App shell.** A persistent top bar, `56px` tall, holds the wordmark (left),
 then primary navigation, then the account area (right: an online indicator —
 the socket connecting is what "online" means in this game, per
-`docs/stack-api.md`'s presence model — and the account menu).
+`docs/stack-api.md`'s presence model — and the account menu). The account menu
+holds the language switcher on every signed-in screen (§13).
 
 What sits in the navigation slot changes with where the player is:
 
 | Screen | Top bar contents |
 | --- | --- |
-| Account / login | Wordmark + nothing else — there's no character yet. |
+| Account / login | Wordmark + a standalone language switcher (§13) — there's no character yet, and no account menu to put the switcher inside. |
 | Character select | Wordmark + account menu only. No character-scoped tabs, because no character is active yet. |
 | Hunt selection, Character sheet, Inventory | Wordmark + tabs (Hunt · Character · Inventory) + account menu. Each tab is a link to a route, and the active one is derived from the current URL — `docs/stack-web.md` rule 3 puts the router in from the first screen, so every one of these screens is a real, reloadable, shareable URL. |
 | Live-hunt (arena + HUD) | Wordmark + a compact icon rail replacing the text tabs (Character sheet and Inventory open as slide-over panels without leaving the fight) + account menu. The arena is the point of this screen, so the chrome shrinks to make room for it. |
@@ -45,7 +48,9 @@ What sits in the navigation slot changes with where the player is:
 width. A fixed `380px` column sits to its right, holding the status panel
 (HP/mana/buffs) stacked above the gambit trace (a scrollable rule list). This
 column is ordinary DOM/React, not part of the PixiJS canvas — see
-`docs/architecture-web.md` rule 3 (the two must never share a DOM subtree).
+`docs/architecture-web.md` rule 3 (the two must never share a DOM subtree). It
+stays `380px` in both languages, because the arena needs the rest of the width:
+a longer Portuguese trace row wraps rather than widening the column (§13).
 
 **Whitespace rhythm.** Vertical spacing between major page sections is
 `32px` (`space-6`). Between related items inside one block, `16px`
@@ -71,6 +76,14 @@ host is unreachable):
 
 - Display: `'Rajdhani', 'Segoe UI', sans-serif`
 - Body: `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`
+
+**Arena text.** Neither face is used inside the PixiJS canvas. The floating
+damage numbers are drawn in a pixel bitmap font baked into the sprite atlas
+(`docs/stack-web.md` rules 55 and 56) — a smooth vector face anti-aliased over
+32×32 pixel art is the one place the meta UI's type would visibly fight the
+arena's idiom, and a bitmap sheet also costs one texture rather than one per
+distinct number. The canvas draws numbers only; every *word* belongs to the HUD
+beside it (`docs/architecture-web.md` rules 28 and 29).
 
 **Type scale** (1.25 ratio off a `16px` body — token names on the left):
 
@@ -275,6 +288,11 @@ A `loading` state replaces the label with a spinner (§7) at the same size —
 the button never resizes — and disables pointer events without switching to
 the visually-disabled style, so it doesn't read as unavailable, just busy.
 
+A button never truncates its label. Portuguese runs longer (§13), so a label
+that stops fitting wraps to a second line or the button grows: "Iniciar Caçada"
+is 40% wider than "Start Hunt", and an ellipsis in the primary CTA is worse than
+a taller button.
+
 ### Inputs (text, number, select)
 
 Default: `surface` fill, `borderStrong` border, `textPrimary` text,
@@ -372,7 +390,10 @@ list actually did on the last tick:
 
 This is the game's core feedback loop (a player retunes by reading this, not
 by guessing), so the skip reason is always visible as text, never only as a
-tooltip — nothing here should require a hover to understand.
+tooltip — nothing here should require a hover to understand. It is never
+truncated either: a longer Portuguese reason wraps inside the fixed `380px`
+column (§13), because a reason cut off mid-sentence fails for the same reason a
+reason hidden behind a hover does.
 
 ### Character sheet modifier breakdown
 
@@ -415,10 +436,10 @@ mood rather than a heavier game-UI look.
 
 **Imagery aspect ratios:** item icons `1:1`. Character portraits (character
 select, account menu) `3:4` (portrait), matching a typical RPG character-card
-shape. Both render at `image-rendering: auto` — the pixelated rendering rule
-is scoped only to the arena's own sprites (`docs/stack-web.md` rule 26), not
-to portraits or item icons in the meta UI, even where the source art is
-pixel art.
+shape. Both render at `image-rendering: auto` — the crisp-pixel rule is scoped only
+to the arena's own sprites (`docs/stack-web.md` rule 26, where it is a PixiJS
+texture scale mode rather than a CSS property), not to portraits or item icons
+in the meta UI, even where the source art is pixel art.
 
 ## 7. Motion & interaction
 
@@ -523,7 +544,11 @@ are still perceivable without motion.
 alone — each pairs a distinct color (§3) with a distinct icon shape
 (`swords`/`flame`/`zap`), so the distinction survives any form of color
 blindness. This applies everywhere the distinction appears: damage numbers,
-gambit condition badges, item tooltips.
+gambit condition badges, item tooltips. Inside the arena that means a floating
+damage number carries a small glyph baked into the sprite atlas rather than a
+Lucide SVG — an SVG cannot be drawn into a canvas (`docs/stack-web.md` rule 56)
+— and its colour comes from the same `damageType` tokens the HUD uses, reaching
+the renderer through the generated module in `docs/stack-web.md` rule 54.
 
 ## 10. Responsive behavior
 
@@ -584,3 +609,66 @@ theme from this file and fails CI when the two disagree, which is what makes
 this doc's "the JSON file is correct" claim above enforceable rather than
 aspirational. There is no front-end scaffold yet, per
 `docs/prompts/06-define-the-ui-design-specification.md`'s Output section.
+
+## 13. Two languages
+
+Added 2026-08-26. The game ships in English and Portuguese from the first
+screen (`docs/stack-web.md` rules 48–52). Everything above was written when the
+app was English-only; this section is what that decision changes about the
+layout, the copy and the chrome.
+
+**What is translated, and what is not.** Every string a developer wrote is
+translated: buttons, labels, validation messages, empty states, the gambit
+trace's skip reasons. Every name an author wrote is not — hunts, monsters,
+skills and item prefixes and suffixes stay English in both languages
+(`docs/architecture-api.md` rule 87, `docs/stack-web.md` rule 51). So a
+Portuguese hunt card reads "Ashfen Ruins" above "Nível recomendado: 12", and
+§8's login summary reads "Você morreu para o chefe de Ashfen Ruins." The mixing
+is deliberate: a name means one thing in chat, in a wiki and in a bug report.
+It is also the only place this spec accepts two languages in one sentence.
+
+**Length budget: +40%.** A component sized before its copy exists must hold its
+English string at +40% without truncating or reflowing. Forty rather than the
+usual thirty, because the game's own primary button already spends it:
+
+| English | Portuguese | Growth |
+| --- | --- | --- |
+| "Start Hunt" | "Iniciar Caçada" | +40% |
+| "No items yet" | "Nenhum item ainda" | +42% |
+| "Save Gambit" | "Salvar Gambito" | +27% |
+| "HP not below 30%" | "HP não abaixo de 30%" | +25% |
+| "Not enough mana" | "Mana insuficiente" | +13% |
+| "On cooldown" | "Em recarga" | −9% |
+
+Once both catalogues exist the budget stops being the check. `docs/stack-web.md`
+rule 50 makes the Portuguese catalogue complete rather than partial, so a
+layout is verified against the actual Portuguese string — a real string beats a
+percentage, and the percentage is only for the component drawn before its copy
+is written.
+
+**When it still doesn't fit, nothing truncates.** No translated string in this
+UI gets an ellipsis. A button wraps to a second line or grows (§5). A gambit
+trace row wraps inside §1's fixed `380px` column, because §5 already requires
+the skip reason to be readable as text rather than hidden behind a hover, and a
+sentence cut off mid-word fails the same way. A toast grows to its content up to
+its maximum width, then wraps. The price is vertical: a Portuguese trace row can
+be two lines tall, so fewer rules are visible at once than in English and the
+column scrolls sooner. That is accepted rather than solved — widening the column
+takes width from the arena, which is the point of that screen.
+
+**The language switcher.** Signed in, it is an item in the account menu, which
+§1 puts on every screen including the live-hunt icon rail: the active language
+lives on the account (`docs/stack-web.md` rule 52), so the control lives with the
+account. Signed out, §1's login top bar carries a standalone switcher, because a
+player who cannot read the login screen is exactly the one who needs it and the
+account menu they would otherwise use does not exist yet. That pre-auth choice
+writes `localStorage` only and is carried onto the account at sign-up
+(`docs/stack-web.md` rule 53), so nobody picks a language twice in a row.
+
+**§11's copy rules survive translation, with one addition.** Verb-first button
+labels hold — "Iniciar Caçada", "Salvar Gambito", "Excluir Personagem" all lead
+with the verb — and so does the error-message order, what went wrong then what
+to do about it. The addition: write each string as one whole sentence and never
+assemble one from fragments at render time. Word order moves in translation, and
+a sentence glued together from pieces can only be reordered by editing the code
+that glues it — which puts a translator's problem in a developer's file.

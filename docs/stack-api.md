@@ -180,16 +180,25 @@ file carries the rule, that file carries the argument.
     what makes `architecture-api.md`'s content-is-data rule and `alpha.md`'s
     referential-integrity requirement enforceable rather than aspirational.
 
-32. **Jest everywhere, including the framework-free packages.** One runner and
-    one set of conventions across the repo beats a per-package optimum, and Jest
-    is what NestJS 11 ships and documents — rule 2 already declined the v12
-    preview that swaps it for Vitest, so picking Vitest now would mean running
-    two runners until that migration lands. *Revised 2026-08-26; this rule
-    previously rested on the `backend-standards` skill's testing rules already
-    being written against Jest. Those rules are now
-    [`architecture-api.md`](architecture-api.md) rules 70–86 and are still
-    written against Jest, but a rule doc citing a rule doc is not a reason — the
-    reason is the framework's own default.*
+32. **Jest in `apps/api` and in every `libs/` package, the framework-free ones
+    included.** Jest is what NestJS 11 ships and documents, and rule 2 already
+    declined the v12 preview that swaps it for Vitest — so the runner here is
+    the framework's own default, and holding every package the API boots with to
+    it is what lets [`architecture-api.md`](architecture-api.md) rules 70–86 be
+    written once. *Revised twice, both on 2026-08-26. First: this rule rested on
+    the `backend-standards` skill's testing rules already being written against
+    Jest; those rules are now `architecture-api.md` rules 70–86 and are still
+    written against Jest, but a rule doc citing a rule doc is not a reason.
+    Second: the scope read "Jest everywhere", justified by "one runner and one
+    set of conventions **across the repo** beats a per-package optimum" and
+    closing with "picking Vitest now would mean running two runners until that
+    migration lands". `stack-web.md` rule 41 then put Vitest on the web
+    deliberately, so the repo runs two runners today — the across-the-repo claim
+    was false the day it was written and the warning describes the world as it
+    now is. The scope is narrowed to what this file governs; the reason is
+    unchanged.* The two-runner price is named by `stack-web.md` rule 41 rather
+    than here, and it lands on this side too: `libs/content` is imported by the
+    web (rule 31) and tested under a runner the web does not run.
 
 33. **Configure Jest for ESM in `libs/simulation` rather than compiling it down.**
     `libs/simulation` is ESM-native so it survives the NestJS 12 migration

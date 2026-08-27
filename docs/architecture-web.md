@@ -26,6 +26,11 @@ every rule below is written against [`alpha.md`](../alpha.md),
 [`design.md`](design.md) and the existing rule docs rather than against
 something already built.
 
+Rules 28–30 were added later on 2026-08-26, when the text drawn inside the
+canvas turned out to fall through every rule either file had. In the same pass
+this file became the single home of the renderer boundary: `stack-web.md` rules
+13 and 17 were rules 3 and 4 written a second time, and now cite them by number.
+
 ## Dependency direction
 
 1. **The renderer reads state and consumes events; it never computes a rule.**
@@ -37,6 +42,12 @@ something already built.
    decision.
 
 ## Renderer boundary
+
+This file owns the boundary. `stack-web.md` rules 13 and 17 carried a
+near-verbatim second copy of rules 3 and 4 until 2026-08-26; they are pointers
+now, because what may write a DOM subtree is a dependency direction rather than
+a tool choice. All four numbers stay alive — a roadmap item citing any of them
+still lands somewhere true.
 
 3. **The renderer owns one element and React never renders inside it.** Two
    systems writing the same DOM subtree is the failure this boundary exists to
@@ -233,6 +244,42 @@ mismatch. That was the only failure state with a rule; these are the rest.
     error so that one client switch covers both transports, and that message is
     one language written for a developer — with `stack-web.md` rule 48 shipping
     Portuguese, rendering it puts English on a Portuguese screen.
+
+## Text in the arena
+
+Added 2026-08-26. [`alpha.md`](../alpha.md)'s live-hunt view puts health bars
+over every entity and floating damage numbers that distinguish physical from
+fire from electric, so there are user-facing numbers rendered *inside* the
+canvas. `stack-web.md` rules 54–56 are the tool half — the token module, the
+bitmap font and the atlas that carries them.
+
+28. **Keep i18next and the catalogues out of `renderer/`: the arena draws
+    numbers, and a word reaches it as a finished string through the
+    `RendererPort`.** [`alpha.md`](../alpha.md)'s arena is health bars and
+    damage numbers — digits, not sentences — so the renderer has nothing to look
+    up, and a translator injected into that folder would be exactly the
+    dependency rule 10 exists to keep out, wearing a different name. The price
+    is paid the first time the arena does need a word: whoever calls the port
+    resolves it first, so a nameplate or a floating "Immune" is one more method
+    on `stack-web.md` rule 7's port rather than something `renderer/` can build
+    alone.
+
+29. **Put every user-facing sentence in the HUD, never in the canvas.**
+    `design.md` §1's 380px column is ordinary React beside the arena, and that is
+    where react-i18next, the type scale and the theme's utilities already work; a
+    sentence drawn into the canvas gets none of the three and is invisible to the
+    screen reader `design.md` §9 commits to. The price: anything that wants to
+    sit over an entity's head is positioned by the HUD from coordinates the
+    renderer hands out, rather than drawn where it belongs.
+
+30. **Take a colour, size or duration from the generated `lib/theme.ts`
+    (`stack-web.md` rule 54) anywhere CSS cannot reach it — `renderer/`
+    included.** `stack-web.md` rule 46 forbids a raw colour in a component, and
+    the arena is the one place that ban had no mechanism behind it, because a
+    Pixi text style takes a number rather than a class. This is also the only
+    import `renderer/` takes from another folder, and it is deliberate: rule 10
+    keeps React and every game rule out of there, and a generated token module is
+    neither.
 
 ## Deferred, deliberately
 

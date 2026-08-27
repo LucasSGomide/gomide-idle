@@ -25,6 +25,13 @@ before the code they govern. Structure and dependency direction live in
 day; where a rule needs both halves it is written once and cited from the other
 file by number.
 
+Rules 53–56 were added later on 2026-08-26, and rules 8, 12, 13, 17, 26 and 51
+were revised in the same pass — the arena's text, the token path into it, the
+pre-auth language switcher, and a sweep of the rules that were still arguing
+with the DOM renderer rules 6 and 34 cancelled. Rules 13 and 17 became pointers:
+they were `architecture-web.md` rules 3 and 4 written a second time, and the
+boundary is structure, so that file owns it.
+
 ## Shell
 
 1. **React 19 and Vite 8, TypeScript.** There is no React 20; Vite 8 ships
@@ -70,10 +77,17 @@ file by number.
    that keeps game rules out of the renderer, and the seam that lets the
    projection, depth sort and frame-index logic be tested without a browser.
 
-8. **Never choose or reject a renderer on sprite count.** Every candidate is
-   comfortable at 20–150 entities; the DOM ceiling — ~150 live nodes, or
-   style-recalc above ~4ms per frame — is reached by damage floaters rather than
-   monsters, and decides nothing here.
+8. **Never choose or reject a renderer, or a change inside one, on sprite
+   count.** Every candidate is comfortable at 20–150 entities, so the count
+   decides nothing. *Revised 2026-08-26. The why previously read: "the DOM
+   ceiling — ~150 live nodes, or style-recalc above ~4ms per frame — is reached
+   by damage floaters rather than monsters, and decides nothing here." That
+   arithmetic measured the DOM plan rules 6 and 34 cancelled, and nobody can
+   reach it now.* The imperative outlives its own reasoning because the same
+   worry comes back inside PixiJS wearing different clothes — pool the floaters,
+   cull the off-screen sprites, split the container — and the answer has not
+   changed: at this scale the number is a guess, and a frame budget is measured
+   or it is not known.
 
 9. **Do not adopt Three.js or Phaser.** Three.js is a 3D engine, so a
    permanently 2D game pays its whole vocabulary and still writes the sprite
@@ -92,15 +106,26 @@ file by number.
 11. **Break depth-sort ties by entity id.** The server's ordering and the
     renderer's must agree, and stable ties are how that stays true.
 
-12. **Drive the sprite frame index from the render loop, never from CSS
-    `steps()`.** A CSS animation cannot be aligned to a server tick or
-    interrupted by an event, which is the whole job here.
+12. **Drive the sprite frame index from the render loop — `gotoAndStop(n)`,
+    never `play()`.** A frame clock the renderer does not own cannot be aligned
+    to a server tick or interrupted by an event, which is the whole job here.
+    *Revised 2026-08-26; this rule previously read "never from CSS `steps()`",
+    which was the DOM plan's version of that mistake and is unreachable now that
+    rules 6 and 34 chose PixiJS.* Pixi's `AnimatedSprite.play()` is the same
+    mistake rebuilt in the new renderer: a timer of its own, running beside the
+    tick clock, with `onFrameChange` reporting to nobody who can interrupt it.
 
 ## Renderer and React
 
-13. **The renderer owns one empty div and React never renders inside it.** Two
-    systems writing the same DOM subtree is the single failure mode this boundary
-    exists to prevent.
+13. **See [`architecture-web.md`](architecture-web.md) rule 3: the renderer owns
+    one element and React never renders inside it.** *Revised 2026-08-26; this
+    rule carried its own near-verbatim copy of that boundary — "The renderer owns
+    one empty div and React never renders inside it. Two systems writing the same
+    DOM subtree is the single failure mode this boundary exists to prevent." Both
+    copies were true and neither was the owner, so the boundary now lives in one
+    file and this number points at it.* The boundary is a dependency direction
+    rather than a tool choice, which is what puts it in that file and not this
+    one.
 
 14. **Push data to the renderer imperatively through a ref, never through
     props.** A prop change is a React render, and the arena updates at frame rate.
@@ -114,8 +139,12 @@ file by number.
     `init()` is async, so a naive effect can finish initializing after its own
     cleanup ran and leave an orphan canvas.
 
-17. **The arena event stream never enters React state.** React must not re-render
-    at frame rate, so events go from the socket to the `RendererPort` directly.
+17. **See [`architecture-web.md`](architecture-web.md) rule 4: the arena event
+    stream never enters React state.** *Revised 2026-08-26, with rule 13 and for
+    the same reason; this rule previously read "React must not re-render at frame
+    rate, so events go from the socket to the `RendererPort` directly", which is
+    that file's rule 4 in different words.* Rule 14 is this file's half — the ref
+    is how the data gets there.
 
 ## Consuming the event stream
 
@@ -153,8 +182,18 @@ file by number.
     library.** Owning the file means deleting a default instead of overriding it
     through a theme engine.
 
-26. **Keep `image-rendering: pixelated` scoped to sprites and the arena.** It is
-    an arena rule, not a page rule, now that the meta UI is not pixel art.
+26. **Set the arena's textures to the `nearest` scale mode, and leave
+    `image-rendering` at its default everywhere in the DOM.** Crisp pixel
+    scaling is an arena rule, not a page rule, now that the meta UI is not pixel
+    art. *Revised 2026-08-26; this rule previously read "Keep
+    `image-rendering: pixelated` scoped to sprites and the arena". That is a CSS
+    property, so it was written for the DOM renderer rules 6 and 34 cancelled —
+    under PixiJS the arena is a single `<canvas>` element and a canvas has no
+    per-sprite CSS, so the same setting is a texture scale mode set in
+    `renderer/`.* The DOM half survives as the default it always was:
+    `design.md` §6 cites this rule to keep item icons and character portraits
+    unpixelated even where their source art is pixel art, and that half is
+    unchanged.
 
 27. **Build the item tooltip on a positioning engine, not a tooltip primitive.**
     Rolled prefix and suffix modifiers need collision-aware flipping at the
@@ -261,7 +300,7 @@ can be silently wrong.
     reaching the same place with Jest means a second transform pipeline plus a
     hand-written module map that drifts silently the day `vite.config.ts`
     changes. `stack-api.md` rule 32 keeps Jest for `apps/api` and the `libs/`
-    packages and is unchanged — so the repo runs two runners, with two mocking
+    packages — so the repo runs two runners, with two mocking
     vocabularies (`vi.fn()` here, `jest.fn()` there) and two configurations to
     keep current. That is the price, and it is paid because the web's runner
     should be the one that already understands the web's build.
@@ -337,13 +376,18 @@ below, and the research file carries a note saying so.
     on a Portuguese screen and never say so — found by a player rather than by
     the build.
 
-51. **Take a hunt, monster, skill, prefix or suffix name from the content pack's
-    locale map, never from the i18n catalogue.** Those names are authored data,
-    and `architecture-api.md` rule 11 requires that adding a monster be a
-    content edit — putting its Portuguese in the client's catalogue would make
-    every new monster a code change in a second package. `libs/content`
-    validates the map at load, so a missing language fails exactly where a
-    missing skill id already does.
+51. **Take a hunt, monster, skill, prefix or suffix name from the content pack,
+    never from the i18n catalogue — and never translate it.** Those names are
+    authored data, and `architecture-api.md` rule 11 requires that adding a
+    monster be a content edit; putting its name in the client's catalogue would
+    make every new monster a code change in a second package.
+    `architecture-api.md` rule 87 is the other half — a content name is one
+    English string, the same one on a Portuguese screen. *Revised 2026-08-26;
+    this rule previously read "from the content pack's locale map" and closed
+    with "`libs/content` validates the map at load, so a missing language fails
+    exactly where a missing skill id already does". There is no locale map:
+    content names are not translated, so a name is a plain string and there is
+    nothing per-language left to validate.*
 
 52. **Keep the active language on the account and out of the URL, mirrored into
     `localStorage`.** The route tree stays as rule 39 describes it with no locale
@@ -353,3 +397,57 @@ below, and the research file carries a note saying so.
     resolves, so the `localStorage` mirror is read synchronously at startup and
     is the only reason a returning Portuguese player does not see one English
     frame.
+
+53. **Let a signed-out screen write the language to `localStorage` alone, and
+    carry that choice onto the account at sign-up.** Rule 52 keeps the active
+    language on the account, and the login screen has no account yet — while a
+    player who cannot read that screen is exactly the one who needs the
+    switcher, which is why `design.md` §13 puts one in its top bar. The price is
+    one setting with two write paths: sign-up has to pass the local choice
+    through, or the player picks a language once before the form and again after
+    it.
+
+## The arena's text
+
+Added 2026-08-26. `alpha.md`'s live-hunt view needs health bars over every
+entity and floating damage numbers that tell physical from fire from electric —
+so there are user-facing numbers rendered *inside* the canvas, which rules 45
+and 46 cannot reach and rules 48–52 do not translate.
+[`architecture-web.md`](architecture-web.md) rules 28–30 are the structural half:
+what may be drawn there, and what `renderer/` is allowed to import.
+
+54. **Generate `apps/web/src/lib/theme.ts` from
+    [`docs/design-tokens.json`](design-tokens.json) with rule 45's generator and
+    on rule 45's terms — committed, regenerated in CI, failing on any
+    difference.** A Pixi text style takes a number (`0xF97316`), not a Tailwind
+    utility and not a CSS custom property, so `renderer/` cannot read the theme
+    rule 45 emits — and without a second output the three `damageType` colours
+    are typed a second time inside the renderer, putting the hole in rule 46's
+    ban on raw colours exactly where the game's most-read numbers are drawn. The
+    price: a fourth generated file nobody may hand-edit, after Orval's client,
+    rule 38's route tree and rule 45's `theme.css`, plus a hex-to-`0x`
+    conversion the generator now owns. It is emitted into `lib/` rather than
+    beside the folders, which is what keeps `architecture-web.md` rule 6's count
+    of root files true.
+
+55. **Draw arena text with a bitmap font — a font shipped as an image of
+    pre-drawn characters — through Pixi's `BitmapText`, never `Text`.** `Text`
+    builds one texture per distinct string, so `-127` and `-128` are two uploads
+    and the damage floaters are the highest-churn text on the screen, where
+    `BitmapText` reuses a single glyph sheet instead. It is also what rule 24's
+    arena idiom asks for — a smooth vector face over 32×32 pixel art is the one
+    place that idiom visibly breaks, and it is why `design.md` §2's Rajdhani and
+    Inter stop at the canvas edge. Two prices: a second font asset, whose licence
+    is recorded under rules 36 and 37 like every other; and a bitmap sheet holds
+    only the glyphs baked into it — digits, minus and per cent today — so the day
+    a word is drawn in the arena, its accented characters have to be in the sheet
+    already or they render blank.
+
+56. **Bake the arena font and the three damage-type icons through AssetPack,
+    into the same atlas as the sprites.** Rule 35 already chose that pipeline;
+    `design.md` §9 forbids carrying the physical/fire/electric distinction on
+    colour alone, and a Lucide icon is an SVG rendered in the DOM — it cannot be
+    drawn into a canvas, so the arena needs its own small copies of `swords`,
+    `flame` and `zap`. The price is three glyphs duplicating a decision made
+    elsewhere: if `design.md` §3 ever swaps `flame` for a different icon, the
+    arena's copy does not follow on its own.

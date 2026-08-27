@@ -1,6 +1,6 @@
 # Goal: Close the six loose ends prompt 08 reported — the renderer boundary written twice, `stack-api.md` rule 32's now-false claim, the rules still arguing against a renderer that was cancelled, the canvas's untouched text, and the two places that never learned the game ships in English *and* Portuguese
 
-**Status:** not executed
+**Status:** executed 2026-08-26 — `architecture-web.md` took ownership of the renderer boundary and gained rules 28–30 for text in the arena; `stack-web.md` revised rules 8, 12, 13, 17, 26 and 51 and appended 53–56; `stack-api.md` rule 32 was revised a second time; `design.md` gained §13 and arena-text edits in §§1, 2, 5, 6 and 9; `architecture-api.md` gained rules 87–88 and `naming.md` rule 13. Item F reversed mid-run at Lucas's instruction: content names are not translated, so there is no locale map and the back-end rules record that instead
 **Rating:** —
 **Run:** standalone, after [`08-audit-the-web-stack-and-architecture-rules.md`](08-audit-the-web-stack-and-architecture-rules.md). Read that prompt and the diff it produced first — every item below is something its own Findings section reported and deliberately did not act on.
 
