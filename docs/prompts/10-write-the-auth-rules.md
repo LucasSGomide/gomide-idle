@@ -1,6 +1,16 @@
 # Goal: Fill `docs/auth.md` — number it from 1 and write the rules for sessions, the one route guard, ownership checks and the session hook, on both sides
 
-**Status:** not executed
+**Status:** executed 2026-08-27 — `docs/auth.md` written from its empty stub and
+numbered 1–30, with the Gotchas in the same sequence rather than a second one;
+`docs/architecture-web.md` revised rules 6, 11, 14–20 and 22 in place and gained
+rule 33; `docs/stack-web.md` revised rule 42 and appended 57–59;
+`docs/architecture-api.md` revised rule 26 and gained rules 89–90;
+`docs/stack-api.md` gained rule 39. The pass reversed one of prompt 08's settled
+decisions mid-run at Lucas's instruction: `architecture-api.md` rule 59 already
+promised Orval-generated TanStack Query hooks while `architecture-web.md` rules
+14–18 hand-wrote every hook over an injected port, and the ports lost. Ports are
+retired, every dependency reaches a component as a hook, MSW is the test seam,
+and that file's Ports section is now "Hooks, not ports"
 **Rating:** —
 **Run:** standalone, after [`09-close-the-loose-ends-prompt-08-left.md`](09-close-the-loose-ends-prompt-08-left.md). Read prompts 08 and 09 first — they set the numbering discipline, the split-by-kind rule and the voice this pass has to match.
 

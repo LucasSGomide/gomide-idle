@@ -31,6 +31,11 @@ canvas turned out to fall through every rule either file had. In the same pass
 this file became the single home of the renderer boundary: `stack-web.md` rules
 13 and 17 were rules 3 and 4 written a second time, and now cite them by number.
 
+Rule 33 was added 2026-08-27 by the auth pass, and that pass revised rules 6,
+11, 14–20 and 22 in place. The largest of those is the Ports section: ports are
+gone, every dependency reaches a component as a hook, and the rules keep their
+numbers with their old reasoning left visible.
+
 ## Dependency direction
 
 1. **The renderer reads state and consumes events; it never computes a rule.**
@@ -71,18 +76,19 @@ piles of shared code.
 apps/web/src/
   routes/                 # TanStack Router file routes
   features/
+    session/              # the auth client's only consumer — see auth.md rule 4
     character/            # components, hooks, query keys for one screen-area
     hunt/
     inventory/
     gambit/
   renderer/               # Pixi and the RendererPort — no React, no game rule
   transport/              # socket client, event decoding
-  ports/                  # PortsProvider, usePorts
   ui/                     # copied-in primitives (button, tooltip, …)
-  lib/                    # generated api client, i18n catalogues, config, utils
+  lib/                    # generated client and hooks, the fetch mutator, the
+                          # auth client, i18n catalogues, config, utils
 ```
 
-6. **Give `apps/web/src` those seven folders, and put nothing beside them but
+6. **Give `apps/web/src` those six folders, and put nothing beside them but
    the entry point and the three generated files — `stack-web.md` rule 38's
    route tree and rules 45 and 54's two theme outputs.** Every folder above
    answers "what belongs here" in one line, which is what a `components/` and a
@@ -90,6 +96,10 @@ apps/web/src/
    lands in when nowhere else is obviously right. *Revised 2026-08-27; this rule
    read "the two generated files" before rule 54's `theme.ts` existed. Both
    theme outputs sit at the root, so one generator has one destination.*
+   *Revised again 2026-08-27: seven folders became six when `ports/` was
+   retired. It held the `PortsProvider` and `usePorts` that rules 14–18 have
+   since dropped — every dependency now reaches a component as a hook, so there
+   is nothing left for that folder to hold.*
 
 7. **Never import one feature from another.** Two features that import each
    other are one feature with a boundary drawn through the middle of it, and
@@ -112,10 +122,19 @@ apps/web/src/
     broken in a diff; a boundary that is only a principle is one you find broken
     later.
 
-11. **Import the generated API client only in `lib/`, and let `ports/` hand it
-    out from there.** Orval rewrites that file whenever the spec changes
-    (`architecture-api.md` rule 59), so one import site is the one place a
-    regeneration can break.
+11. **Keep Orval's output in `lib/`, let a feature import the generated hook it
+    needs straight from there, and write the fetch mutator — the one file that
+    generated code calls — exactly once.** *Revised 2026-08-27; this rule read
+    "import the generated API client only in `lib/`, and let `ports/` hand it out
+    from there", reasoning that one import site is the one place a regeneration
+    can break. That was written when a feature hand-wrote its hooks over an
+    injected client. `stack-web.md` rule 57 now has Orval generate the hooks
+    themselves, so a single import site is neither possible nor wanted — a
+    regeneration is supposed to break at every call site whose endpoint
+    changed.* What survives is the mutator: the base URL, `credentials`, and
+    the 401 handling of [`auth.md`](auth.md) rule 26 all live in it, so a second
+    one is a second configuration and the second one is always the one still
+    aimed at the old host.
 
 12. **Import the socket library only in `transport/`.** Decoding a frame and
     knowing which library delivered it are two jobs, and only one of them should
@@ -125,80 +144,112 @@ apps/web/src/
     component and does not contain one.** A screen defined inside its route
     cannot be rendered by a test without booting the router.
 
-## Ports
+## Hooks, not ports
 
-A **port** is an interface for something outside the app that the app does not
-control — the generated API client, the socket, the clock, the renderer. It is
-the same word `architecture-api.md` rules 31 and 48 use, pointed at the browser
-instead of at the database.
+*This section was rewritten 2026-08-27, and rules 14–19 keep their numbers and
+their intent while their mechanism changed.* It described a `PortsProvider` at
+the app root holding the generated API client, the socket and the clock, read
+through `usePorts()`, where a **port** was "an interface for something outside
+the app that the app does not control" — `architecture-api.md` rules 31 and 48's
+word, pointed at the browser. That shape is dropped. `architecture-api.md` rule
+59 has Orval generate the TanStack Query hooks from the OpenAPI document, and a
+generated hook imports its fetch mutator at module scope, so it cannot take an
+injected client — keeping the seam meant hand-writing, for every endpoint,
+exactly what the generator already emits, plus a second set of query keys beside
+the ones it produced. Every dependency now reaches a component as a hook, and
+the only question about a hook is who wrote it: Orval, or us.
 
-14. **Hold the app's ports in one `PortsProvider` at the root and read them with
-    `usePorts()`.** One place builds them, so a test builds different ones
-    without touching a single import. The price is paid by every test that
-    renders anything: nothing works outside that provider, so the wrapper helper
-    is written on day one rather than at the fiftieth test.
+14. **Give a component its data through a hook — one Orval generated for a
+    documented endpoint, one we wrote for everything else.** *Revised 2026-08-27;
+    this rule read "Hold the app's ports in one `PortsProvider` at the root and
+    read them with `usePorts()`", bought by "one place builds them, so a test
+    builds different ones without touching a single import" and priced at "every
+    test that renders anything: nothing works outside that provider". The
+    provider and its price are both gone.* One shape for every dependency means
+    a screen's data path reads the same whether the data came from the API, from
+    the socket or from Better Auth, and there is no bag of ports whose contents
+    a test has to know before it can render anything.
 
     ```tsx
-    // app root
-    <PortsProvider value={{ api, socket, clock }}>
+    // features/character/use-character.ts — Orval's, re-exported
+    export const useCharacter = useGetCharacter;
 
-    // features/character/use-character.ts
-    export function useCharacter(id: string) {
-      const { api } = usePorts();                  // injected
-      return useQuery({
-        queryKey: characterKeys.detail(id),
-        queryFn: () => api.getCharacter(id),
-      });
+    // features/session/use-session.ts — ours; auth.md rules 4 and 23
+    export function useSession() {
+      return useQuery({ queryKey: sessionKeys.current(), queryFn: getSession });
     }
 
     // features/character/CharacterSheet.tsx
     const { data } = useCharacter(id);             // no client import
-
-    // test
-    render(<PortsProvider value={{ api: fakeApi }}>…)
     ```
 
-15. **Never let a component import the API client or the socket, or call `fetch`
-    or `Date.now()`.** [`alpha.md`](../alpha.md) decision 2 puts the clock on the
-    server — "never `Date.now()` from the browser" — and a component that
-    reaches the network itself can only be tested by faking the network around
-    it.
+15. **Never let a component import the generated client, the auth client or the
+    socket, or call `fetch` or `Date.now()`.** [`alpha.md`](../alpha.md) decision
+    2 puts the clock on the server — "never `Date.now()` from the browser" — and
+    a component that reaches the network itself can only be tested by faking the
+    network around it. *Revised 2026-08-27: the auth client joined the list when
+    [`auth.md`](auth.md) rule 4 gave it a home, and what a component holds
+    instead is a hook rather than an injected port.*
 
-16. **Build a port only in `ports/` or `lib/`; a feature receives one, never
-    constructs one.** A feature that builds its own client is a second
-    configuration point, and the second one is always the one still aimed at the
-    old base URL.
+16. **Build a client in `lib/` or `transport/`; a feature calls it through a
+    hook and never constructs one.** A feature that builds its own client is a
+    second configuration point, and the second one is always the one still aimed
+    at the old base URL. *Revised 2026-08-27; this rule read "Build a port only
+    in `ports/` or `lib/`; a feature receives one, never constructs one." The
+    folder and the receiving both went with the provider — the limit on where a
+    client is constructed did not.*
 
 17. **Give a component exactly one way to get data: a feature hook.** A
-    component that also reads a port directly has two data paths, and a test
-    that swaps the port only redirects one of them.
+    component that also calls a client directly has two data paths, and a test
+    that fakes one of them redirects only that one. *Revised 2026-08-27: "reads
+    a port directly" became "calls a client directly"; the rule is otherwise
+    untouched.*
 
-18. **Swap a port in a test by wrapping `PortsProvider` with a fake, never by
-    mocking a module.** A module mock is bound to a file path, so it survives
-    the refactor that moves the file and quietly stops mocking anything —
-    `architecture-api.md` rule 74 draws the same line on the back end — mock only
-    what was injected.
+18. **Fake the network in a test, never a module.** *Revised 2026-08-27; this
+    rule read "Swap a port in a test by wrapping `PortsProvider` with a fake,
+    never by mocking a module", and only its first half died with the provider.*
+    The ban stands for the reason it always had: a module mock is bound to a
+    file path, so it survives the refactor that moves the file and quietly stops
+    mocking anything, and `architecture-api.md` rule 74 draws the same line on
+    the back end. `stack-web.md` rule 58 is the replacement answer — MSW at the
+    network boundary, with handlers Orval generates from the same spec the hooks
+    came from.
 
-19. **Keep the `RendererPort` out of `PortsProvider`; the arena screen builds it,
-    and the exception is deliberate.** `stack-web.md` rule 7's port is exactly
-    rule 14's idea with a different lifetime: `api`, `socket` and `clock` live as
-    long as the app, while a renderer binds to a mounted element and is destroyed
-    with it (`stack-web.md` rule 16), so an app-root provider would have to hold
-    something that does not exist on any screen but one. A test still swaps it by
-    passing a fake in — just not through that provider.
+19. **Let the arena screen build the renderer and a test hand it a fake, and do
+    the same for the socket.** *Revised 2026-08-27; this rule read "Keep the
+    `RendererPort` out of `PortsProvider`; the arena screen builds it, and the
+    exception is deliberate", justified by lifetime — `api`, `socket` and
+    `clock` living as long as the app while a renderer binds to a mounted
+    element and is destroyed with it (`stack-web.md` rule 16). There is no
+    provider left to be an exception to, so what was an exception is now the
+    pattern.* It also has a second subject: MSW cannot intercept Socket.IO,
+    which speaks its own protocol over its own transport, so the socket is the
+    one dependency rule 18's answer does not reach and it is handed in the same
+    way.
 
 ## Data and query keys
 
-20. **Give every feature one `queries.ts` exporting a key factory, and begin
-    every key in it with the feature's folder name.** Two features cannot collide
-    because a folder name is unique by definition, and it makes an invalidation
-    say what it means: `['hunt']` clears one feature's caches and nothing else.
+20. **Take a query key from Orval's generated key builder, and hand-write one
+    only where no generated hook exists — in that feature's `queries.ts`,
+    beginning with the feature's folder name.** *Revised 2026-08-27; this rule
+    read "Give every feature one `queries.ts` exporting a key factory, and begin
+    every key in it with the feature's folder name", because "two features cannot
+    collide when a folder name is unique by definition" and because `['hunt']`
+    then clears one feature's caches and nothing else. `stack-web.md` rule 57's
+    generated hooks come with their own keys, derived from the endpoint path, so
+    a hand-written factory beside them would be a second name for the same cache
+    entry — and the one that `stack-web.md` rule 5's socket writes would then be
+    the wrong one half the time.* The generated keys are URL-shaped rather than
+    feature-shaped, so an invalidation reads worse and prefix-matching is by
+    path; that is the price. The exception the second half covers is real and
+    small: the session (`auth.md` rule 19 keeps those routes out of the spec) and
+    anything else with no documented endpoint behind it.
 
     ```ts
-    // features/hunt/queries.ts
-    export const huntKeys = {
-      all: ['hunt'] as const,
-      detail: (id: string) => ['hunt', 'detail', id] as const,
+    // features/session/queries.ts — no generated hook exists for /api/auth/*
+    export const sessionKeys = {
+      all: ['session'] as const,
+      current: () => ['session', 'current'] as const,
     };
     ```
 
@@ -209,8 +260,12 @@ instead of at the database.
     `stack-web.md` rule 40 is how that is written.
 
 22. **Put the auth guard in one layout route and nowhere else.** A guard repeated
-    per route is a guard that is missing from the route added next week. What it
-    checks is deferred — see the note at the end of this file.
+    per route is a guard that is missing from the route added next week.
+    *Revised 2026-08-27: what it checks is no longer deferred. It resolves the
+    session before the protected screen renders and redirects with the target
+    route in a search param — [`auth.md`](auth.md) rules 24 and 25, which are
+    also what stop a session that is merely still loading from being drawn as a
+    signed-out one.*
 
 ## Failure and loading
 
@@ -312,22 +367,39 @@ untranslated — but nothing said where the browser reads it from.
     label and is searchable in a bug report, for the same reason rule 27 renders
     an error from its type rather than from a message.
 
+## The session
+
+Added 2026-08-27. [`auth.md`](auth.md) rule 4 gives `features/session/` the auth
+client, which raises a question rule 7 would otherwise answer badly: every screen
+has a signed-in player, and no feature may import another feature.
+
+33. **Let only `routes/` and `features/session/` itself read the session.** Rule
+    22's guard already guarantees a user for every screen beneath it, and
+    `auth.md` rule 13 takes the acting user from the session on the server rather
+    than from anything the client sends — so a feature that wants the current
+    user is nearly always about to put it in a payload the server will ignore or
+    must not trust. The chrome that genuinely shows who is signed in — the
+    account menu, the sign-out control — hangs off a route file, which may import
+    a feature freely, so rule 7 needs no exception. The price is a redirect for
+    the rare screen that really does want the player's own name in its body:
+    it asks the API for it like any other data.
+
 ## Deferred, deliberately
 
-**Client auth** has no rules here beyond rule 22's "the guard lives in one layout
-route". What the guard reads, how a session is held on the client and how it is
-refreshed belong with [`auth.md`](auth.md), which `project.yml` points the
-**Auth** area at and which holds no rules yet. One more question waits there,
-added 2026-08-27: `stack-web.md` rule 53 puts a language switcher on the
-signed-out screens, so the sign-up request has to carry that local choice onto
-the account it creates.
-[`docs/prompts/10-write-the-auth-rules.md`](prompts/10-write-the-auth-rules.md)
-is the pass that settles it.
+**Client auth** was deferred here and no longer is.
+[`prompts/10-write-the-auth-rules.md`](prompts/10-write-the-auth-rules.md)
+settled it on 2026-08-27: rule 22 now names what the guard reads, rules 14–20
+were rewritten around hooks in the same pass, rule 33 says who may read the
+session, and everything else — how the session is held, what a 401 does, how a
+refused socket handshake is told apart from an expired session, and how
+`stack-web.md` rule 53's signed-out language choice reaches the account — lives
+in [`auth.md`](auth.md), which `project.yml` points the **Auth** area at.
 
 **Runtime configuration** — how environment variables are declared, validated and
-reached — has no rules here either. Rule 11 says the generated client is touched
-in `lib/` and rule 16 says a port is built in `ports/` or `lib/`, which is where
-config will land when it is written; nothing about its shape is decided.
-
-Both gaps are on purpose. A rule invented here now would be a rule the auth pass
-has to argue with.
+reached — has no rules here, and that gap is still on purpose. Rules 11 and 16
+say where a client is built, which is where config will land when it is written;
+nothing about its shape is decided. *Revised 2026-08-27: this paragraph pointed
+at "a port is built in `ports/` or `lib/`" and at the generated client being
+touched in `lib/`. Both rules changed in the same pass; the base URL and
+`credentials` now live in rule 11's fetch mutator, which is the first piece of
+runtime configuration the app will have.*

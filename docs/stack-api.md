@@ -256,3 +256,17 @@ and login**. Rule 12 was revised in the same pass.
     upgrade request automatically, which is also why cross-site WebSocket
     hijacking exists — CORS does not govern the handshake, so `Origin`
     validation is the check that replaces it.
+
+## Rate limiting
+
+Added 2026-08-27, when [`auth.md`](auth.md) was written and FR.5.1 needed a
+mechanism rather than an intention.
+
+39. **Rate-limit with Better Auth's own limiter, not `@nestjs/throttler` or a
+    second package.** Sign-in is the only endpoint the alpha rate-limits
+    (FR.5.1) and it is the library's own route, so a Nest-side guard would be
+    limiting a handler it does not own, by path, after the library had already
+    counted the attempt. [`auth.md`](auth.md) rule 17 is the policy and names the
+    price: the counters live in this process's memory (FR.5.3), which is correct
+    only while rule 24 holds and fails silently rather than loudly on the day it
+    does not.

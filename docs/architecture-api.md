@@ -156,8 +156,14 @@ and the read/write split that CQRS buys is already bought by rules 30–36 below
     of its argument list.
 
 26. **Check the shape of an input at the entrypoint and its meaning in the use
-    case.** "Is this a UUID" is a parse and belongs at the edge; "does this
-    character belong to this account" is a rule and belongs where the rules are.
+    case.** "Is this a UUID" is a parse and belongs at the edge; "may this
+    character seal an offline session" is a rule and belongs where the rules
+    are. *Revised 2026-08-27: the example was "does this character belong to this
+    account", which is no longer checked anywhere.
+    [`auth.md`](auth.md) rules 20 and 21 make ownership a property of the load
+    instead — every read is scoped by the acting user, so a character that is
+    not the caller's is not found rather than refused. The imperative is
+    unchanged; only an example that stopped being true was replaced.*
 
 27. **Give a pre-write check that needs a database read its own `@Injectable()`
     validator class.** Inline database checks are what grow `execute` past one
@@ -506,3 +512,22 @@ shape a back-end question that nothing here had answered.
     a name — a hunt's blurb or a skill's tooltip text is authored *and* wants
     translating, and nothing in the alpha has one yet, so the day one appears
     this rule is what has to be revisited rather than worked around.
+
+## Where auth reaches in
+
+Added 2026-08-27, when [`auth.md`](auth.md) was written from an empty stub. Both
+rules below are auth rules that constrain shapes this file owns, so they are
+numbered here and stated there — never both.
+
+89. **See [`auth.md`](auth.md) rules 20 and 21: every repository and DAO method
+    that reaches account-owned data takes the acting user's id, and there is no
+    unscoped find-by-id.** It reads like a persistence rule and is an
+    authorization one — it is what makes ownership impossible to forget rather
+    than a check somebody remembers — but the signatures it constrains are rules
+    30–34's, so a reader adding a DAO needs to meet it here.
+
+90. **See [`auth.md`](auth.md) rules 5–7: Better Auth's generated tables hold no
+    product data, and a player's own settings live in the domain's `user_preference`.**
+    Rule 22 already refuses to let a Drizzle row type become the domain's shape;
+    this is the same boundary drawn around a schema file the project does not
+    write, and the reason a new column does not go in the obvious place.

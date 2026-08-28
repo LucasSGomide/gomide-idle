@@ -61,6 +61,11 @@ with the DOM renderer rules 6 and 34 cancelled. Rules 13 and 17 became pointers:
 they were `architecture-web.md` rules 3 and 4 written a second time, and the
 boundary is structure, so that file owns it.
 
+Rules 57–59 were added 2026-08-27 by the auth pass, and rule 42 was revised in
+the same pass. Orval generates the hooks, MSW fakes the network, and the ports
+`architecture-web.md` rules 14–18 described are gone — the whole argument is in
+rule 57.
+
 ## Shell
 
 1. **React 19 and Vite 8, TypeScript.** There is no React 20; Vite 8 ships
@@ -334,12 +339,17 @@ can be silently wrong.
     keep current. That is the price, and it is paid because the web's runner
     should be the one that already understands the web's build.
 
-42. **Test the ports seam, the projection and depth sort from rule 10, the event
-    buffer from rules 18–21, and every feature hook.** These are the parts that
-    go wrong quietly: a projection off by half a tile still looks like a game, a
-    starved buffer renders something rather than nothing, and a feature hook is
-    where the query key and the port meet — the two things
-    `architecture-web.md` rules 14 and 20 exist to keep straight.
+42. **Test the projection and depth sort from rule 10, the event buffer from
+    rules 18–21, the hooks we wrote ourselves, and the route guard's redirect.**
+    These are the parts that go wrong quietly: a projection off by half a tile
+    still looks like a game, a starved buffer renders something rather than
+    nothing, and a guard that fails open looks identical to one that works until
+    the day a session expires. *Revised 2026-08-27; this rule opened with "the
+    ports seam" and closed with "a feature hook is where the query key and the
+    port meet — the two things `architecture-web.md` rules 14 and 20 exist to
+    keep straight". There is no ports seam: rule 57 generates the hooks and
+    their keys together, so a generated hook is the generator's output and
+    testing it tests Orval. What is left worth testing is what we wrote.*
 
 43. **Never assert on the canvas; assert on the calls made to the
     `RendererPort`.** Reading pixels back out of a WebGL context to prove a
@@ -480,3 +490,42 @@ what may be drawn there, and what `renderer/` is allowed to import.
     `flame` and `zap`. The price is three glyphs duplicating a decision made
     elsewhere: if `design.md` §3 ever swaps `flame` for a different icon, the
     arena's copy does not follow on its own.
+
+## The generated client, and faking it
+
+Added 2026-08-27 by the auth pass, which found `architecture-api.md` rule 59
+promising "Orval's client **and TanStack Query hooks**" while
+[`architecture-web.md`](architecture-web.md) rules 14–18 had every hook
+hand-written over an injected port. Both could not be true. The hooks are
+generated; that file's rules were revised in the same pass and its `ports/`
+folder retired.
+
+57. **Generate the TanStack Query hooks with Orval, and never hand-write a hook
+    for a documented endpoint.** The spec already describes the request, the
+    response and every error rule 61 of `architecture-api.md` registered, so a
+    hand-written hook is a second copy of all three that nothing keeps honest —
+    and it comes with a second query key beside the generated one, which is the
+    copy `stack-web.md` rule 5's socket write picks wrong. Two prices. The
+    generated keys are URL-shaped, so an invalidation reads as a path rather
+    than as a feature (`architecture-web.md` rule 20). And a generated hook
+    resolves its fetch instance at module scope, which is what makes injecting a
+    client impossible and is therefore the mechanical reason the ports went.
+
+58. **Put MSW at the network boundary from the first test.** Rule 57's hooks run
+    for real against handlers Orval generates from the same document they came
+    from, so a test fakes the server rather than the code under test — which is
+    what lets `architecture-web.md` rule 18 keep banning module mocks now that
+    there is no provider to swap. Three prices, and each has a name. It is a
+    dependency plus a `vitest.setup.ts`. `/api/auth/*` is outside the spec
+    ([`auth.md`](auth.md) rule 19), so its handlers are hand-written and are the
+    only ones that can drift. And MSW cannot intercept Socket.IO, which speaks
+    its own protocol over its own transport — so the arena's stream is faked by
+    handing the screen a fake socket, per `architecture-web.md` rule 19.
+
+59. **Use Better Auth's own React client on the web.** It is the same library the
+    API runs (`stack-api.md` rule 26) talking to the routes that library mounted,
+    so the request shapes and the error codes are the library's on both sides and
+    there is nothing to keep in step by hand. The price is that it is the one
+    hand-written client in the app — Orval generates nothing for `/api/auth/*` —
+    and [`auth.md`](auth.md) rules 4, 23 and 27 are the three rules that exist
+    because of it.

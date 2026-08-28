@@ -9,4 +9,260 @@ preference, and the next person will not know whether to keep it.
 Numbered, because roadmap items cite them by number — renumbering breaks the
 citations, so append rather than reorder.
 
-<!-- Nothing here yet. Write the first rule the first time a decision repeats. -->
+Written 2026-08-27, from an empty stub, by
+[`prompts/10-write-the-auth-rules.md`](prompts/10-write-the-auth-rules.md).
+Auth is the least green-field area in this project:
+[`stack-api.md`](stack-api.md) rules 26–28 chose the library and the session
+store, rule 17 put `drizzle-kit` in charge of the migration, rule 38
+authenticates the socket, and [`requirements.md`](requirements.md) feature 1 —
+UN.1–UN.6, FR.1.1–FR.6.2 — is binding and already written. Most of
+what follows is therefore collected rather than decided, and cites the rule that
+settled it rather than restating it.
+
+One numbering sequence runs through the whole file, the Gotchas included, so a
+roadmap item citing "auth.md rule 30" lands on exactly one thing.
+
+## What is chosen
+
+| Concern | Choice | Why this one |
+| --- | --- | --- |
+| Library | Better Auth | Owns credentials and sessions, has a Drizzle adapter, and needs no service of its own (`stack-api.md` rule 26) |
+| Session store | The project's own Postgres | The server hits the database on every request anyway, so revoking is a `DELETE` (`stack-api.md` rule 27) |
+| Session transport | A cookie | Nothing to hold in JavaScript, so no interceptor, no refresh logic and no token to leak |
+| Web client | Better Auth's React client | The same library as the API, talking to the same routes, with the types already written |
+| Sending mail | Nothing at all | The address is an identifier and is never sent to (FR.1.2) |
+| Roles | None | One kind of user; the only authorization question is ownership |
+
+## Where it lives
+
+1. **Keep every Better Auth import inside `apps/api/src/auth`.** One module owns
+   the dependency, so an upgrade or a swap is one folder rather than a grep —
+   and `stack-api.md` rule 30 already gave auth a module of its own.
+
+2. **Build the instance in the auth module's `infrastructure/`, and mount it
+   from its `entrypoint/`.** The library is an adapter and mounting is an
+   entrypoint concern, which is `architecture-api.md` rule 19's split applied to
+   a dependency that would otherwise sit in neither layer.
+
+3. **Mount Better Auth as one Fastify route at `/api/auth/*`; never re-declare
+   its endpoints as Nest controllers.** A controller in front of a library route
+   is a second implementation of sign-in, and the two drift the first time the
+   library adds a field.
+
+4. **On the web, build the client in `lib/` and let one `features/session/`
+   folder be its only consumer.** Every screen that cares about who is signed in
+   asks that feature, so there is one place to change when the library does.
+   `architecture-web.md` rule 33 is the other half — who is allowed to ask.
+
+## It owns its tables
+
+5. **Let `better-auth generate` write `user`, `session`, `account` and
+   `verification` into the auth module's Drizzle schema, commit that file, and
+   never hand-edit it.** `stack-api.md` rule 17 makes `drizzle-kit` the only
+   migration path in the repo, so a hand-edit is a change the next `generate`
+   silently reverts.
+
+6. **Put no product data in Better Auth's tables.** Credentials, sessions and
+   linked providers are the library's; everything the game means by a player is
+   the domain's own, in `user_preference` keyed by the Better Auth user id.
+   Declaring extra fields on `user` instead would put a HUD preference inside a
+   generated file and make every new setting an edit to the auth config plus a
+   regeneration. The price of the split is a second read: the language is not in
+   the row the session lookup already loaded.
+
+7. **Scope a preference to the account or to the character, in two tables, and
+   never to both.** The language and the death setting belong to the player
+   (FR.7.2, `alpha.md`); a saved build or a HUD layout belongs to one character.
+   One table for both would carry a null character id on half its rows and lose
+   the only thing that makes the boundary checkable. The character-scoped table
+   is named and ruled by the character module, not here.
+
+8. **Read a preference row that does not exist as the defaults, never as an
+   error.** Nothing writes that row at sign-up — there is no create hook — so
+   absence is the ordinary state of a new account, and a reader that treats it
+   as a fault breaks every account on its first request.
+
+9. **Treat `language: null` as "never chosen on this account", and let the
+   client write its local choice once when it sees it.** `stack-web.md` rule 53
+   has to carry the signed-out language onto the account, and a null makes that
+   carry-through and the retry after a failed write the same code path — with
+   rule 52's `localStorage` mirror meaning the player never sees an English
+   frame while it settles. A stored `'en'` therefore means the player chose
+   English, and is never overwritten.
+
+10. **Keep counters and quotas out of the preference tables.** The daily Hard-run
+    count (`docs/requirements.md` feature 28) is state the server resets on a
+    schedule, not something a player set; sharing a row between the client's
+    writes and the game's would put a language switch and a quota decrement in
+    contention for no reason.
+
+## The API side
+
+11. **Read the session in one guard of the project's own, calling Better Auth's
+    `getSession`, and let that guard be the only caller.** `stack-api.md` rule 28
+    already declined the community NestJS adapter; the price it named is a couple
+    of hours of wiring, and this rule is what keeps that price from being paid
+    twice.
+
+12. **Apply the session guard globally and mark the few public routes with one
+    decorator.** A guard applied per controller is the guard missing from the
+    controller added next week — the same argument `architecture-web.md` rule 22
+    makes for the client's single layout guard.
+
+13. **Pass the authenticated user id into a use case as part of its input.**
+    `application/` and `domain/` never read an ambient store for it, because the
+    same use case is called by an HTTP controller and by a socket handler
+    (`architecture-api.md` rules 24 and 25) and only one of those has a request.
+
+14. **Authenticate the socket handshake with that same guard's session read, per
+    `stack-api.md` rule 38, and refuse it with an `ErrorTypeEnum` member rather
+    than a bare disconnect.** A refused handshake has at least three causes —
+    no session, an account already playing (FR.4.2), a stale protocol
+    (`stack-web.md` rule 22) — and a client that cannot tell them apart has to
+    guess which screen to show.
+
+15. **Configure Better Auth with no mail sender at all, and switch e-mail
+    verification and password reset off rather than leaving them unwired.**
+    FR.1.2 makes the address an identifier and nothing more; a hook left unwired
+    is a route that answers with a server error instead of not existing.
+
+16. **Recover a forgotten password by hand, as an operator writing to the
+    database.** FR.1.5 says there is no self-service reset, and the price is
+    exactly what it sounds like: a person hashing a password at whatever hour the
+    player asks, with no audit trail but the shell history.
+
+17. **Rate-limit sign-in per source address and per account** — with the limiter
+    `stack-api.md` rule 39 chose. FR.5.1 is the only lock on a door
+    whose key is an unlisted URL. FR.5.3 is the price and it has an expiry date:
+    the counters are correct only while `stack-api.md` rule 24's single process
+    holds, and nothing fails loudly on the day a second one is added — so this
+    rule and rule 35 of `stack-api.md` expire together.
+
+18. **Close registration by configuration, refusing a new sign-up with a stated
+    reason while every existing account keeps working.** FR.5.2 — when the
+    unlisted URL leaks, closing the door is the only lever the alpha has.
+
+19. **Keep `/api/auth/*` outside the OpenAPI document, deliberately.** Better
+    Auth owns those routes and their payloads, and it is mounted as a Fastify
+    handler rather than a Nest controller (rule 3), so there is no place to hang
+    the `libs/contracts` schema `architecture-api.md` rule 56 would otherwise
+    require. Three prices, all real: Orval generates no client for them, so the
+    auth client is the one hand-written client on the web; a codegen check never
+    sees them; and their errors are not `ErrorTypeEnum` members, which is why
+    rule 27 exists.
+
+## Authorization
+
+Two questions, two homes. The appendix this doc grew from had three — a role
+check sat in the middle — and there is no such thing here.
+
+| Question | Where it is answered | Result |
+| --- | --- | --- |
+| Is there a session? | the session guard (rules 11–12) | 401 |
+| May this user act on **this** record? | the load itself — every read is scoped by owner | 404 |
+
+20. **Take the acting user's id in every repository and DAO method that reaches
+    account-owned data, and expose no unscoped find-by-id.** A check that can be
+    forgotten will be, on the ninth use case; a method that does not exist cannot
+    be called. `architecture-api.md` rules 30–34 are the shapes this applies to.
+    The price is a user id on every read signature, including the ones where it
+    looks redundant.
+
+21. **Answer a miss with one `NOT_FOUND`, whether the record is gone or belongs
+    to someone else.** The two are indistinguishable by construction after rule
+    20, it leaks nothing about what other accounts hold, and the client's
+    reaction is identical either way — which is exactly when
+    `architecture-api.md` rule 40 refuses a second error type.
+
+22. **Write no role check, and add no role column.** There is one kind of user
+    (`docs/requirements.md` feature 1), so a role guard would have no subject and
+    would be a mechanism maintained for a distinction nobody makes.
+
+## The web side
+
+The session is server state like any other, so it is a query. Nothing about the
+signed-in user is copied into a store and no credential is held in JavaScript.
+
+23. **Read the session with an ordinary TanStack Query hook over
+    `getSession` — never Better Auth's own `useSession`.** The library's hook
+    keeps its own copy of the session beside the Query cache, and `stack-web.md`
+    rule 2 has exactly one cache for everything the server owns.
+
+24. **Resolve the session in `_authed.tsx`'s `beforeLoad` before a protected
+    screen renders, and redirect to the sign-in route carrying the target in a
+    search param.** Awaiting is what leaves three states in one file — waiting,
+    signed in, signed out — so no screen below ever branches on session status
+    and `architecture-web.md` rule 22's single guard stays true in practice
+    rather than only on paper. The price is a cold load that waits for one
+    request before painting.
+
+25. **Never render a session that is still loading as a signed-out one.** It is
+    `architecture-web.md` rule 24's loading-versus-empty line pointed at auth,
+    and getting it wrong shows the sign-in screen for a moment to a player who
+    was signed in the whole time.
+
+26. **Handle a 401 in one place — the fetch mutator in `lib/` that every
+    generated hook calls — by clearing the session query and redirecting to
+    sign-in with the current route preserved.** An expired session surfaces on
+    whichever query happens to run next, so a component that branches on 401 is
+    a branch that has to exist in every component. A refused handshake carrying
+    `UNAUTHORIZED` (rule 14) calls that same function; the other refusal reasons
+    do not, because being already online elsewhere is not a reason to sign
+    anybody out.
+
+27. **Map Better Auth's error codes to catalogue keys once, in
+    `features/session/`.** Rule 19 keeps those routes out of `ErrorTypeEnum`, so
+    `architecture-web.md` rule 27's "render from the type, never the message"
+    has nothing to switch on here — and rendering the library's own English
+    string would put English on a Portuguese screen, which is the thing that
+    rule was written to stop.
+
+28. **Send the cookie on every request and keep no credential in JavaScript.**
+    It is what makes the session invisible to the client, and it is also the
+    thing that fails silently when one of three settings is wrong — see rule 29.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `make api-auth-schema` | Runs `better-auth generate` into the auth module's Drizzle schema, per rule 5 |
+
+## Known gaps
+
+| Gap | Intended direction when it comes up | Trigger |
+| --- | --- | --- |
+| Outbound e-mail | An `EmailPort` in the API that Better Auth's hooks resolve — never a provider SDK in the auth config | Registration opening to anyone who is not a friend |
+| Self-service password reset | Better Auth's own reset flow, which needs the e-mail above first | The same trigger, or the second recovery done by hand |
+| Shared rate-limit storage | Better Auth's limiter pointed at storage both processes can see | The day a second process is added (`stack-api.md` rule 24) |
+| Roles | Nothing is designed, on purpose (rule 22) | The first action only an operator may take |
+| The `verification` table | Generated by rule 5 and permanently empty while rule 15 holds | It fills by itself the day verification or reset is switched on |
+| Social sign-in | Better Auth ships providers and the `account` table is already generated for them | A player who wants to sign in with Google |
+
+## Gotchas
+
+Each of these costs real time. Read the symptom, apply the rule. Same numbering
+as everything above, and appended to the same way.
+
+29. **Cookie sessions need `credentials` on both sides, and no wildcard
+    origin.** *Symptom:* sign-in succeeds, the response even carries
+    `set-cookie`, and every request after it is a 401. *Rule:* three things must
+    line up and missing any one produces that same 401. The API's CORS options
+    set `credentials: true` **and** an explicit origin list, because a wildcard
+    is silently ignored once credentials are involved. The web's fetch mutator
+    sends `credentials: 'include'`. The cookie's `sameSite`/`secure` pair matches
+    the deployment — same-site over `localhost` works with `lax`, while a
+    cross-domain deploy needs `sameSite: 'none'` **and** `secure: true`, which
+    means HTTPS at both ends. The last one is the one that passes locally and
+    fails deployed, and `stack-api.md` rule 22 leaves the host undecided, so it
+    will be met.
+
+30. **jsdom has no cookie, so a session in a test is written rather than
+    assumed.** *Symptom:* a test of a protected screen renders the signed-out
+    branch forever, or hangs on the session query, while the same screen works
+    in the browser. *Rule:* the cookie the API sets does not exist in the test
+    environment, so the session is never ambient there. `stack-web.md` rule 58
+    puts MSW at the network boundary, but Orval generates handlers only for
+    documented routes and rule 19 keeps `/api/auth/*` undocumented — so the
+    session handler is one of the few written by hand, in the test setup.
+    Seeding the session query directly is the other way; pick one per tier and
+    keep it there, because a test doing both hides which one it is relying on.
