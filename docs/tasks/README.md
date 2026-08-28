@@ -5,4 +5,6 @@ slice, each with acceptance criteria that double as its tests.
 
 A folder lives only while the item is open. Items — are `done`.
 
-_No breakdown is open. Create one with `/msg-roadmap-task-breakdown NN`._
+| # | Roadmap item | Tasks | Progress | Status |
+|---|---|---|---|---|
+| [01](01-the-api-foundation/) | The API foundation: workspace, contract and the server's half of the first path | 7 | 0/7 | not-started |
