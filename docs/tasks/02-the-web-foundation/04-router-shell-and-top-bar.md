@@ -14,6 +14,11 @@
   built against provisional styling is a screen built twice.
 - The language switcher is the bar's only control, and it drives the mirror task
   `03` already shipped.
+- The wordmark is one line — `Tormented Path: Mortal Ways`, the game name bold
+  and the active season italic (`design.md` §1, `naming.md` rule 16). Both
+  strings live in one `brand` module under `lib/` — `GAME_NAME` and
+  `ACTIVE_SEASON` — and are proper nouns: never translation keys, identical in
+  both languages. The season is a bare label here; nothing switches on it.
 
 ## User experience
 
@@ -34,10 +39,15 @@
 - **Web stack** — add TanStack Router with `@tanstack/router-plugin`, commit
   `routeTree.gen.ts`, and extend `01`'s regenerate command to cover it;
   `stack-web.md` rules 38–39.
-- **Front-end** — write `__root.tsx` and `index.tsx` under `routes/`;
+- **Front-end** — write `__root.tsx` and `index.tsx` under `routes/`, and the
+  `brand` module under `lib/` exporting `GAME_NAME` (`Tormented Path`) and
+  `ACTIVE_SEASON` (`Mortal Ways`); nothing else spells either string;
   `architecture-web.md` rules 6–13.
 - **Design** — build the top bar in `__root.tsx`: 56px tall, wordmark left,
-  standalone language switcher right, sized against the Portuguese string.
+  standalone language switcher right, sized against the Portuguese string. The
+  wordmark is a single non-wrapping line in Rajdhani — `GAME_NAME` bold, then
+  `: `, then `ACTIVE_SEASON` italic — both read from the `brand` module;
+  `design.md` §1, `naming.md` rule 16.
 - **Design** — nothing truncates; every component is sized against the Portuguese
   string.
 
@@ -46,6 +56,8 @@
 - [ ] `(integration)` the route tree regenerates from `routes/` and matches the committed `routeTree.gen.ts`
 - [ ] `(e2e)` loading `/` renders the top bar over an empty body
 - [ ] `(unit)` the top bar is 56px tall, with the wordmark left and the switcher right
+- [ ] `(unit)` the wordmark renders on one line as `GAME_NAME` bold, `": "`, then `ACTIVE_SEASON` italic, both from the `brand` module and neither spelled as a literal anywhere else in the app
+- [ ] `(unit)` the wordmark and season render identically under a Portuguese `localStorage` mirror as under English — neither is a translation key
 - [ ] `(e2e)` a load with Portuguese mirrored in `localStorage` paints the bar in Portuguese, with no English frame first
 - [ ] `(e2e)` switching to Portuguese re-renders every string in the bar at once and writes only to `localStorage`
 - [ ] `(unit)` the top bar renders its Portuguese strings without truncation at the narrowest supported width
@@ -59,6 +71,10 @@
 - `architecture-web.md` rules 6–13 — the six folders and the import rules.
 - `design.md` §1 ([`design.md:42`](../../design.md)) and §13
   ([`design.md:664`](../../design.md)) — the signed-out top bar and the switcher.
+- `design.md` §1 — the wordmark: one line, `Tormented Path: Mortal Ways`, name
+  bold and season italic.
+- `naming.md` rule 16 — the game is _Tormented Path_, the season is _Mortal Ways_,
+  and both come from one `brand` module rather than a literal typed twice.
 - `requirements.md` `FR.16.2` — the app shell renders the top bar specified for a
   signed-out screen: the wordmark and a standalone language switcher.
 - `requirements.md` `FR.10.4` — nothing on the path is a throwaway fixture.

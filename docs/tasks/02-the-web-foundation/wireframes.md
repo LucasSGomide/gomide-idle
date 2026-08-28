@@ -13,7 +13,7 @@ are the container, not the viewport.
 
 ```
 +----------------------------------------------------------------------------+
-|  GOMIDE IDLE                                                     [ EN v ]  |
+|  TORMENTED PATH: Mortal Ways                                     [ EN v ]  |
 +----------------------------------------------------------------------------+
 |                                                                            |
 |                                                                            |
@@ -23,7 +23,8 @@ are the container, not the viewport.
 |                                                                            |
 +----------------------------------------------------------------------------+
      ^                                                              ^
-     wordmark, Rajdhani 600                    standalone switcher, Inter 500
+     wordmark: "Tormented Path" bold, ": ", "Mortal      standalone switcher,
+     Ways" italic - one line, Rajdhani, no wrap          Inter 500
      top bar is 56px tall
 ```
 
@@ -38,6 +39,9 @@ yet by design.
 - §1 App shell — a persistent top bar `56px` tall, wordmark left. The
   Account/login row is wordmark + a standalone language switcher and nothing
   else: no navigation slot, no account menu, because no account exists yet
+- §1 Wordmark — one line: **Tormented Path** bold, then `: `, then _Mortal Ways_
+  in italic. Rajdhani (§2), never wraps. Both strings come from the single
+  `brand` module and are never translated (`design.md` §1, `naming.md` rule 16)
 - §1 Grid — 12 columns in a centered container, max `1440px`, `32px` page
   margins, `24px` gutters
 - §2 Pairing — Rajdhani for the wordmark as short display text, Inter for the
@@ -50,7 +54,7 @@ yet by design.
 
 ```
 +----------------------------------------------------------------------------+
-|  GOMIDE IDLE                                                     [ EN ^ ]  |
+|  TORMENTED PATH: Mortal Ways                                     [ EN ^ ]  |
 +----------------------------------------------------------------------------+
 |                                                          +--------------+  |
 |                                                          | * English    |  |
@@ -106,7 +110,7 @@ persistent — it does not scroll away, and it survives into every later screen.
 
 ```
 +----------------------------------------------------------------------------+
-|  GOMIDE IDLE                                                     [ EN v ]  |
+|  TORMENTED PATH: Mortal Ways                                     [ EN v ]  |
 +----------------------------------------------------------------------------+
 |                                                                            |
 |                                                                            |
@@ -133,7 +137,7 @@ worth announcing.
 
 ```
 +----------------------------------------------------------------------------+
-|  GOMIDE IDLE                                                     [ EN v ]  |
+|  TORMENTED PATH: Mortal Ways                                     [ EN v ]  |
 +----------------------------------------------------------------------------+
 |                                                                            |
 |                                                                            |
@@ -165,7 +169,7 @@ from `01`'s endpoint, which reads Postgres through Drizzle.
 
 ```
 +----------------------------------------------------------------------------+
-|  GOMIDE IDLE                                                     [ EN v ]  |
+|  TORMENTED PATH: Mortal Ways                                     [ EN v ]  |
 +----------------------------------------------------------------------------+
 |                                                                            |
 |                                                                            |
@@ -198,7 +202,7 @@ attribute, not in the DOM at all.
 
 ```
 +----------------------------------------------------------------------------+
-|  GOMIDE IDLE                                                     [ EN v ]  |
+|  TORMENTED PATH: Mortal Ways                                     [ EN v ]  |
 +----------------------------------------------------------------------------+
 |                                                                            |
 |  +----------------------------------------------------------------------+  |
