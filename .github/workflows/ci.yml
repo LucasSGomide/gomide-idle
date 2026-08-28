@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Later roadmap-01 tasks extend this workflow rather than replacing it:
+# task 02 adds type-checking and the dependency-cruiser boundary check, task 04
+# adds the Postgres integration tier, task 07 adds the generated-file drift check.
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.17.0
+
+      - name: Use Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint (oxlint, every package)
+        run: pnpm lint
+
+      - name: Test (Jest, every package)
+        run: pnpm test

@@ -1,0 +1,47 @@
+packages:
+  - 'apps/*'
+  - 'libs/*'
+
+# This repo pins current package versions deliberately (NestJS 12, Drizzle
+# 1.0.0-rc.4, Jest 30). pnpm's release-age supply-chain gate would flag every one
+# of them and demand a per-package exclude list that goes stale on the next bump,
+# so it is turned off here — dependency review happens at PR time instead.
+minimumReleaseAge: 0
+
+# A fresh clone on Node < 24 must fail at install with the engine requirement
+# named, not surface later as a confusing runtime error (FR.9.6).
+engineStrict: true
+
+# Post-install builds. @parcel/watcher and unrs-resolver are native speedups used
+# by the toolchain; @scarf/scarf is install telemetry and stays off.
+allowBuilds:
+  '@parcel/watcher': true
+  unrs-resolver: true
+  '@scarf/scarf': false
+
+# Single-sourced dependency versions. Every package references these with the
+# `catalog:` protocol so a bump happens in one place.
+catalog:
+  typescript: ~5.9.3
+  jest: ^30.5.0
+  '@types/jest': ^30.0.0
+  ts-jest: ^29.4.12
+  '@types/node': ^24.3.0
+  semver: ^7.8.5
+  '@types/semver': ^7.8.0
+  zod: ^4.4.3
+  oxlint: ^1.80.0
+  nestjs-zod: ^5.5.0
+  '@nestjs/common': ^12.0.1
+  '@nestjs/swagger': ^12.0.1
+  rxjs: ^7.8.1
+
+# stack-api.md rule 41: nestjs-zod (rule 47) still peers @nestjs/* ^11, and rule
+# 2 moved the repo to NestJS 12. This override asserts nestjs-zod works against
+# the 12 line. libs/contracts/test/nestjs-zod-peer.spec.ts is the test rule 41
+# requires — it fails if nestjs-zod ships a peer range the override no longer
+# bridges from.
+peerDependencyRules:
+  allowedVersions:
+    'nestjs-zod>@nestjs/common': '12'
+    'nestjs-zod>@nestjs/swagger': '12'
