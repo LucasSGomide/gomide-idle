@@ -5,6 +5,10 @@ export default {
   ...preset,
   rootDir: '.',
   roots: ['<rootDir>/src', '<rootDir>/test'],
+  moduleNameMapper: {
+    ...preset.moduleNameMapper,
+    '^@gomide/contracts$': '<rootDir>/../../libs/contracts/src/index.ts',
+  },
   setupFiles: ['<rootDir>/test/setup/reflect-metadata.ts'],
   // Boundary-check fixtures are deliberate rule violations, never compiled as
   // part of the app; only test/boundaries.spec.ts loads them, through

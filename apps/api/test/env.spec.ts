@@ -15,6 +15,7 @@ describe('loadEnv', () => {
       PORT: 3000,
       HOST: '0.0.0.0',
       LOG_LEVEL: 'info',
+      OBSERVE_SERVICE_ID: 'gomide-api',
     });
   });
 

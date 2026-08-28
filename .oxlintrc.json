@@ -16,5 +16,8 @@
     "**/*.d.ts",
     "apps/api/migrations/**",
     "apps/api/test/fixtures/**"
-  ]
+  ],
+  "rules": {
+    "no-console": "error"
+  }
 }

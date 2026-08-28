@@ -42,6 +42,10 @@ catalog:
   reflect-metadata: ^0.2.2
   dependency-cruiser: ^18.2.0
   tsx: ^4.20.0
+  '@nestjs/observe': ^0.1.8
+  pino: ^10.3.1
+  pino-http: ^11.0.0
+  fastify: ^5.12.1
 
 # stack-api.md rule 41: nestjs-zod (rule 47) still peers @nestjs/* ^11, and rule
 # 2 moved the repo to NestJS 12. This override asserts nestjs-zod works against

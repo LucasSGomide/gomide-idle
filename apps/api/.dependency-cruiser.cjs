@@ -53,7 +53,7 @@ module.exports = {
       severity: 'error',
       from: { path: MODULE + 'domain/' },
       to: {
-        path: '(^|/)node_modules/(@nestjs/|drizzle-orm|drizzle-kit|socket[.]io|nestjs-zod|@gomide/contracts)',
+        path: '(^|/)(node_modules/(@nestjs/|drizzle-orm|drizzle-kit|socket[.]io|nestjs-zod)|libs/contracts/)',
       },
     },
     {
@@ -75,6 +75,8 @@ module.exports = {
       conditionNames: ['import', 'require', 'node', 'default', 'types'],
       extensions: ['.ts', '.js', '.mjs', '.cjs', '.json'],
     },
-    doNotFollow: { path: 'node_modules' },
+    // Record the edge to a workspace lib or an external package, but do not
+    // parse it — only apps/api's own tree is under this cruise.
+    doNotFollow: { path: '(^|/)node_modules/|(^|/)libs/' },
   },
 };

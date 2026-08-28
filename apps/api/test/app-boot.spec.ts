@@ -1,10 +1,6 @@
-import { NestFactory } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  type NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import { type NestFastifyApplication } from '@nestjs/platform-fastify';
 
-import { AppModule } from '../src/app.module.js';
+import { createApiApp } from '../src/bootstrap.js';
 import { loadEnv } from '../src/config/env.js';
 
 describe('API bootstrap', () => {
@@ -12,11 +8,7 @@ describe('API bootstrap', () => {
   let lastSeenIp: string | undefined;
 
   beforeAll(async () => {
-    app = await NestFactory.create<NestFastifyApplication>(
-      AppModule.register(loadEnv({ NODE_ENV: 'test' })),
-      new FastifyAdapter({ trustProxy: true }),
-      { logger: false },
-    );
+    app = await createApiApp(loadEnv({ NODE_ENV: 'test' }));
     // A transport-level probe: onRequest runs before routing, so this needs no
     // route and adds nothing to the app itself.
     app

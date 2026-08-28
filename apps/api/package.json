@@ -10,12 +10,17 @@
     "start": "node dist/main.js",
     "dev": "tsx watch src/main.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "depcruise": "depcruise src --config .dependency-cruiser.cjs"
+    "depcruise": "pnpm --filter @gomide/contracts build && depcruise src --config .dependency-cruiser.cjs"
   },
   "dependencies": {
+    "@gomide/contracts": "workspace:*",
     "@nestjs/common": "catalog:",
     "@nestjs/core": "catalog:",
+    "@nestjs/observe": "catalog:",
     "@nestjs/platform-fastify": "catalog:",
+    "fastify": "catalog:",
+    "pino": "catalog:",
+    "pino-http": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "zod": "catalog:"

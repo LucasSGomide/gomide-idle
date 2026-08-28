@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+// A committed .env.example line copied verbatim leaves KEY= (empty). Treat an
+// empty optional variable as absent rather than as a malformed value.
+const emptyAsUndefined = (value: unknown): unknown =>
+  value === '' ? undefined : value;
+
 // FR.14.1: every environment variable the system reads is declared here and
 // validated at start-up. A missing or malformed value stops the process with the
 // offending field named. New variables are added to this schema and to
@@ -13,6 +18,14 @@ export const envSchema = z.object({
   LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
+
+  // Observability (stack-api.md rules 43-44, UN.21). The agent activates only
+  // when BOTH credentials are present; development and CI leave them unset and it
+  // then sends nothing at all (FR.21.2). See src/observability/observability.ts.
+  OBSERVE_APP_KEY: z.preprocess(emptyAsUndefined, z.string().min(1).optional()),
+  OBSERVE_APP_SECRET: z.preprocess(emptyAsUndefined, z.string().min(1).optional()),
+  OBSERVE_SERVICE_ID: z.string().min(1).default('gomide-api'),
+  OBSERVE_ENDPOINT: z.preprocess(emptyAsUndefined, z.string().url().optional()),
 });
 
 export type EnvType = z.infer<typeof envSchema>;

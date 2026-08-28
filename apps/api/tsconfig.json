@@ -8,7 +8,16 @@
     ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "baseUrl": ".",
+    "paths": {
+      "@gomide/contracts": [
+        "../../libs/contracts/src/index.ts"
+      ],
+      "@gomide/contracts/*": [
+        "../../libs/contracts/src/*"
+      ]
+    }
   },
   "include": [
     "src",
