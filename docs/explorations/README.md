@@ -13,3 +13,4 @@ knowledge survives even when the idea never ships.
 | [02](02-domain-model.md) | The game domain: bounded contexts, modules and aggregates |  | — | viable, not yet spiked |
 | [03](03-colyseus-spike.md) | Colyseus, or a room abstraction we own |  | — | ruled out |
 | [04](04-the-live-hunt.md) | The live hunt: arenas, tiers, and what the player does while it runs |  | — | viable, not yet spiked |
+| [05](05-server-wide-toggles.md) | Server-wide toggles: feature flags, maintenance mode and live-event switches |  | — | viable, not yet spiked |

@@ -24,6 +24,14 @@
   checked against a server-side session and there is no session yet; the
   **Account sign-up and login** item adds the check to a handshake that already
   exists, which is an edit rather than the throwaway `FR.10.4` forbids.
+- `server_meta` belongs to no game system, so `apps/api` gains a fifth module,
+  `system`, decided 2026-08-28. `FR.9.7` records it and supersedes `FR.9.3`'s
+  four. Its second tenant already exists: `FR.19.2`'s health check, in the
+  **Deployment** feature. App-level code was the alternative and was rejected —
+  it sits outside the boundary check `FR.12.2` runs, in the item that writes the
+  repository's first DAO. Server-wide toggles are a possible later tenant, held
+  in [`explorations/05`](../explorations/05-server-wide-toggles.md) and
+  deliberately not in this item.
 - The **Deployment** feature (`UN.17`–`UN.20`) is a separate roadmap item, not
   yet written. This item ships only the Postgres this repository needs to run
   its own migrations and tests.
@@ -51,7 +59,7 @@
 3. Scaffold `libs/contracts` and write its first Zod schemas — the `server_meta`
    response and the socket handshake payload — each carrying `.meta({ id })`.
 4. Scaffold `apps/api` on NestJS 12 over Fastify with `trustProxy` on, holding
-   the four modules `auth`, `player`, `character` and `hunt`, each with
+   the five modules `auth`, `player`, `character`, `hunt` and `system`, each with
    `domain/`, `application/`, `infrastructure/` and `entrypoint/`. `auth` and
    `player` hold no code yet.
 5. Add the environment schema validated at start-up — a missing or malformed
@@ -61,9 +69,10 @@
    holding Postgres alone on the engine version the tests use, and write the
    first migration: the `server_meta` table and the row seeding the protocol
    integer, the content-pack version and the build id.
-7. Build the read path for that row: `GetServerMetaDaoPort` in `application/`,
-   `GetServerMetaDao` in `infrastructure/database/dao/`, a use case, and an HTTP
-   controller in `entrypoint/` that decides nothing.
+7. Build the read path for that row inside the `system` module:
+   `GetServerMetaDaoPort` in `application/`, `GetServerMetaDao` in
+   `infrastructure/database/dao/`, a use case, and an HTTP controller in
+   `entrypoint/` that decides nothing.
 8. Add the exception filter normalising every HTTP response to
    `{ statusCode, code, message }`, and its socket twin, which emits the same
    `code` with the causing message's correlation id and never closes the
