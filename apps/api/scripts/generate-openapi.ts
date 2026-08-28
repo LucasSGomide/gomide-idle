@@ -36,7 +36,7 @@ const app = await NestFactory.create(
 );
 
 const config = new DocumentBuilder()
-  .setTitle('gomide_idle API')
+  .setTitle('Tormented Path API')
   .setVersion('0.1.0')
   .build();
 

@@ -1,6 +1,7 @@
 # gomide_idle
 
-A browser idle RPG in the Tibia visual idiom, built to be played by other people.
+**Tormented Path** — a browser idle RPG in the Tibia visual idiom, built to be played by
+other people. The alpha runs its first season, **Mortal Ways**.
 
 **Status:** design only. No code yet.
 

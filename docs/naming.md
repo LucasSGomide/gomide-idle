@@ -123,3 +123,20 @@ spelling one.
     `architecture-api.md` rule 41 matches on a driver's SQLSTATE `code`, which is
     a different vocabulary that happens to share the word — a SQLSTATE is never
     assigned to an error code, it is translated into one.
+
+Rule 16 was added 2026-08-28, when the game got its name — _Tormented Path_ —
+and its content got a name for the current era — the _Mortal Ways_ season — with
+a second season (_Celestial Ways_) wanted for a far-future major version
+([`vision.md`](../vision.md)).
+
+16. **The game is _Tormented Path_; its live content is one _season_ at a time,
+    currently _Mortal Ways_.** Both are proper nouns: authored in English, shown
+    identically in both languages (rule 13, [`architecture-api.md`](architecture-api.md)
+    rule 87), never a translation key. Each is written in exactly one place — a
+    single `brand` module the web app imports (`GAME_NAME`, `ACTIVE_SEASON`) —
+    and never retyped as a literal anywhere else, because the one thing a season
+    is _for_ is that a later major version swaps it, and a swap has to be one
+    edit rather than a search across the tree. What a season means beyond a
+    label — a ladder reset, a content-only addition, its own content folder — is
+    deliberately undecided; this rule reserves the word and its single source and
+    nothing more.

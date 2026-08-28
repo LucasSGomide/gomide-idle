@@ -1,5 +1,5 @@
 {
-  "$schema": "gomide_idle meta-UI design tokens — single dark theme, no light variant. See docs/design.md for the reasoning behind each value.",
+  "$schema": "Tormented Path meta-UI design tokens — single dark theme, no light variant. See docs/design.md for the reasoning behind each value.",
   "color": {
     "neutral": {
       "bg": "#0B0A10",

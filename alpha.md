@@ -23,6 +23,12 @@ make those rules pay off, and the tuning you do **while watching it happen**.
 **Goal:** ship a game people play. **Audience, staged:** friends in a closed alpha →
 MuOnline/Tibia/WYD nostalgics → general idle players.
 
+The game is called **Tormented Path**. The alpha runs its first season, **Mortal Ways**,
+which lasts until the V1 release. A season is just the name of the current era of content;
+what one means beyond that — whether a later season resets progress or only adds to it — is
+undecided, and nothing in the alpha depends on there ever being a second one. See
+[`vision.md`](vision.md) and [`docs/naming.md`](docs/naming.md) rule 16.
+
 ## The loop
 
 ```

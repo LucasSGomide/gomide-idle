@@ -35,6 +35,17 @@ the socket connecting is what "online" means in this game, per
 `docs/stack-api.md`'s presence model — and the account menu). The account menu
 holds the language switcher on every signed-in screen (§13).
 
+**Wordmark.** The wordmark is a single line, set in Rajdhani (§2) as display text
+— not an image asset: the game's name **Tormented Path** in bold, then a colon
+and space, then the **active season name** _Mortal Ways_ in italic —
+`Tormented Path: Mortal Ways`. It never wraps to a second line. Both are proper
+nouns, identical in English and Portuguese (§13 — names are never translated),
+and both come from the single `brand` module (`naming.md` rule 16), so the season
+is one edit from _Celestial Ways_ whenever a later version calls for it. Whether
+such a version also resets a ladder or adds routes is out of scope here; the
+wordmark only has to keep a place for the season name. Every "Wordmark" in the
+table below means this lockup.
+
 What sits in the navigation slot changes with where the player is:
 
 | Screen | Top bar contents |

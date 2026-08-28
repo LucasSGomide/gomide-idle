@@ -271,6 +271,22 @@ headcount from the first line of code — with a headcount that happens to be 1 
 
 ---
 
+## Seasons
+
+Added 2026-08-28, when the game was named **Tormented Path** and its current content
+era was named the **Mortal Ways** season (alpha → V1).
+
+**A second season — *Celestial Ways*.** Wanted for a far-future major version. Undecided
+and not designed here: whether a new season is content-only — new hunts, forms and items
+on the same characters — or a fresh start, with a ladder and economy reset and old
+characters archived to a permanent pool.
+→ *Constraint:* the game name and the active season are one `brand` module the web app
+imports (`docs/naming.md` rule 16), never a literal typed twice, and the season is a bare
+label with no mechanic wired to it. So swapping the label to *Celestial Ways* is one edit,
+and giving a season teeth later is additive rather than a rewrite.
+
+---
+
 ## Ideas that arrive at the wrong time
 
 Write them here. Don't build them.

@@ -70,7 +70,10 @@
 4. Add TanStack Router with `@tanstack/router-plugin`, commit `routeTree.gen.ts`,
    and write `__root.tsx` and `index.tsx`.
 5. Build the top bar in `__root.tsx`: 56px tall, wordmark left, standalone
-   language switcher right, sized against the Portuguese string.
+   language switcher right, sized against the Portuguese string. The wordmark is
+   one line — `Tormented Path: Mortal Ways`, the game name bold and the active
+   season italic — both from a single `brand` module and neither a translation
+   key (`design.md` §1, `naming.md` rule 16).
 6. Add react-i18next 17 and i18next 26 with English and Portuguese catalogues in
    `lib/i18n/`, a `react-i18next.d.ts` declaring `CustomTypeOptions['resources']`
    as `typeof en` with `returnNull: false`, and the Portuguese catalogue written
@@ -111,6 +114,8 @@
   ([`design.md:664`](../design.md)) — the signed-out top bar and the switcher.
 - `naming.md` rule 15 — the `SCREAMING_SNAKE_CASE` error codes the catalogue keys
   off.
+- `naming.md` rule 16 — the game name and the active season, from one `brand`
+  module rather than a literal typed twice.
 - `requirements.md` `FR.10.1`, `FR.10.3`, `FR.11.3`, `FR.11.6`, `FR.12.2`,
   `FR.13.3`, `FR.14.3`, `FR.15.4`, `UN.16`.
 
