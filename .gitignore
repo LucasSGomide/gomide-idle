@@ -5,6 +5,14 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# TS emit belongs in dist/, never beside sources
+*/src/**/*.js
+*/src/**/*.js.map
+*/src/**/*.d.ts
+*/*/src/**/*.js
+*/*/src/**/*.js.map
+*/*/src/**/*.d.ts
+
 # Test / coverage
 coverage/
 

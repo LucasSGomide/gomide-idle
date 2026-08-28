@@ -3,12 +3,12 @@ import {
 } from '@nestjs/platform-fastify';
 
 import { createApiApp } from '../src/bootstrap.js';
-import { loadEnv } from '../src/config/env.js';
 import { resolveObservability } from '../src/observability/observability.js';
+import { makeTestEnv } from './support/env.js';
 
-const envWithout = () => loadEnv({ NODE_ENV: 'test' });
+const envWithout = () => makeTestEnv();
 const envWith = () =>
-  loadEnv({ NODE_ENV: 'test', OBSERVE_APP_KEY: 'ak', OBSERVE_APP_SECRET: 'as' });
+  makeTestEnv({ OBSERVE_APP_KEY: 'ak', OBSERVE_APP_SECRET: 'as' });
 
 describe('observability wiring (FR.21.1-21.2)', () => {
   it('with the credentials absent, boots and wires no agent', async () => {

@@ -17,7 +17,8 @@
       "@gomide/contracts/*": [
         "../../libs/contracts/src/*"
       ]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "include": [
     "src",

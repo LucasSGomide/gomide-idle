@@ -5,6 +5,7 @@ import { ConfigModule } from './config/config.module.js';
 import { type EnvType } from './config/env.js';
 import { ErrorsModule } from './errors/errors.module.js';
 import { LoggingModule } from './logging/logging.module.js';
+import { DatabaseModule } from './modules/system/infrastructure/database/database.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CharacterModule } from './modules/character/character.module.js';
 import { HuntModule } from './modules/hunt/hunt.module.js';
@@ -24,6 +25,7 @@ export class AppModule {
       imports: [
         ConfigModule.register(env),
         LoggingModule.register(options.rootLogger),
+        DatabaseModule.register(),
         ErrorsModule,
         ...options.observabilityImports,
         AuthModule,

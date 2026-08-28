@@ -5,8 +5,10 @@ on:
     branches: [main]
   pull_request:
 
-# Roadmap-01 tasks extend this workflow rather than replacing it: task 04 adds
-# the Postgres integration tier, task 07 adds the generated-file drift check.
+# Roadmap-01 tasks extend this workflow rather than replacing it: task 07 adds
+# the generated-file drift check. The test step runs both Jest projects — the
+# unit project and the integration project, which starts one Postgres container
+# via testcontainers (Docker is available on ubuntu-latest by default).
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -35,5 +37,5 @@ jobs:
       - name: Dependency boundaries (dependency-cruiser, from apps/api)
         run: pnpm --filter @gomide/api depcruise
 
-      - name: Test (Jest, every package)
+      - name: Test (Jest unit + Postgres integration, every package)
         run: pnpm test

@@ -6,15 +6,20 @@ import { ENV_KEYS, envSchema, loadEnv } from '../src/config/env.js';
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
-const validEnv = (): Record<string, string> => ({ NODE_ENV: 'test' });
+const validEnv = (): Record<string, string> => ({
+  NODE_ENV: 'test',
+  DATABASE_URL: 'postgres://user:pass@127.0.0.1:5432/test',
+});
 
 describe('loadEnv', () => {
   it('parses a valid environment and applies the defaults', () => {
     expect(loadEnv(validEnv())).toEqual({
       NODE_ENV: 'test',
+      DATABASE_URL: 'postgres://user:pass@127.0.0.1:5432/test',
       PORT: 3000,
       HOST: '0.0.0.0',
       LOG_LEVEL: 'info',
+      BUILD_ID: 'dev',
       OBSERVE_SERVICE_ID: 'gomide-api',
     });
   });

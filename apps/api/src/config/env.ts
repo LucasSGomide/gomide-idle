@@ -13,6 +13,17 @@ export const envSchema = z.object({
   // Required, no default: an operator must state the environment rather than
   // have the process guess one (UN.14).
   NODE_ENV: z.enum(['development', 'test', 'production']),
+
+  // Postgres connection string. Required — a misconfigured deployment must fail
+  // at start-up (UN.14). postgres.js connects lazily, so a placeholder is fine
+  // in tests that never touch the database.
+  DATABASE_URL: z.string().url(),
+
+  // The running build's identifier, reported on the server_meta read path. A
+  // build id fixed at migration time is stale on the next build (roadmap 01
+  // open decision), so it comes from the environment and the seeded column is
+  // only the fallback. Defaults to 'dev' for a local run.
+  BUILD_ID: z.string().min(1).default('dev'),
   PORT: z.coerce.number().int().positive().max(65_535).default(3000),
   HOST: z.string().min(1).default('0.0.0.0'),
   LOG_LEVEL: z

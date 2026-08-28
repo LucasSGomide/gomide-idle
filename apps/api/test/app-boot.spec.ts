@@ -1,14 +1,14 @@
 import { type NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { createApiApp } from '../src/bootstrap.js';
-import { loadEnv } from '../src/config/env.js';
+import { makeTestEnv } from './support/env.js';
 
 describe('API bootstrap', () => {
   let app: NestFastifyApplication;
   let lastSeenIp: string | undefined;
 
   beforeAll(async () => {
-    app = await createApiApp(loadEnv({ NODE_ENV: 'test' }));
+    app = await createApiApp(makeTestEnv());
     // A transport-level probe: onRequest runs before routing, so this needs no
     // route and adds nothing to the app itself.
     app

@@ -10,7 +10,11 @@
     "start": "node dist/main.js",
     "dev": "tsx watch src/main.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "depcruise": "pnpm --filter @gomide/contracts build && depcruise src --config .dependency-cruiser.cjs"
+    "depcruise": "pnpm --filter @gomide/contracts build && depcruise src --config .dependency-cruiser.cjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --import tsx ./scripts/migrate.ts",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --selectProjects unit",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --selectProjects integration"
   },
   "dependencies": {
     "@gomide/contracts": "workspace:*",
@@ -18,19 +22,24 @@
     "@nestjs/core": "catalog:",
     "@nestjs/observe": "catalog:",
     "@nestjs/platform-fastify": "catalog:",
+    "drizzle-orm": "catalog:",
     "fastify": "catalog:",
     "pino": "catalog:",
     "pino-http": "catalog:",
+    "postgres": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@nestjs/testing": "catalog:",
+    "@testcontainers/postgresql": "catalog:",
     "@types/jest": "catalog:",
     "@types/node": "catalog:",
     "dependency-cruiser": "catalog:",
+    "drizzle-kit": "catalog:",
     "jest": "catalog:",
+    "testcontainers": "catalog:",
     "ts-jest": "catalog:",
     "tsx": "catalog:",
     "typescript": "catalog:"

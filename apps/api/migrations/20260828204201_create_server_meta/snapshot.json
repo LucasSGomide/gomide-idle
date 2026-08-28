@@ -1,0 +1,86 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "97eee8a6-d838-43ee-97c6-56d02270cf6f",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "server_meta",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "1",
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "server_meta"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "socket_protocol_version",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "server_meta"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "content_pack_version",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "server_meta"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "build_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "server_meta"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "server_meta_pkey",
+      "schema": "public",
+      "table": "server_meta",
+      "entityType": "pks"
+    },
+    {
+      "value": "\"id\" = 1",
+      "name": "server_meta_singleton",
+      "entityType": "checks",
+      "schema": "public",
+      "table": "server_meta"
+    }
+  ],
+  "renames": []
+}
