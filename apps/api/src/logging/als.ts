@@ -2,10 +2,10 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 export type RequestStoreType = {
   correlationId: string;
+  // Set only for socket message handling (architecture-api.md rule 53): the
+  // connection's identity, which carries across every message the connection
+  // sends while each message keeps its own correlation id.
+  connectionId?: string;
 };
 
-// One store per in-flight request. Populated in Fastify's onRequest hook
-// (architecture-api.md rule 52) and read wherever a log line is written, so the
-// correlation id follows a request without being threaded through every
-// signature.
 export const requestStore = new AsyncLocalStorage<RequestStoreType>();

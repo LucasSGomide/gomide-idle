@@ -41,6 +41,7 @@ describe('observability wiring (FR.21.1-21.2)', () => {
     let capturedOptions: Record<string, unknown> | undefined;
     const stubApp = {
       getHttpAdapter: () => ({ getInstance: () => ({ addHook: () => undefined }) }),
+      useWebSocketAdapter: () => undefined,
     } as unknown as NestFastifyApplication;
 
     await createApiApp(envWith(), {

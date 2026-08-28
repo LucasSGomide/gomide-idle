@@ -20,6 +20,9 @@ export function writeLog(
   const payload: Record<string, unknown> = { module: moduleName };
   if (store) {
     payload.correlationId = store.correlationId;
+    if (store.connectionId) {
+      payload.connectionId = store.connectionId;
+    }
   }
 
   const mergedContext: Record<string, unknown> = { ...context };

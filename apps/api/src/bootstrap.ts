@@ -3,6 +3,7 @@ import {
   FastifyAdapter,
   type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 import { AppModule } from './app.module.js';
 import { type EnvType } from './config/env.js';
@@ -54,6 +55,9 @@ export async function createApiApp(
         : {}),
     },
   );
+
+  // The socket is presence (stack-api.md rule 12); Socket.IO is the transport.
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   installRequestLogging(app.getHttpAdapter().getInstance(), rootLogger);
 

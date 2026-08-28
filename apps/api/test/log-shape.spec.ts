@@ -1,5 +1,3 @@
-import { Writable } from 'node:stream';
-
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
   FastifyAdapter,
@@ -11,23 +9,7 @@ import { AppLogger } from '../src/logging/app-logger.js';
 import { LoggingModule } from '../src/logging/logging.module.js';
 import { createRootLogger } from '../src/logging/pino.js';
 import { installRequestLogging } from '../src/logging/request-logging.js';
-
-class LineSink extends Writable {
-  readonly lines: Array<Record<string, unknown>> = [];
-  private buffer = '';
-
-  override _write(chunk: Buffer, _enc: string, done: () => void): void {
-    this.buffer += chunk.toString();
-    let index = this.buffer.indexOf('\n');
-    while (index !== -1) {
-      const raw = this.buffer.slice(0, index).trim();
-      this.buffer = this.buffer.slice(index + 1);
-      if (raw) this.lines.push(JSON.parse(raw) as Record<string, unknown>);
-      index = this.buffer.indexOf('\n');
-    }
-    done();
-  }
-}
+import { LineSink } from './support/line-sink.js';
 
 @Controller()
 class LoggingController {

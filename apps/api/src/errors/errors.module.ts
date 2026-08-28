@@ -1,9 +1,17 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 
-import { HttpExceptionFilter } from './http-exception.filter.js';
+import { AllExceptionsFilter } from './all-exceptions.filter.js';
 
+// Global so a gateway can name AllExceptionsFilter in @UseFilters — NestJS's
+// default WS handling emits its own `exception` event otherwise, bypassing the
+// normalised shape (architecture-api.md rule 45).
+@Global()
 @Module({
-  providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],
+  providers: [
+    AllExceptionsFilter,
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
+  ],
+  exports: [AllExceptionsFilter],
 })
 export class ErrorsModule {}

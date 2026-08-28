@@ -22,6 +22,8 @@
     "@nestjs/core": "catalog:",
     "@nestjs/observe": "catalog:",
     "@nestjs/platform-fastify": "catalog:",
+    "@nestjs/platform-socket.io": "catalog:",
+    "@nestjs/websockets": "catalog:",
     "drizzle-orm": "catalog:",
     "fastify": "catalog:",
     "pino": "catalog:",
@@ -29,6 +31,7 @@
     "postgres": "catalog:",
     "reflect-metadata": "catalog:",
     "rxjs": "catalog:",
+    "socket.io": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -40,6 +43,7 @@
     "dependency-cruiser": "catalog:",
     "drizzle-kit": "catalog:",
     "jest": "catalog:",
+    "socket.io-client": "catalog:",
     "testcontainers": "catalog:",
     "ts-jest": "catalog:",
     "tsx": "catalog:",

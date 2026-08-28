@@ -5,3 +5,4 @@
 export * from './errors.js';
 export * from './protocol.js';
 export * from './server-meta.schema.js';
+export * from './socket.schema.js';
