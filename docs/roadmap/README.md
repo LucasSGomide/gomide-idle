@@ -16,15 +16,23 @@ permanent ID, never renumbered**. Ordering lives in this table only.
 - The prose above the table is hand-written and says **why** the next item is
   next. The table sorts by estimate; that sort is not a priority.
 
-**Next up: _nothing yet._**
+**Next up: [01](01-the-api-foundation.md).** The repository is documentation
+and nothing else, so 01 writes its first line of code and every other item
+waits on it. [02](02-the-web-foundation.md) is blocked on the OpenAPI document
+01 produces, and the **Deployment** feature (`requirements.md` `UN.17`–`UN.20`)
+still has no item.
 
 ## Ready
 
-_(none)_
+| # | Item | Est | Depends on | Status |
+|---|---|---|---|---|
+| [01](01-the-api-foundation.md) | The API foundation: workspace, contract and the server's half of the first path | 10 | — | not-started |
 
 ## Blocked
 
-_(none)_
+| # | Item | Est | Depends on | Status |
+|---|---|---|---|---|
+| [02](02-the-web-foundation.md) | The web foundation: shell, design system and the first rendered screen | 9 | 01 | not-started |
 
 ## Parked
 
