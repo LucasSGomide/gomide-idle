@@ -17,6 +17,7 @@ engineStrict: true
 allowBuilds:
   '@parcel/watcher': true
   unrs-resolver: true
+  esbuild: true
   '@scarf/scarf': false
 
 # Single-sourced dependency versions. Every package references these with the
@@ -35,6 +36,12 @@ catalog:
   '@nestjs/common': ^12.0.1
   '@nestjs/swagger': ^12.0.1
   rxjs: ^7.8.1
+  '@nestjs/core': ^12.0.1
+  '@nestjs/platform-fastify': ^12.0.1
+  '@nestjs/testing': ^12.0.1
+  reflect-metadata: ^0.2.2
+  dependency-cruiser: ^18.2.0
+  tsx: ^4.20.0
 
 # stack-api.md rule 41: nestjs-zod (rule 47) still peers @nestjs/* ^11, and rule
 # 2 moved the repo to NestJS 12. This override asserts nestjs-zod works against

@@ -5,9 +5,8 @@ on:
     branches: [main]
   pull_request:
 
-# Later roadmap-01 tasks extend this workflow rather than replacing it:
-# task 02 adds type-checking and the dependency-cruiser boundary check, task 04
-# adds the Postgres integration tier, task 07 adds the generated-file drift check.
+# Roadmap-01 tasks extend this workflow rather than replacing it: task 04 adds
+# the Postgres integration tier, task 07 adds the generated-file drift check.
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -29,6 +28,12 @@ jobs:
 
       - name: Lint (oxlint, every package)
         run: pnpm lint
+
+      - name: Type-check (every package)
+        run: pnpm -r typecheck
+
+      - name: Dependency boundaries (dependency-cruiser, from apps/api)
+        run: pnpm --filter @gomide/api depcruise
 
       - name: Test (Jest, every package)
         run: pnpm test

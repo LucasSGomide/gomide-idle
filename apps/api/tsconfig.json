@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": [
+      "node",
+      "jest"
+    ],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
+  },
+  "include": [
+    "src",
+    "test"
+  ],
+  "exclude": [
+    "test/fixtures",
+    "dist",
+    "node_modules"
+  ]
+}
