@@ -2,8 +2,14 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 const FORBIDDEN: Array<{ pattern: string; re: RegExp }> = [
-  { pattern: 'new Logger()', re: /\bnew\s+(?:Logger|ConsoleLogger|AppLogger|PinoLogger)\s*\(/ },
-  { pattern: 'console call', re: /\bconsole\s*\.\s*(?:log|info|warn|error|debug|trace)\s*\(/ },
+  {
+    pattern: 'new Logger()',
+    re: /\bnew\s+(?:Logger|ConsoleLogger|AppLogger|PinoLogger)\s*\(/,
+  },
+  {
+    pattern: 'console call',
+    re: /\bconsole\s*\.\s*(?:log|info|warn|error|debug|trace)\s*\(/,
+  },
   { pattern: 'pino() call', re: /(?:^|[^.\w])pino\s*\(/ },
 ];
 

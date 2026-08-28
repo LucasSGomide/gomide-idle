@@ -6,7 +6,9 @@ import {
 
 describe('the socket schemas', () => {
   it('each carries an explicit .meta({ id }) (stack-api rule 47)', () => {
-    expect(socketInboundEnvelopeSchema.meta()).toEqual({ id: 'SocketInboundEnvelope' });
+    expect(socketInboundEnvelopeSchema.meta()).toEqual({
+      id: 'SocketInboundEnvelope',
+    });
     expect(socketHandshakeSchema.meta()).toEqual({ id: 'SocketHandshake' });
     expect(socketErrorFrameSchema.meta()).toEqual({ id: 'SocketErrorFrame' });
   });
@@ -17,7 +19,10 @@ describe('the socket schemas', () => {
     ).not.toThrow();
     expect(() => socketHandshakeSchema.parse({ protocolVersion: 1 })).toThrow();
     expect(() =>
-      socketHandshakeSchema.parse({ correlationId: 'c1', protocolVersion: 1.5 }),
+      socketHandshakeSchema.parse({
+        correlationId: 'c1',
+        protocolVersion: 1.5,
+      }),
     ).toThrow();
   });
 });

@@ -58,10 +58,19 @@ describe('the log line shape (architecture-api.md rules 50-51)', () => {
     sink.lines.length = 0;
     await app.inject({ method: 'GET', url: '/log' });
 
-    const line = sink.lines.find((entry) => entry.message === 'handled the request');
+    const line = sink.lines.find(
+      (entry) => entry.message === 'handled the request',
+    );
     expect(line).toBeDefined();
     expect(Object.keys(line ?? {}).sort()).toEqual(
-      ['context', 'correlationId', 'level', 'message', 'module', 'timestamp'].sort(),
+      [
+        'context',
+        'correlationId',
+        'level',
+        'message',
+        'module',
+        'timestamp',
+      ].sort(),
     );
     expect(line?.module).toBe('LoggingController');
     expect(line?.level).toBe('info');
@@ -83,9 +92,13 @@ describe('the log line shape (architecture-api.md rules 50-51)', () => {
     expect(idB).toBeDefined();
     expect(idA).not.toBe(idB);
 
-    const handled = sink.lines.filter((l) => l.message === 'handled the request');
+    const handled = sink.lines.filter(
+      (l) => l.message === 'handled the request',
+    );
     expect(handled).toHaveLength(2);
-    expect(new Set(handled.map((l) => l.correlationId))).toEqual(new Set([idA, idB]));
+    expect(new Set(handled.map((l) => l.correlationId))).toEqual(
+      new Set([idA, idB]),
+    );
   });
 
   it('logs none of a password, token, session id or e-mail address', async () => {
@@ -107,7 +120,9 @@ describe('the log line shape (architecture-api.md rules 50-51)', () => {
     expect(dump).not.toContain('sess_zzz999');
     expect(dump).not.toContain('player@example.com');
 
-    const line = sink.lines.find((l) => l.message === 'received credentials-shaped body');
+    const line = sink.lines.find(
+      (l) => l.message === 'received credentials-shaped body',
+    );
     expect(line?.context).toEqual({
       password: '[REDACTED]',
       token: '[REDACTED]',

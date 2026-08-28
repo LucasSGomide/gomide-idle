@@ -31,7 +31,9 @@ describe('the read path file layout (naming.md rules 2, 7, 10)', () => {
 
   it('the implementation is GetServerMetaDao in get-server-meta.dao.ts', () => {
     expect(existsSync(daoFile)).toBe(true);
-    expect(readFileSync(daoFile, 'utf8')).toMatch(/export class GetServerMetaDao\b/);
+    expect(readFileSync(daoFile, 'utf8')).toMatch(
+      /export class GetServerMetaDao\b/,
+    );
   });
 
   it('the ORM appears in neither the file name nor the symbol name', () => {
@@ -47,6 +49,8 @@ describe('the read path file layout (naming.md rules 2, 7, 10)', () => {
 describe('no Drizzle inferred row type escapes the data-access layer (architecture-api.md rule 22)', () => {
   it('nothing under infrastructure/database exports a $inferSelect / $inferInsert type', () => {
     const dbDir = join(systemDir, 'infrastructure', 'database');
-    expect(filesMatching(dbDir, /export\b[^\n]*\$infer(Select|Insert)/)).toEqual([]);
+    expect(
+      filesMatching(dbDir, /export\b[^\n]*\$infer(Select|Insert)/),
+    ).toEqual([]);
   });
 });

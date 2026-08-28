@@ -4,9 +4,14 @@ import { AllExceptionsFilter } from '../src/errors/all-exceptions.filter.js';
 import { CodedException } from '../src/errors/coded-exception.js';
 import { createRootLogger } from '../src/logging/pino.js';
 
-const filter = new AllExceptionsFilter(createRootLogger({ LOG_LEVEL: 'silent' }));
+const filter = new AllExceptionsFilter(
+  createRootLogger({ LOG_LEVEL: 'silent' }),
+);
 
-function httpHost(capture: { status?: number; body?: Record<string, unknown> }): ArgumentsHost {
+function httpHost(capture: {
+  status?: number;
+  body?: Record<string, unknown>;
+}): ArgumentsHost {
   return {
     getType: () => 'http',
     switchToHttp: () => ({
@@ -24,7 +29,11 @@ function httpHost(capture: { status?: number; body?: Record<string, unknown> }):
 
 function wsHost(
   data: unknown,
-  capture: { event?: string; frame?: Record<string, unknown>; disconnected?: boolean },
+  capture: {
+    event?: string;
+    frame?: Record<string, unknown>;
+    disconnected?: boolean;
+  },
 ): ArgumentsHost {
   return {
     getType: () => 'ws',
@@ -45,7 +54,11 @@ function wsHost(
 
 describe('the socket error twin (architecture-api.md rule 45)', () => {
   it('emits the same code as the HTTP path for the same error', () => {
-    const exception = new CodedException('EMAIL_TAKEN', 'taken', HttpStatus.CONFLICT);
+    const exception = new CodedException(
+      'EMAIL_TAKEN',
+      'taken',
+      HttpStatus.CONFLICT,
+    );
 
     const http: { body?: Record<string, unknown> } = {};
     filter.catch(exception, httpHost(http));
@@ -91,6 +104,8 @@ describe('the socket error twin (architecture-api.md rule 45)', () => {
       wsHost({ correlationId: 'c2' }, ws),
     );
     expect(ws.frame?.code).toBe('INTERNAL_ERROR');
-    expect(JSON.stringify(ws.frame)).not.toMatch(/pg:|does not exist|server_meta|\bstack\b/i);
+    expect(JSON.stringify(ws.frame)).not.toMatch(
+      /pg:|does not exist|server_meta|\bstack\b/i,
+    );
   });
 });

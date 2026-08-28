@@ -6,4 +6,6 @@ import { serverMetaResponseSchema } from '@gomide/contracts';
 // understands. cleanupOpenApiDoc later renames the component to the schema's
 // explicit .meta({ id }) — 'ServerMetaResponse' — so no generated type is named
 // after its position (stack-api.md rule 47, FR.11.4).
-export class ServerMetaResponse extends createZodDto(serverMetaResponseSchema) {}
+export class ServerMetaResponse extends createZodDto(
+  serverMetaResponseSchema,
+) {}

@@ -14,7 +14,11 @@ import { createRootLogger } from '../src/logging/pino.js';
 class ThrowingController {
   @Get('/throw/coded')
   coded(): never {
-    throw new CodedException('EMAIL_TAKEN', 'That address already has an account', HttpStatus.CONFLICT);
+    throw new CodedException(
+      'EMAIL_TAKEN',
+      'That address already has an account',
+      HttpStatus.CONFLICT,
+    );
   }
 
   @Get('/throw/raw')
@@ -28,7 +32,10 @@ describe('the HTTP error shape (FR.13.1)', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [LoggingModule.register(createRootLogger({ LOG_LEVEL: 'silent' })), ErrorsModule],
+      imports: [
+        LoggingModule.register(createRootLogger({ LOG_LEVEL: 'silent' })),
+        ErrorsModule,
+      ],
       controllers: [ThrowingController],
     }).compile();
 
@@ -53,7 +60,11 @@ describe('the HTTP error shape (FR.13.1)', () => {
       code: 'EMAIL_TAKEN',
       message: 'That address already has an account',
     });
-    expect(Object.keys(res.json() as object).sort()).toEqual(['code', 'message', 'statusCode']);
+    expect(Object.keys(res.json() as object).sort()).toEqual([
+      'code',
+      'message',
+      'statusCode',
+    ]);
   });
 
   it('normalises an unexpected error to the same three keys, with no stack and no driver detail', async () => {

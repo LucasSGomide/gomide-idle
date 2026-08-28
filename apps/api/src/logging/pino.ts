@@ -21,7 +21,8 @@ const SENSITIVE_KEYS = new Set([
   'appkey',
 ]);
 
-const normalise = (key: string): string => key.toLowerCase().replace(/[-_]/g, '');
+const normalise = (key: string): string =>
+  key.toLowerCase().replace(/[-_]/g, '');
 
 // architecture-api.md rule 51: no password, token, session id or e-mail address
 // ever reaches a log line. Recursive, so it holds however deeply a caller nests

@@ -26,21 +26,24 @@ module.exports = {
     },
     {
       name: 'application-imports-inward-only',
-      comment: 'architecture-api.md rule 19: application/ may reach domain/ only.',
+      comment:
+        'architecture-api.md rule 19: application/ may reach domain/ only.',
       severity: 'error',
       from: { path: MODULE + 'application/' },
       to: { path: MODULE + '(infrastructure|entrypoint)/' },
     },
     {
       name: 'infrastructure-not-entrypoint',
-      comment: 'architecture-api.md rule 19: the outer ring peers do not import each other.',
+      comment:
+        'architecture-api.md rule 19: the outer ring peers do not import each other.',
       severity: 'error',
       from: { path: MODULE + 'infrastructure/' },
       to: { path: MODULE + 'entrypoint/' },
     },
     {
       name: 'entrypoint-not-infrastructure',
-      comment: 'architecture-api.md rules 19, 24: entrypoint wires through application ports.',
+      comment:
+        'architecture-api.md rules 19, 24: entrypoint wires through application ports.',
       severity: 'error',
       from: { path: MODULE + 'entrypoint/' },
       to: { path: MODULE + 'infrastructure/' },

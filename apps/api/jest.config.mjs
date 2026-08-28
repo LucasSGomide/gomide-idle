@@ -27,7 +27,10 @@ export default {
       displayName: 'integration',
       roots: ['<rootDir>/test/integration'],
       testMatch: ['<rootDir>/test/integration/**/*.spec.ts'],
-      testPathIgnorePatterns: ['/node_modules/', '<rootDir>/test/integration/support/'],
+      testPathIgnorePatterns: [
+        '/node_modules/',
+        '<rootDir>/test/integration/support/',
+      ],
       globalSetup: '<rootDir>/test/integration/global-setup.ts',
       globalTeardown: '<rootDir>/test/integration/global-teardown.ts',
       testTimeout: 120_000,

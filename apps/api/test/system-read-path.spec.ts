@@ -34,7 +34,9 @@ describe('GetServerMetaUseCase', () => {
   });
 
   it('exposes exactly one public method, execute', () => {
-    const names = Object.getOwnPropertyNames(GetServerMetaUseCase.prototype).sort();
+    const names = Object.getOwnPropertyNames(
+      GetServerMetaUseCase.prototype,
+    ).sort();
     expect(names).toEqual(['constructor', 'execute']);
   });
 });
@@ -56,9 +58,9 @@ describe('ServerMetaController (architecture-api.md rule 24)', () => {
     expect(useCase.execute).toHaveBeenCalledWith({});
     expect(result).toBe(sentinel);
     // one public method
-    expect(Object.getOwnPropertyNames(ServerMetaController.prototype).sort()).toEqual(
-      ['constructor', 'get'],
-    );
+    expect(
+      Object.getOwnPropertyNames(ServerMetaController.prototype).sort(),
+    ).toEqual(['constructor', 'get']);
   });
 });
 
@@ -70,7 +72,9 @@ describe('the GET_SERVER_META_DAO injection token (naming.md rule 12)', () => {
       .toUpperCase();
 
   it('is named after the port it satisfies', () => {
-    expect(GET_SERVER_META_DAO.description).toBe(tokenNameFor('GetServerMetaDaoPort'));
+    expect(GET_SERVER_META_DAO.description).toBe(
+      tokenNameFor('GetServerMetaDaoPort'),
+    );
     expect(GET_SERVER_META_DAO.description).toBe('GET_SERVER_META_DAO');
   });
 });

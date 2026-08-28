@@ -15,6 +15,8 @@ describe('integration tests apply migrations, they do not create tables (FR.15.2
   });
 
   it('flags a spec that creates a table itself', () => {
-    expect(findAdHocDdl(join(here, 'fixtures', 'integration')).length).toBeGreaterThan(0);
+    expect(
+      findAdHocDdl(join(here, 'fixtures', 'integration')).length,
+    ).toBeGreaterThan(0);
   });
 });

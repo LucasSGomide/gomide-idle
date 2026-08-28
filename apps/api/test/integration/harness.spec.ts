@@ -12,7 +12,13 @@ import {
 } from './support/db.js';
 import { serverMeta } from '../../src/modules/system/infrastructure/database/schema/server-meta.schema.js';
 
-const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
+const repoRoot = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+  '..',
+);
 
 describe('the Jest database harness (architecture-api.md rule 91)', () => {
   it('runs one container for the whole project, not one per worker', () => {

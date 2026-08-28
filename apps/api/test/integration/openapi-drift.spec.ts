@@ -21,7 +21,11 @@ function regenerate(): string {
       encoding: 'utf8',
       // FR.11.2 / AC1: no real database is reachable at this URL. If generation
       // connected to one it would hang or fail here rather than finish.
-      env: { ...process.env, OPENAPI_OUT: out, DATABASE_URL: 'postgres://nope:1/x' },
+      env: {
+        ...process.env,
+        OPENAPI_OUT: out,
+        DATABASE_URL: 'postgres://nope:1/x',
+      },
     },
   );
   return readFileSync(out, 'utf8');

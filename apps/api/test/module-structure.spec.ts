@@ -10,7 +10,12 @@ const modulesDir = join(
 );
 
 const MODULES = ['auth', 'player', 'character', 'hunt', 'system'] as const;
-const LAYERS = ['domain', 'application', 'infrastructure', 'entrypoint'] as const;
+const LAYERS = [
+  'domain',
+  'application',
+  'infrastructure',
+  'entrypoint',
+] as const;
 
 // FR.9.7 / architecture-api.md rule 19: five modules, each with the four layer
 // folders.

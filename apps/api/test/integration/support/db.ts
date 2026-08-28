@@ -52,7 +52,9 @@ export async function setupWorkerSchema(
   return { db: drizzle({ client: sql }), sql, schema };
 }
 
-export async function teardownWorkerSchema(worker: WorkerDbType): Promise<void> {
+export async function teardownWorkerSchema(
+  worker: WorkerDbType,
+): Promise<void> {
   await worker.sql.end();
   const admin = postgres(connectionString(), { max: 1 });
   try {

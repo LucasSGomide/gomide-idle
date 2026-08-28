@@ -44,7 +44,9 @@ export class SystemGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage('handshake')
-  handshake(@MessageBody() body: unknown): WsResponse<{ protocolVersion: number }> {
+  handshake(
+    @MessageBody() body: unknown,
+  ): WsResponse<{ protocolVersion: number }> {
     const parsed = socketHandshakeSchema.safeParse(body);
     if (!parsed.success) {
       throw new CodedException(
@@ -54,7 +56,10 @@ export class SystemGateway implements OnGatewayConnection {
         parsed.error.issues,
       );
     }
-    return { event: 'handshake', data: { protocolVersion: SOCKET_PROTOCOL_VERSION } };
+    return {
+      event: 'handshake',
+      data: { protocolVersion: SOCKET_PROTOCOL_VERSION },
+    };
   }
 
   @SubscribeMessage('server-meta')

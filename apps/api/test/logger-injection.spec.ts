@@ -22,6 +22,8 @@ describe('the logger is injected, not constructed (architecture-api.md rule 48)'
     // sanity: the fixture is where the test expects it
     expect(readdirSync(fixtureDir)).toContain('bad-use-case.ts');
     const found = findConstructedLoggers(fixtureDir);
-    expect(found.map((violation) => violation.pattern)).toContain('new Logger()');
+    expect(found.map((violation) => violation.pattern)).toContain(
+      'new Logger()',
+    );
   });
 });

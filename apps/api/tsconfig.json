@@ -2,31 +2,17 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "types": [
-      "node",
-      "jest"
-    ],
+    "types": ["node", "jest"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
     "baseUrl": ".",
     "paths": {
-      "@gomide/contracts": [
-        "../../libs/contracts/src/index.ts"
-      ],
-      "@gomide/contracts/*": [
-        "../../libs/contracts/src/*"
-      ]
+      "@gomide/contracts": ["../../libs/contracts/src/index.ts"],
+      "@gomide/contracts/*": ["../../libs/contracts/src/*"]
     },
     "allowImportingTsExtensions": true
   },
-  "include": [
-    "src",
-    "test"
-  ],
-  "exclude": [
-    "test/fixtures",
-    "dist",
-    "node_modules"
-  ]
+  "include": ["src", "test"],
+  "exclude": ["test/fixtures", "dist", "node_modules"]
 }

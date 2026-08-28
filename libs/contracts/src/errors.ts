@@ -57,10 +57,16 @@ export function assertSituationCode(code: string): void {
     throw new ErrorCodeConventionError(code, 'not SCREAMING_SNAKE_CASE');
   }
   if (HTTP_STATUS_NAMES.has(code)) {
-    throw new ErrorCodeConventionError(code, 'names an HTTP status, not a situation');
+    throw new ErrorCodeConventionError(
+      code,
+      'names an HTTP status, not a situation',
+    );
   }
   if (/^(?:HTTP_?)?E?_?\d{3}$/i.test(code) || /^ERROR_?\d+$/i.test(code)) {
-    throw new ErrorCodeConventionError(code, 'names an HTTP status number, not a situation');
+    throw new ErrorCodeConventionError(
+      code,
+      'names an HTTP status number, not a situation',
+    );
   }
 }
 

@@ -34,7 +34,10 @@ export const envSchema = z.object({
   // when BOTH credentials are present; development and CI leave them unset and it
   // then sends nothing at all (FR.21.2). See src/observability/observability.ts.
   OBSERVE_APP_KEY: z.preprocess(emptyAsUndefined, z.string().min(1).optional()),
-  OBSERVE_APP_SECRET: z.preprocess(emptyAsUndefined, z.string().min(1).optional()),
+  OBSERVE_APP_SECRET: z.preprocess(
+    emptyAsUndefined,
+    z.string().min(1).optional(),
+  ),
   OBSERVE_SERVICE_ID: z.string().min(1).default('gomide-api'),
   OBSERVE_ENDPOINT: z.preprocess(emptyAsUndefined, z.string().url().optional()),
 });

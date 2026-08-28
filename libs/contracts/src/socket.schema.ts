@@ -9,7 +9,9 @@ export const socketInboundEnvelopeSchema = z
   })
   .meta({ id: 'SocketInboundEnvelope' });
 
-export type SocketInboundEnvelopeType = z.infer<typeof socketInboundEnvelopeSchema>;
+export type SocketInboundEnvelopeType = z.infer<
+  typeof socketInboundEnvelopeSchema
+>;
 
 // The handshake payload the client sends. Unauthenticated for now (decided
 // 2026-08-28): no session, no credential.

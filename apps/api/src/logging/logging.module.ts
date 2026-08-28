@@ -10,10 +10,7 @@ export class LoggingModule {
   static register(rootLogger: Logger): DynamicModule {
     return {
       module: LoggingModule,
-      providers: [
-        { provide: ROOT_LOGGER, useValue: rootLogger },
-        AppLogger,
-      ],
+      providers: [{ provide: ROOT_LOGGER, useValue: rootLogger }, AppLogger],
       exports: [ROOT_LOGGER, AppLogger],
     };
   }

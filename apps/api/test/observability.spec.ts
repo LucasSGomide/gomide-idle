@@ -1,6 +1,4 @@
-import {
-  type NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import { type NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { createApiApp } from '../src/bootstrap.js';
 import { resolveObservability } from '../src/observability/observability.js';
@@ -40,7 +38,9 @@ describe('observability wiring (FR.21.1-21.2)', () => {
 
     let capturedOptions: Record<string, unknown> | undefined;
     const stubApp = {
-      getHttpAdapter: () => ({ getInstance: () => ({ addHook: () => undefined }) }),
+      getHttpAdapter: () => ({
+        getInstance: () => ({ addHook: () => undefined }),
+      }),
       useWebSocketAdapter: () => undefined,
     } as unknown as NestFastifyApplication;
 

@@ -23,7 +23,13 @@
  * silently alter how these tables render. Zero non-builtin imports, by rule.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -94,7 +100,8 @@ function listSorted(dir, predicate) {
 const isNumberedDoc = (name) => /^[0-9].*\.md$/.test(name);
 
 /** Matches the glob `[0-9]*-*`. @param {string} name */
-const isNumberedFolder = (name) => /^[0-9]/.test(name) && name.indexOf('-', 1) !== -1;
+const isNumberedFolder = (name) =>
+  /^[0-9]/.test(name) && name.indexOf('-', 1) !== -1;
 
 // --------------------------------------------------------------------------- project.yml
 
@@ -136,7 +143,9 @@ export function parseSimpleYaml(text) {
   const unquote = (/** @type {string} */ v) => v.replace(/^['"]+|['"]+$/g, '');
 
   for (const raw of splitLines(text)) {
-    const line = (raw.includes(' #') ? raw.slice(0, raw.indexOf(' #')) : raw).replace(/\s+$/, '');
+    const line = (
+      raw.includes(' #') ? raw.slice(0, raw.indexOf(' #')) : raw
+    ).replace(/\s+$/, '');
     if (line.trim() === '' || line.trimStart().startsWith('#')) continue;
 
     const indented = line[0] === ' ' || line[0] === '\t';
@@ -203,18 +212,34 @@ export function loadConfig(startDir) {
   };
   const structure = block('structure');
 
-  const folder = (/** @type {'roadmap'|'tasks'|'explorations'|'ditched'} */ name) =>
-    join(root, String(structure.get(name) || DEFAULT_STRUCTURE[name]).replace(/\/+$/, ''));
+  const folder = (
+    /** @type {'roadmap'|'tasks'|'explorations'|'ditched'} */ name,
+  ) =>
+    join(
+      root,
+      String(structure.get(name) || DEFAULT_STRUCTURE[name]).replace(
+        /\/+$/,
+        '',
+      ),
+    );
 
   /** @type {Array<{ block: string, key: string, value: string }>} */
   const manifestPaths = [];
   if (existsSync(manifest)) {
     for (const name of ['structure', 'areas']) {
-      for (const [key, value] of block(name)) manifestPaths.push({ block: name, key, value });
+      for (const [key, value] of block(name))
+        manifestPaths.push({ block: name, key, value });
     }
     const requirementsFile = raw.get('requirementsFile');
-    if (typeof requirementsFile === 'string' && requirementsFile.trim() !== '') {
-      manifestPaths.push({ block: 'requirementsFile', key: '', value: requirementsFile });
+    if (
+      typeof requirementsFile === 'string' &&
+      requirementsFile.trim() !== ''
+    ) {
+      manifestPaths.push({
+        block: 'requirementsFile',
+        key: '',
+        value: requirementsFile,
+      });
     }
   }
 
@@ -255,12 +280,14 @@ export function parseHeader(path) {
   if (lines.length === 0) throw new DocError(`${name}: empty`);
 
   const titleMatch = TITLE_RE.exec(lines[0]);
-  if (!titleMatch) throw new DocError(`${name}: first line is not \`# NN — Title\``);
+  if (!titleMatch)
+    throw new DocError(`${name}: first line is not \`# NN — Title\``);
   const number = Number(titleMatch[1]);
   const title = titleMatch[2].trim();
 
   const headerLine = lines.slice(1, 6).find((line) => line.startsWith('**'));
-  if (headerLine === undefined) throw new DocError(`${name}: no \`**Key:** value\` metadata header`);
+  if (headerLine === undefined)
+    throw new DocError(`${name}: no \`**Key:** value\` metadata header`);
 
   /** @type {Map<string, string>} */
   const fields = new Map();
@@ -280,7 +307,8 @@ export function parseHeader(path) {
  * @returns {string[]}
  */
 export function parseDeps(raw) {
-  if (!raw || raw.trim() === DASH || raw.trim() === '-' || raw.trim() === '') return [];
+  if (!raw || raw.trim() === DASH || raw.trim() === '-' || raw.trim() === '')
+    return [];
   return raw
     .split(',')
     .map((part) => part.trim())
@@ -344,11 +372,15 @@ export function loadRoadmap(cfg) {
     const { number, title, fields, text } = parseHeader(path);
     const status = (fields.get('Status') ?? '').trim();
     if (!STATUSES.includes(status)) {
-      throw new DocError(`${name}: status '${status}' not one of ${STATUSES.join(', ')}`);
+      throw new DocError(
+        `${name}: status '${status}' not one of ${STATUSES.join(', ')}`,
+      );
     }
     const existing = items.get(number);
     if (existing) {
-      throw new DocError(`${name}: number ${pad(number)} is already taken by ${existing.slug}.md`);
+      throw new DocError(
+        `${name}: number ${pad(number)} is already taken by ${existing.slug}.md`,
+      );
     }
     items.set(number, {
       number,
@@ -394,7 +426,9 @@ export function loadTasks(cfg, items, problems) {
       const marker = '## Acceptance criteria';
       const at = text.indexOf(marker);
       if (at === -1) {
-        problems.push(`${tasksRel}/${folderName}/${name}: no acceptance criteria`);
+        problems.push(
+          `${tasksRel}/${folderName}/${name}: no acceptance criteria`,
+        );
         continue;
       }
       // indexOf + slice, never split: `split` has no maxsplit and would shatter a
@@ -434,7 +468,12 @@ export function deriveStatuses(items) {
     if (item.status === 'parked') continue;
     const ticked = item.tasks.reduce((sum, t) => sum + t.ticked, 0);
     const total = item.tasks.reduce((sum, t) => sum + t.total, 0);
-    const derived = total && ticked === total ? 'done' : ticked ? 'in-progress' : 'not-started';
+    const derived =
+      total && ticked === total
+        ? 'done'
+        : ticked
+          ? 'in-progress'
+          : 'not-started';
     if (derived !== item.status) {
       changes.push(`roadmap ${key(item)} ${item.status} -> ${derived}`);
       item.status = derived;
@@ -459,7 +498,8 @@ export function replaceField(text, keyName, value) {
   // replacement keeps `$&` and `$1` inside `value` literal.
   return text.replace(
     new RegExp(`(\\*\\*${escaped}:\\*\\*\\s*)([^·\\n]*)`),
-    (_match, prefix, old) => (old.endsWith(' ') ? `${prefix}${value} ` : `${prefix}${value}`),
+    (_match, prefix, old) =>
+      old.endsWith(' ') ? `${prefix}${value} ` : `${prefix}${value}`,
   );
 }
 
@@ -487,9 +527,13 @@ export function validate(cfg, items, problems) {
   for (const item of items.values()) {
     for (const dep of item.deps) {
       if (!isDigits(dep)) {
-        problems.push(`roadmap ${key(item)}: dependency '${dep}' is not a number`);
+        problems.push(
+          `roadmap ${key(item)}: dependency '${dep}' is not a number`,
+        );
       } else if (!items.has(Number(dep))) {
-        problems.push(`roadmap ${key(item)}: depends on ${dep}, which does not exist`);
+        problems.push(
+          `roadmap ${key(item)}: depends on ${dep}, which does not exist`,
+        );
       } else if (Number(dep) === item.number) {
         problems.push(`roadmap ${key(item)}: depends on itself`);
       }
@@ -511,7 +555,9 @@ export function validate(cfg, items, problems) {
       }
     }
     if (!isDigits(item.estimate)) {
-      problems.push(`roadmap ${key(item)}: estimate '${item.estimate}' is not a number`);
+      problems.push(
+        `roadmap ${key(item)}: estimate '${item.estimate}' is not a number`,
+      );
     }
   }
 }
@@ -541,7 +587,10 @@ export function validateManifest(cfg, problems) {
  */
 export function renderTable(headers, rows) {
   if (rows.length === 0) return '_(none)_\n';
-  const out = [`| ${headers.join(' | ')} |`, `|${headers.map(() => '---').join('|')}|`];
+  const out = [
+    `| ${headers.join(' | ')} |`,
+    `|${headers.map(() => '---').join('|')}|`,
+  ];
   for (const row of rows) out.push(`| ${row.join(' | ')} |`);
   return `${out.join('\n')}\n`;
 }
@@ -565,7 +614,8 @@ export function emptyTable(headers) {
  * @returns {RoadmapItem[]}
  */
 export function sortQueue(entries) {
-  const est = (/** @type {RoadmapItem} */ i) => (isDigits(i.estimate) ? Number(i.estimate) : 0);
+  const est = (/** @type {RoadmapItem} */ i) =>
+    isDigits(i.estimate) ? Number(i.estimate) : 0;
   return [...entries].sort((a, b) => est(b) - est(a) || a.number - b.number);
 }
 
@@ -614,7 +664,11 @@ export function roadmapReadme(cfg, items, current) {
 export function replaceFirstTable(text, table, where) {
   const match = TABLE_RE.exec(text);
   if (!match) throw new DocError(`${where}: no table to regenerate`);
-  return text.slice(0, match.index) + table + text.slice(match.index + match[0].length);
+  return (
+    text.slice(0, match.index) +
+    table +
+    text.slice(match.index + match[0].length)
+  );
 }
 
 /**
@@ -634,14 +688,20 @@ export function explorationsReadme(cfg, current) {
     ];
   });
   const est = (/** @type {string} */ v) => (isDigits(v) ? Number(v) : 0);
-  rows.sort((a, b) => est(b[2]) - est(a[2]) || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  rows.sort(
+    (a, b) => est(b[2]) - est(a[2]) || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0),
+  );
 
   const headers = ['#', 'Idea', 'Est', 'Depends on', 'Verdict'];
   // An empty table keeps its heading row: `_(none)_` would leave nothing for the
   // next run to find, and the run after that would fail with "no table to
   // regenerate". Only ever hit by a project with no explorations yet.
   const table = rows.length ? renderTable(headers, rows) : emptyTable(headers);
-  return replaceFirstTable(current, table, `${cfg.rel(cfg.explorations)}/README.md`);
+  return replaceFirstTable(
+    current,
+    table,
+    `${cfg.rel(cfg.explorations)}/README.md`,
+  );
 }
 
 /**
@@ -666,7 +726,9 @@ export function firstBullet(text, heading) {
  */
 export function ditchedReadme(cfg, current) {
   const rows = listSorted(cfg.ditched, isNumberedDoc).map((name) => {
-    const { number, title, fields, text } = parseHeader(join(cfg.ditched, name));
+    const { number, title, fields, text } = parseHeader(
+      join(cfg.ditched, name),
+    );
     return [
       `[${pad(number)}](${name})`,
       title,
@@ -698,8 +760,15 @@ export function folderReadme(cfg, item, current) {
     `${t.ticked}/${t.total}`,
     taskStatus(t),
   ]);
-  const table = renderTable(['#', 'Task', 'Scope', 'Depends on', 'Criteria', 'Status'], rows);
-  return replaceFirstTable(current, table, `${cfg.rel(cfg.tasks)}/${item.slug}/README.md`);
+  const table = renderTable(
+    ['#', 'Task', 'Scope', 'Depends on', 'Criteria', 'Status'],
+    rows,
+  );
+  return replaceFirstTable(
+    current,
+    table,
+    `${cfg.rel(cfg.tasks)}/${item.slug}/README.md`,
+  );
 }
 
 /**
@@ -756,7 +825,9 @@ export function tasksReadme(cfg, items, current) {
   // scaffolded project, and the reason the seeded README would fail its own
   // first `make roadmap-check`.
   const done =
-    compressNumbers(byNumber.filter((i) => i.status === 'done').map((i) => i.number)) || DASH;
+    compressNumbers(
+      byNumber.filter((i) => i.status === 'done').map((i) => i.number),
+    ) || DASH;
   // No /g: first occurrence only. Function replacement keeps `$` in `done` literal.
   const text = current.replace(
     /Items [^\n]*(?:\n(?!\n)[^\n]*)* are `done`/,
@@ -765,7 +836,10 @@ export function tasksReadme(cfg, items, current) {
 
   const noneOpen = noBreakdownLine();
   if (rows.length) {
-    const table = renderTable(['#', 'Roadmap item', 'Tasks', 'Progress', 'Status'], rows);
+    const table = renderTable(
+      ['#', 'Roadmap item', 'Tasks', 'Progress', 'Status'],
+      rows,
+    );
     if (text.includes(noneOpen.trim())) {
       return text.replace(noneOpen.trim(), () => table.replace(/\n+$/, ''));
     }
@@ -773,7 +847,11 @@ export function tasksReadme(cfg, items, current) {
   }
   const match = TABLE_RE.exec(text);
   if (!match) return text;
-  return text.slice(0, match.index) + noneOpen + text.slice(match.index + match[0].length);
+  return (
+    text.slice(0, match.index) +
+    noneOpen +
+    text.slice(match.index + match[0].length)
+  );
 }
 
 // --------------------------------------------------------------------------- driver
@@ -806,7 +884,9 @@ export function run(cfg, check) {
 
   try {
     if (!existsSync(cfg.roadmap) || !statSync(cfg.roadmap).isDirectory()) {
-      err.push(`error: ${cfg.rel(cfg.roadmap)}/ does not exist — run \`npx @lucas-gomide/msg-cli init\` first`);
+      err.push(
+        `error: ${cfg.rel(cfg.roadmap)}/ does not exist — run \`npx @lucas-gomide/msg-cli init\` first`,
+      );
       return { code: 2, out, err };
     }
 
@@ -822,7 +902,9 @@ export function run(cfg, check) {
 
     const readme = join(cfg.roadmap, 'README.md');
     if (!existsSync(readme)) {
-      throw new DocError(`${cfg.rel(readme)}: missing — it is the table this regenerates into`);
+      throw new DocError(
+        `${cfg.rel(readme)}: missing — it is the table this regenerates into`,
+      );
     }
     writes.set(readme, roadmapReadme(cfg, items, readText(readme)));
 
@@ -852,7 +934,9 @@ export function run(cfg, check) {
   }
 
   /** @type {Array<[string, string]>} */
-  const stale = [...writes].filter(([path, content]) => readText(path) !== content);
+  const stale = [...writes].filter(
+    ([path, content]) => readText(path) !== content,
+  );
 
   for (const line of statusChanges) out.push(`  status  ${line}`);
   for (const line of problems) out.push(`  problem ${line}`);
@@ -881,7 +965,9 @@ export function run(cfg, check) {
     .filter((i) => i.status === 'done' && i.tasks.length)
     .sort((a, b) => a.number - b.number);
   for (const item of retire) {
-    out.push(`  retire  ${cfg.rel(cfg.tasks)}/${item.slug}/ — ${key(item)} is done`);
+    out.push(
+      `  retire  ${cfg.rel(cfg.tasks)}/${item.slug}/ — ${key(item)} is done`,
+    );
   }
 
   return { code: problems.length ? 1 : 0, out, err };
@@ -915,6 +1001,10 @@ export function main(argv, startDir) {
 // roadmap-sync.mjs — what `msg init` vendors — is allowed to self-execute.
 const entry = process.argv[1];
 const isVendoredScript = import.meta.url.endsWith('/roadmap-sync.mjs');
-if (isVendoredScript && entry !== undefined && import.meta.url === pathToFileURL(entry).href) {
+if (
+  isVendoredScript &&
+  entry !== undefined &&
+  import.meta.url === pathToFileURL(entry).href
+) {
   process.exitCode = main(process.argv.slice(2));
 }

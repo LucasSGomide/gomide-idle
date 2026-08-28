@@ -5,8 +5,17 @@ import type { AppLogger } from '../src/logging/app-logger.js';
 import type { GetServerMetaUseCase } from '../src/modules/system/application/get-server-meta.use-case.js';
 
 function makeSut() {
-  const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
-  const metaResult = { socketProtocolVersion: 1, contentPackVersion: '0.1.0', buildId: 'x' };
+  const logger = {
+    info: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  };
+  const metaResult = {
+    socketProtocolVersion: 1,
+    contentPackVersion: '0.1.0',
+    buildId: 'x',
+  };
   const useCase = { execute: jest.fn(async () => metaResult) };
   const gateway = new SystemGateway(
     logger as unknown as AppLogger,
@@ -31,7 +40,9 @@ describe('SystemGateway', () => {
 
   it('accepts a valid handshake payload and echoes the protocol integer', () => {
     const { gateway } = makeSut();
-    expect(gateway.handshake({ correlationId: 'c1', protocolVersion: 1 })).toEqual({
+    expect(
+      gateway.handshake({ correlationId: 'c1', protocolVersion: 1 }),
+    ).toEqual({
       event: 'handshake',
       data: { protocolVersion: 1 },
     });
@@ -44,7 +55,9 @@ describe('SystemGateway', () => {
       throw new Error('expected handshake to throw');
     } catch (error) {
       expect((error as { code?: string }).code).toBe('HANDSHAKE_INVALID');
-      const body = (error as { getResponse: () => Record<string, unknown> }).getResponse();
+      const body = (
+        error as { getResponse: () => Record<string, unknown> }
+      ).getResponse();
       expect(Array.isArray(body.children)).toBe(true);
     }
   });
@@ -52,7 +65,10 @@ describe('SystemGateway', () => {
   it('calls the same use case an HTTP controller would, deciding nothing', async () => {
     const { gateway, useCase, metaResult } = makeSut();
     const client = { id: 'sock-2', data: { connectionId: 'sock-2' } };
-    const result = await gateway.serverMeta({ correlationId: 'c2' }, client as never);
+    const result = await gateway.serverMeta(
+      { correlationId: 'c2' },
+      client as never,
+    );
     expect(useCase.execute).toHaveBeenCalledWith({});
     expect(result).toEqual({ event: 'server-meta', data: metaResult });
   });

@@ -28,7 +28,9 @@ function rulesTriggeredBy(relEntry: string): Set<string> {
   const report = JSON.parse(stdout) as {
     summary: { violations: Array<{ rule: { name: string } }> };
   };
-  return new Set(report.summary.violations.map((violation) => violation.rule.name));
+  return new Set(
+    report.summary.violations.map((violation) => violation.rule.name),
+  );
 }
 
 // stack-api.md rule 42 / FR.12.2: the boundary check catches what neither linter
@@ -47,9 +49,9 @@ describe('the dependency-cruiser boundary check', () => {
   });
 
   it('fails on a NestJS import inside domain/ (architecture-api.md rule 20)', () => {
-    expect(rulesTriggeredBy('modules/alpha/domain/imports-nestjs.ts')).toContain(
-      'domain-free-of-frameworks',
-    );
+    expect(
+      rulesTriggeredBy('modules/alpha/domain/imports-nestjs.ts'),
+    ).toContain('domain-free-of-frameworks');
   });
 
   it('fails on an outward import written as type-only (FR.12.3)', () => {

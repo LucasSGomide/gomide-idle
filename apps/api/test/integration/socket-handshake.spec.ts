@@ -22,7 +22,9 @@ describe('the socket handshake and its error twin (FR.10.3, FR.13.2)', () => {
   beforeAll(async () => {
     app = await createApiApp(makeTestEnv(), { logDestination: sink });
     await app.listen(0, '127.0.0.1');
-    url = (await app.getUrl()).replace('[::1]', '127.0.0.1').replace('0.0.0.0', '127.0.0.1');
+    url = (await app.getUrl())
+      .replace('[::1]', '127.0.0.1')
+      .replace('0.0.0.0', '127.0.0.1');
   });
 
   afterAll(async () => {
@@ -58,7 +60,9 @@ describe('the socket handshake and its error twin (FR.10.3, FR.13.2)', () => {
   }
 
   const once = <T>(socket: ClientSocket, event: string): Promise<T> =>
-    new Promise((resolve) => socket.once(event, resolve as (value: unknown) => void));
+    new Promise((resolve) =>
+      socket.once(event, resolve as (value: unknown) => void),
+    );
 
   it('sends the protocol integer at the handshake, with no session or credential present', async () => {
     const { socket, handshake } = await connect();

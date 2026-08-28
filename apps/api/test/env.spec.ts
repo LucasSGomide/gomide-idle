@@ -4,7 +4,12 @@ import { fileURLToPath } from 'node:url';
 
 import { ENV_KEYS, envSchema, loadEnv } from '../src/config/env.js';
 
-const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+const repoRoot = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '..',
+  '..',
+  '..',
+);
 
 const validEnv = (): Record<string, string> => ({
   NODE_ENV: 'test',
@@ -29,7 +34,9 @@ describe('loadEnv', () => {
   });
 
   it('stops start-up with a message naming a malformed value', () => {
-    expect(() => loadEnv({ ...validEnv(), PORT: 'not-a-number' })).toThrow(/PORT/);
+    expect(() => loadEnv({ ...validEnv(), PORT: 'not-a-number' })).toThrow(
+      /PORT/,
+    );
   });
 });
 

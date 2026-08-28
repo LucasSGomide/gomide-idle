@@ -15,10 +15,16 @@ function readNearestPackageJson(fromEntry: string): Record<string, unknown> {
     if (parent === dir) throw new Error(`no package.json above ${fromEntry}`);
     dir = parent;
   }
-  return JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as Record<string, unknown>;
+  return JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as Record<
+    string,
+    unknown
+  >;
 }
 
-const workspaceYaml = readFileSync(join(here, '..', '..', '..', 'pnpm-workspace.yaml'), 'utf8');
+const workspaceYaml = readFileSync(
+  join(here, '..', '..', '..', 'pnpm-workspace.yaml'),
+  'utf8',
+);
 const nestjsZod = readNearestPackageJson(require.resolve('nestjs-zod')) as {
   peerDependencies: Record<string, string>;
 };
@@ -33,18 +39,22 @@ const nestjsZod = readNearestPackageJson(require.resolve('nestjs-zod')) as {
 describe('nestjs-zod peer override', () => {
   it('is declared in pnpm-workspace.yaml for both @nestjs peers', () => {
     expect(workspaceYaml).toMatch(/nestjs-zod>@nestjs\/common['"]?:\s*['"]?12/);
-    expect(workspaceYaml).toMatch(/nestjs-zod>@nestjs\/swagger['"]?:\s*['"]?12/);
+    expect(workspaceYaml).toMatch(
+      /nestjs-zod>@nestjs\/swagger['"]?:\s*['"]?12/,
+    );
   });
 
   it('still declares a @nestjs/swagger peer that admits the 11 line', () => {
     const declared = nestjsZod.peerDependencies['@nestjs/swagger'];
-    if (declared === undefined) throw new Error('nestjs-zod dropped its @nestjs/swagger peer entirely');
+    if (declared === undefined)
+      throw new Error('nestjs-zod dropped its @nestjs/swagger peer entirely');
     expect(semver.satisfies('11.999.999', declared)).toBe(true);
   });
 
   it('still declares a @nestjs/common peer that admits the 11 line', () => {
     const declared = nestjsZod.peerDependencies['@nestjs/common'];
-    if (declared === undefined) throw new Error('nestjs-zod dropped its @nestjs/common peer entirely');
+    if (declared === undefined)
+      throw new Error('nestjs-zod dropped its @nestjs/common peer entirely');
     expect(semver.satisfies('11.999.999', declared)).toBe(true);
   });
 });
