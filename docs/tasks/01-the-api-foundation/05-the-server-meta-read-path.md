@@ -53,6 +53,8 @@
 - [ ] `(integration)` the response validates against the `libs/contracts` schema
 - [ ] `(unit)` the response schema carries an explicit `.meta({ id })`
 - [ ] `(unit)` the injection token's name matches the port it satisfies
+- [ ] `(unit)` the port is suffixed `Port` in a `.port.ts` file and the implementation is `GetServerMetaDao` in `get-server-meta.dao.ts`, with the ORM named in neither
+- [ ] `(unit)` the use case exposes one public `execute`, taking a `GetServerMetaInputType`
 
 ## References
 

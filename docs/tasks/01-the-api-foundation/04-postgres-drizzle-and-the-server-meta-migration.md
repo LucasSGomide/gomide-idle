@@ -47,6 +47,7 @@
 
 - [ ] `(integration)` the migration creates `server_meta` and seeds exactly one row
 - [ ] `(integration)` the seeded row carries the socket protocol integer, the content-pack version and the build id
+- [ ] `(unit)` the Drizzle table is declared under its singular `snake_case` name and exported as the plural camelCase symbol
 - [ ] `(integration)` the build id the API reports identifies the running build, not the moment the migration ran
 - [ ] `(integration)` the harness starts one container per test project, and not one per worker
 - [ ] `(integration)` two Jest workers running concurrently read isolated schemas and neither sees the other's rows

@@ -30,6 +30,10 @@
   and never closes the connection (`FR.13.2`, `architecture-api.md` rule 45).
 - **Back-end** — the socket handler stays free of decisions, so it and an HTTP
   controller can call the same use case (`architecture-api.md` rule 24).
+- **Back-end** — the socket log context is initialised once at the handshake and
+  a message-scoped child context is opened per inbound message, so connection
+  identity follows every later message and message identity does not
+  (`architecture-api.md` rule 53).
 - **Naming** — the socket error `code` follows the same
   `SCREAMING_SNAKE_CASE` situation naming as the HTTP one (`naming.md` rule 15).
 
@@ -38,7 +42,9 @@
 - [ ] `(integration)` a connecting client receives the protocol integer at the handshake
 - [ ] `(integration)` the handshake succeeds with no session and no credential present
 - [ ] `(integration)` a handshake payload failing the `libs/contracts` schema is rejected with a `code`
-- [ ] `(integration)` a socket error reply carries the correlation id of the message that caused it
+- [ ] `(integration)` a socket error reply is exactly `{ correlationId, code, message }` — plus `children` where the error has them — carrying the correlation id of the message that caused it
+- [ ] `(integration)` a log line written while handling an inbound message carries the connection's context and that message's own correlation id
+- [ ] `(unit)` the handshake payload schema carries an explicit `.meta({ id })`
 - [ ] `(integration)` the connection stays open after an error reply
 - [ ] `(unit)` the socket filter and the HTTP filter emit the same `code` for the same error
 
@@ -47,6 +53,7 @@
 - `stack-api.md` rule 15 — the protocol integer the client hard-codes.
 - `stack-api.md` rule 47 — `.meta({ id })` on every reusable schema.
 - `architecture-api.md` rules 24, 45 — the decision-free entrypoint, the socket filter.
+- `architecture-api.md` rule 53 — the connection log context and its per-message child.
 - `naming.md` rule 15 — the error `code` spelling.
 - `requirements.md` `FR.10.3`, `FR.10.4`, `FR.11.1`, `FR.11.4`, `FR.13.2`,
   `FR.13.3`, `FR.3.2` (the session check this handshake deliberately defers).

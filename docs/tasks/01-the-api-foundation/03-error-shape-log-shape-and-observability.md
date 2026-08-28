@@ -35,6 +35,9 @@
   (`architecture-api.md` rules 48–55).
 - **Back-end** — the logger is injected and never constructed in place
   (`FR.13.4`).
+- **Back-end** — no password, token, session id or e-mail address ever reaches a
+  log line; the redaction ships with the log shape rather than being remembered
+  per feature (`architecture-api.md` rule 51).
 - **API stack** — `@nestjs/observe` wired through NestJS 12's `instrument`
   bootstrap option in `main.ts` and the app module, reading `appKey` and
   `appSecret` from the environment schema task `02` created
@@ -50,6 +53,7 @@
 - [ ] `(integration)` a request log line carries `timestamp`, `level`, `module`, `message` and the correlation id at the top level, with every other field nested under `context`
 - [ ] `(integration)` two concurrent requests carry two different correlation ids, and each handler's log lines carry its own
 - [ ] `(unit)` the logger is injected, and a logger constructed inside a use case fails the check
+- [ ] `(integration)` a request carrying a password, a token, a session id and an e-mail address logs none of the four
 - [ ] `(integration)` with `appKey` and `appSecret` absent, start-up succeeds and the agent sends nothing
 - [ ] `(integration)` with both present, the agent is registered through the `instrument` bootstrap option
 

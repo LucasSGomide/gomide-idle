@@ -32,6 +32,10 @@
   malformed value stops the process and names the field (`FR.14.1`).
 - **API stack** — a committed `.env.example` listing every variable the system
   reads; no file holding real values is ever committed (`FR.14.2`).
+- **Back-end** — the boundary check also fails a cross-import between sibling
+  modules — `hunt` reaching into `character` — which is the shape
+  `stack-api.md` rule 42's capture-group back-reference exists to express and
+  neither linter can state at all (`FR.12.2`).
 - **API stack** — dependency-cruiser as its own check, run from `apps/api`, with
   `tsPreCompilationDeps`, `combinedDependencies` and `exportsFields` set
   (`stack-api.md` rule 42), so type-only imports count (`FR.12.3`).
@@ -43,8 +47,10 @@
 - [ ] `(unit)` a missing required environment variable stops start-up with a message naming the field
 - [ ] `(unit)` a malformed environment value stops start-up with a message naming the field
 - [ ] `(unit)` `.env.example` lists every variable the environment schema declares, and the test fails when one is absent
+- [ ] `(unit)` no committed file holds real environment values — every env file but the example is excluded by the ignore rules
 - [ ] `(integration)` all five modules exist, each with the four layer folders
 - [ ] `(integration)` dependency-cruiser fails on an import from `domain/` into `infrastructure/`
+- [ ] `(integration)` dependency-cruiser fails on an import from one module into a sibling module
 - [ ] `(integration)` dependency-cruiser fails on an outward import written as type-only
 - [ ] `(integration)` CI fails when type-checking fails, and when dependency-cruiser fails
 
