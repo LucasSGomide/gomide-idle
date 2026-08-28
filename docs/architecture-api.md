@@ -17,6 +17,12 @@ preference, and the next person will not know whether to keep it.
 Numbered, because roadmap items cite them by number — renumbering breaks the
 citations, so append rather than reorder.
 
+Rules 37–42, 45, 48, 67 and 69 were rewritten 2026-08-28 by the **Project
+scaffolding** requirements pass, which dropped this project's own `ApiError`
+hierarchy, its `ErrorTypeEnum` and its `LoggerPort` in favour of NestJS's
+exceptions and `pino-http`. Rule 19 and the Layers header were corrected in the
+same pass. Every one of them keeps its number and quotes the text it replaced.
+
 Rules 1–18 were written 2026-08-24; numbering them, on 2026-08-26, was the only
 edit to their wording. Rules 19–86 were added on 2026-08-26, adapted from a
 personal `backend-standards` skill that lived outside this repository and was
@@ -108,15 +114,24 @@ correctness requirement.
 
 Added 2026-08-26.
 
-`apps/api` divides into `character`, `hunt` and `auth` (`stack-api.md` rule 30).
-Each of those is one module with four layers. Two words used below: an
+`apps/api` divides into `auth`, `player`, `character` and `hunt`
+(`stack-api.md` rule 30). *Corrected 2026-08-28: this named three modules and
+that rule grew a fourth, `player`, on the same day — so the doc that defines the
+layers listed one fewer module than the doc that defines the modules.* Each of
+those is one module with four layers. Two words used below: an
 **aggregate** is a domain object that owns its own invariants, and a **port** is
 an interface named by the layer that needs it.
 
 19. **Give every module four layers — `domain`, `application`, `infrastructure`,
     `entrypoint` — and let imports point inward only.** It is the one rule that
     keeps a database row type or a socket handle out of a combat rule, and
-    inward-only is something a lint rule can check where "keep it clean" is not.
+    inward-only is something a machine can check where "keep it clean" is not.
+    *Revised 2026-08-28; the why read "something a lint rule can check", which
+    stopped being true when `stack-api.md` rule 40 chose oxlint — it cannot
+    express a path-to-path boundary at all. `stack-api.md` rule 42 is the
+    mechanism now: dependency-cruiser, as its own check. The imperative is
+    unchanged, and so is the claim that it is enforced rather than hoped for;
+    only the thing doing the enforcing moved.*
 
 20. **Import nothing from NestJS, Drizzle, Socket.IO or the schema library into
     `domain/`.** Drizzle makes this nearly free — its schemas are plain objects,
@@ -218,34 +233,69 @@ runs one read and returns the flat shape its caller wants.
 
 ## Errors
 
-37. **Sort every error into two categories: expected ones extend `ApiError`, and
-    everything else is a 500.** A third category is where "handled sometimes"
-    lives, and it ends up unhandled on one of the two transports.
+Rules 37–42 and 45 were rewritten 2026-08-28, with the **Project scaffolding**
+requirements. This project had an `ApiError` hierarchy of its own and an
+`ErrorTypeEnum` beside it; both are dropped in favour of NestJS's own exceptions
+carrying a machine-readable `code`. The numbers and the reasoning survive — what
+changed is the class thrown, and every rule below keeps its old text quoted so a
+reader can see which argument was kept and which was bought out.
 
-38. **Never throw a NestJS exception — `HttpException`, `BadRequestException`,
-    `WsException` — from `domain`, `application` or `infrastructure`.** Each one
-    encodes a transport, and the same use case runs over both.
+37. **Sort every error into two categories: an expected one is a NestJS
+    `HttpException` subclass carrying a `code` in its body, and everything else
+    is a 500.** A third category is where "handled sometimes" lives, and it ends
+    up unhandled on one of the two transports. One exception filter normalises
+    every HTTP response to `{ statusCode, code, message }`, and rule 45's socket
+    filter is its twin — the shape is declared in one place or each transport
+    invents its own. *Revised 2026-08-28; this read "expected ones extend
+    `ApiError`". The two-category split is unchanged and is the part worth
+    keeping; the base class is now the framework's rather than ours.*
 
-39. **Add every new error `type` to `ErrorTypeEnum` in `libs/contracts`.** One
-    vocabulary means the client writes one error switch instead of one per
-    transport.
+38. **Throw a NestJS exception from `application/` or `infrastructure/`, and
+    never from `domain/`.** *Reversed 2026-08-28. This rule read "Never throw a
+    NestJS exception — `HttpException`, `BadRequestException`, `WsException` —
+    from `domain`, `application` or `infrastructure`", because "each one encodes
+    a transport, and the same use case runs over both". That objection is real
+    and is answered rather than dismissed: rule 45's socket filter reads the
+    thrown exception's status and body and emits a frame, so the status code is
+    translated at the edge instead of being absent from the throw. What survives
+    intact is the half rule 20 already guards — `domain/` imports nothing from
+    NestJS, so it throws plain `Error` subclasses of its own and the layer that
+    knows a transport exists is the only layer allowed to name one.*
 
-40. **Create a specific `ApiError` subclass only when the client must react
-    differently to it; otherwise throw `ValidationError`.** A per-message error
-    class the UI renders identically to the last twelve is a class nobody will
-    ever dare delete.
+39. **Declare every `code` in one vocabulary in `libs/contracts`, and add a new
+    one there before throwing it.** One vocabulary means the client writes one
+    error switch instead of one per transport. *Revised 2026-08-28; this read
+    "Add every new error `type` to `ErrorTypeEnum`". The enum is gone and the
+    reason for it is not: `code` is what `architecture-web.md` rule 27 switches
+    on, so a code invented at a throw site and never declared is a code the
+    client renders as a generic failure.*
+
+40. **Add a new `code` freely; add a new exception subclass only when the client
+    must react differently.** A per-message error class the UI renders
+    identically to the last twelve is a class nobody will ever dare delete —
+    where a `code` is one entry in rule 39's list and costs nothing to add.
+    *Revised 2026-08-28; this read "Create a specific `ApiError` subclass only
+    when the client must react differently to it; otherwise throw
+    `ValidationError`". The imperative is unchanged; what it applies to is now a
+    Nest exception, and the cheap alternative is a code rather than a catch-all
+    class.*
 
 41. **Catch the driver error in the repository, match on the SQLSTATE `code` and
-    never on the message, log it, then re-throw `InternalServerError`.** The
-    `postgres` driver's messages change between versions and are not an API;
+    never on the message, log it, then re-throw `InternalServerErrorException`.**
+    The `postgres` driver's messages change between versions and are not an API;
     `23505` unique violation, `23503` foreign key violation and `40001`
-    serialization failure are.
+    serialization failure are. *Revised 2026-08-28: the class thrown was
+    `InternalServerError`, ours. Note the collision the rewrite creates and does
+    not resolve away — SQLSTATE's field is also called `code`, and so is rule
+    39's. They are different vocabularies and one is never assigned to the
+    other.*
 
 42. **Translate a SQLSTATE the use case is deliberately racing on into a named
-    `ApiError` instead.** Two attempts to bring the same character online at once
-    (`stack-api.md` rule 21) is an expected outcome, not a server fault, and a 500
-    would tell the player to file a bug. *Revised 2026-08-28 with that rule, and
-    for its reason: the race is at character select, not at sign-in.*
+    exception with its own `code` instead.** Two attempts to bring the same
+    character online at once (`stack-api.md` rule 21) is an expected outcome, not
+    a server fault, and a 500 would tell the player to file a bug. *Revised
+    2026-08-28 twice: first with that rule, because the race is at character
+    select and not at sign-in; then for rule 37's base class.*
 
 Socket errors. The source material this section was adapted from was entirely
 HTTP-shaped, and the main transport here is a socket, so rules 43–47 are new.
@@ -261,9 +311,13 @@ HTTP-shaped, and the main transport here is a socket, so rules 43–47 are new.
     connection rather than at a request, and the client cannot tell which of
     three in-flight intents failed.
 
-45. **Shape the socket error frame as an `ApiError` minus its status code:
-    `{ correlationId, type, message, children? }`.** Same `ErrorTypeEnum` as
-    HTTP, so an error is rendered by the same client code however it arrived.
+45. **Shape the socket error frame as rule 37's HTTP body minus its status
+    code, plus the correlation id: `{ correlationId, code, message, children? }`.**
+    Same `code` vocabulary as HTTP, so an error is rendered by the same client
+    code however it arrived. *Revised 2026-08-28; this read "as an `ApiError`
+    minus its status code: `{ correlationId, type, message, children? }`" with
+    "Same `ErrorTypeEnum` as HTTP". Both names changed and the shape did not —
+    which is the point of the rule and the reason it kept its number.*
 
 46. **Close a socket for exactly three reasons: a failed handshake, a
     protocol-version mismatch, and the deletion of the session that opened it.**
@@ -287,10 +341,14 @@ HTTP-shaped, and the main transport here is a socket, so rules 43–47 are new.
 `stack-api.md` rule 3 chose Fastify because of rule 52 below, so this section is
 load-bearing rather than housekeeping.
 
-48. **Inject a `LoggerPort`; never construct a logger inside a class and never
-    call `console`.** A logger built in place cannot be handed the request or
+48. **Inject a logger; never construct one inside a class and never call
+    `console`.** A logger built in place cannot be handed the request or
     connection context, so its lines are exactly the ones missing when you need
-    them.
+    them. *Revised 2026-08-28; this read "Inject a `LoggerPort`". There is no
+    port — `stack-api.md` rule 45 registers `pino-http` in Fastify's `onRequest`
+    hook and the logger reaches a class through the framework's own injection.
+    The imperative is the part that mattered and it is untouched: the ban is on
+    constructing, not on any particular interface.*
 
 49. **Pass context as a structured object, never interpolated into the
     message.** `error('Failed to save character', { characterId })` is
@@ -336,7 +394,10 @@ writing a migration.
 
 57. **Use Zod 4 as the only validation library in the repo, `libs/content`
     (`stack-api.md` rule 31) included.** It is Standard Schema compliant so
-    NestJS 12's `@Body`/`@Query`/`@Param` will take it directly; `z.infer` gives
+    NestJS 12's `@Body`/`@Query`/`@Param` take it directly — *confirmed
+    2026-08-28: this read "will take it directly", written while v12 was a
+    preview, and it is the anticipation that `stack-api.md` rule 2 cites as the
+    reason for moving to it*; `z.infer` gives
     the socket message types with no second declaration; and `z.toJSONSchema()`
     is built in, which is the step Orval's input actually needs and the one the
     alternatives make you install a second package for.
@@ -398,7 +459,7 @@ it. `libs/simulation` is one pure function and its data.
     package and itself, and the determinism suite must run without booting a
     framework or it will eventually be skipped.
 
-67. **`libs/simulation` never logs — no `LoggerPort`, no `console`.** Logging
+67. **`libs/simulation` never logs — no injected logger, no `console`.** Logging
     inside the tick loop is a side effect in a package whose determinism is a
     correctness requirement, and rule 9's empty dependency list leaves nothing
     to inject a logger through. The caller logs from the event stream the run
@@ -409,9 +470,13 @@ it. `libs/simulation` is one pure function and its data.
     load by `libs/content` (rule 11), intent at the socket edge by rule 63 — and
     rule 9's empty dependency list is the enforcement of every rule above it.
 
-69. **`libs/simulation` throws plain `Error`, never `ApiError`.** `ApiError`
-    lives in `libs/contracts` and importing it would end rule 9; rule 47 says
-    what the caller does with the throw.
+69. **`libs/simulation` throws plain `Error`, never a NestJS exception.** A
+    framework exception would end rule 9's empty dependency list — the one thing
+    enforcing every determinism rule above it — and rule 47 already says what the
+    caller does with the throw. *Revised 2026-08-28; this read "never `ApiError`",
+    whose home was `libs/contracts`. The class changed and the boundary did not:
+    what this package may not import is anything, and that includes whatever the
+    errors are made of this week.*
 
 ## Testing
 

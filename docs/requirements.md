@@ -310,3 +310,8 @@ than on login.
 | Scaffolding | Deployment | UN.20 | An operator needs the deployment path to fail loudly here rather than quietly on a server. | — | — | 2026-08-28 |
 | Scaffolding | Deployment | UN.20 | — | FR.20.1 | CI stands up the full deployment stack on every change and runs the end-to-end path from UN.10 against it, over HTTPS. | 2026-08-28 |
 | Scaffolding | Deployment | UN.20 | — | FR.20.2 | That test obtains the proxy's certificate from the running stack rather than disabling verification, so it exercises the same TLS path a browser will. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.21 | A developer needs to see what the running system is doing — which requests are slow, what threw, where the time goes — without instrumenting a feature after the fact. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.21 | — | FR.21.1 | The observability agent is wired at bootstrap from the first commit, so instrumenting is never a later edit to files that have since become stable. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.21 | — | FR.21.2 | The agent activates only when its credentials are present in the environment. Development and CI leave them unset, and it then sends nothing at all. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.21 | — | FR.21.3 | Telemetry leaves the machine to a hosted collector this project does not control. That is a deliberate trade, and FR.21.2 is what keeps it from happening by default. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.21 | — | FR.21.4 | The agent carries traces, runtime metrics and profiles. Log lines are the logger's job and do not travel through it. | 2026-08-28 |

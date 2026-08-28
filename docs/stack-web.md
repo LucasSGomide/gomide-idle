@@ -529,3 +529,34 @@ folder retired.
     hand-written client in the app — Orval generates nothing for `/api/auth/*` —
     and [`auth.md`](auth.md) rules 4, 23 and 27 are the three rules that exist
     because of it.
+
+## Tooling and generation, revisited
+
+Added 2026-08-28 by the **Project scaffolding** requirements (`UN.11`, `UN.12`).
+The linter and the boundary checker are repo-wide rather than web-specific, so
+they are ruled once in [`stack-api.md`](stack-api.md) and pointed at here.
+
+60. **See [`stack-api.md`](stack-api.md) rules 40 and 42: oxlint is the
+    repository's linter, and dependency-cruiser checks the boundaries as its own
+    step.** Rules 6–10 of [`architecture-web.md`](architecture-web.md) — six
+    folders and nothing beside them, no feature importing a feature, `ui/`
+    knowing no feature, React and game rules out of `renderer/` — are all
+    path-to-path rules, and oxlint cannot express one. dependency-cruiser's
+    capture-group back-reference is what makes rule 7 in particular checkable
+    rather than aspirational: it is the only one of these that compares an
+    import's path against the importer's own.
+
+61. **Pin Orval at 8.0.2 or later, ask it for MSW handlers explicitly, and
+    expect fetch rather than axios.** Three separate traps, all of them defaults.
+    Versions below 8.0.2 carry CVE-2026-23947, which injects code into the
+    *generated client* from an unsanitized `x-enum-descriptions` in the document
+    — a supply-chain hole that arrives through a file nobody reads. `mock: true`
+    in v8 emits Faker data alongside the handlers, where rule 58 wants the
+    handlers alone, so it is written `mock: { generators: [{ type: 'msw' }] }`.
+    And v8 changed the default HTTP client from axios to fetch, which is what
+    [`architecture-web.md`](architecture-web.md) rule 11's mutator is written
+    against — `credentials: 'include'` is a fetch option and would have been an
+    axios one. A fourth thing to watch rather than configure: v8 inlines
+    `allOf`/`anyOf`/`oneOf` by default, which pulls against rule 60 of
+    [`architecture-api.md`](architecture-api.md); `stack-api.md` rule 47 is the
+    answer, applied on the producing side where the names are actually assigned.

@@ -296,11 +296,16 @@ mismatch. That was the only failure state with a rule; these are the rest.
     the player sees afterwards, which is the last frame held with a stated reason
     over it. An arena that empties itself reads as "everything died".
 
-27. **Render an error from its `type`, never from the server's `message`.**
-    `architecture-api.md` rules 39 and 45 put an `ErrorTypeEnum` member on every
-    error so that one client switch covers both transports, and that message is
-    one language written for a developer — with `stack-web.md` rule 48 shipping
-    Portuguese, rendering it puts English on a Portuguese screen.
+27. **Render an error from its `code`, never from the server's `message`.**
+    `architecture-api.md` rules 39 and 45 put a `code` on every expected error so
+    that one client switch covers both transports, and that message is one
+    language written for a developer — with `stack-web.md` rule 48 shipping
+    Portuguese, rendering it puts English on a Portuguese screen. *Revised
+    2026-08-28; the field was `type` and its vocabulary was an `ErrorTypeEnum`,
+    both of which went when the API moved to NestJS's own exceptions. Only the
+    name changed: the field is still one machine-readable value declared in
+    `libs/contracts`, and rendering the message is still forbidden for the reason
+    it always was.*
 
 ## Text in the arena
 
@@ -395,11 +400,17 @@ refused socket handshake is told apart from an expired session, and how
 `stack-web.md` rule 53's signed-out language choice reaches the account — lives
 in [`auth.md`](auth.md), which `project.yml` points the **Auth** area at.
 
-**Runtime configuration** — how environment variables are declared, validated and
-reached — has no rules here, and that gap is still on purpose. Rules 11 and 16
-say where a client is built, which is where config will land when it is written;
-nothing about its shape is decided. *Revised 2026-08-27: this paragraph pointed
-at "a port is built in `ports/` or `lib/`" and at the generated client being
-touched in `lib/`. Both rules changed in the same pass; the base URL and
-`credentials` now live in rule 11's fetch mutator, which is the first piece of
-runtime configuration the app will have.*
+**Runtime configuration** was deferred here and no longer is. Settled 2026-08-28
+by the **Project scaffolding** requirements (`FR.14.1`–`FR.14.3`), and the
+answer on this side is almost nothing, which is why it gets a paragraph rather
+than a rule: the deployment serves the web files and the API from one origin, so
+`/api` and the socket are relative paths and no host, base URL or port is ever
+compiled into the client. What remains is a single build-time schema in
+`lib/config.ts` over `import.meta.env`, validated the way `stack-api.md` does it
+server-side, so a missing value fails the build rather than rendering
+`undefined` into a URL. Rule 11's fetch mutator is still where `credentials` and
+the 401 handling live; it simply has no base URL to hold. *This paragraph
+previously read that the gap was "still on purpose" and that "nothing about its
+shape is decided", revised 2026-08-27 to point at the mutator as "the first
+piece of runtime configuration the app will have". It was the first and, on this
+side, very nearly the last.*
