@@ -75,6 +75,9 @@ catalogs:
     postgres:
       specifier: ^3.4.9
       version: 3.4.9
+    prettier:
+      specifier: ^3.9.6
+      version: 3.9.6
     reflect-metadata:
       specifier: ^0.2.2
       version: 0.2.2
@@ -113,6 +116,9 @@ importers:
       oxlint:
         specifier: 'catalog:'
         version: 1.80.0
+      prettier:
+        specifier: 'catalog:'
+        version: 3.9.6
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
@@ -2830,6 +2836,11 @@ packages:
   postgres@3.4.9:
     resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
     engines: {node: '>=12'}
+
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+    engines: {node: '>=14'}
+    hasBin: true
 
   pretty-format@30.5.0:
     resolution: {integrity: sha512-mzNzBErpHwM0zpmWS7ExOv62yhQhvd546nUuFqVR0dmnJB59tfrw9sjDF0DJknwsr59OXP0buwJ7PaKguczHSg==}
@@ -5833,6 +5844,8 @@ snapshots:
       find-up: 4.1.0
 
   postgres@3.4.9: {}
+
+  prettier@3.9.6: {}
 
   pretty-format@30.5.0:
     dependencies:

@@ -13,10 +13,13 @@
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
     "depcruise": "pnpm --filter @gomide/api depcruise",
-    "generate": "pnpm --filter @gomide/api generate"
+    "generate": "pnpm --filter @gomide/api generate",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "oxlint": "catalog:",
+    "prettier": "catalog:",
     "typescript": "catalog:"
   }
 }

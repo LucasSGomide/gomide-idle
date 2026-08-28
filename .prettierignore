@@ -1,0 +1,18 @@
+# Prettier scans the whole tree; keep it off generated output, vendored code,
+# and prose.
+
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+pnpm-lock.yaml
+
+# drizzle-kit owns every file here (stack-api.md rule 17).
+apps/api/migrations/
+
+# Generated document, checked for drift by `make gen-open-api` / CI.
+apps/api/openapi.json
+
+# Docs are hand-authored prose and the roadmap engine writes the tables in
+# docs/ — Prettier stays out of both (formats code and config only).
+*.md
