@@ -178,9 +178,16 @@ timeout defence.
 
 ## Deployment
 
-22. **Ship a Docker container with no host-specific coupling.** The host is
-    deliberately undecided; a container that runs unchanged on Fly, Render, a VPS
-    or Cloud Run keeps it that way.
+22. **Ship two images with no host-specific coupling: the API, and the web's
+    built files behind their own proxy.** A container that runs unchanged on Fly,
+    Render, a VPS or Cloud Run keeps the host an open question, and every
+    difference between one environment and another is an environment variable
+    rather than a rebuild. *Revised 2026-08-28; this rule read "Ship a Docker
+    container", singular, and its why opened "The host is deliberately
+    undecided". The host is still undecided and rule 48 is why there are two
+    images rather than one. What changed is that "undecided" stopped meaning
+    "unexercised": rule 53 runs the real arrangement locally and in CI, so the
+    deployment path is tested long before a host is picked.*
 
 23. **Never serverless.** Sockets need a process that stays alive, and every
     always-on assumption in these rules follows from that.
@@ -189,8 +196,14 @@ timeout defence.
     before adding a second.** A socket connection is stateful, so scaling out is a
     routing decision, not a replica count.
 
-25. **Local development runs Postgres in Docker Compose.** The same database
-    engine and version as production, or integration tests prove the wrong thing.
+25. **Local development runs Postgres in Docker Compose, and a second compose
+    file runs the built images the way a server would.** The same database engine
+    and version as production, or integration tests prove the wrong thing. *Revised
+    2026-08-28: the second file is new and the two have different jobs, which is
+    why they are not one file with a profile. The first runs Postgres alone while
+    the app runs from source on the host — the fast loop. The second runs no
+    source at all: it starts the images rule 22 ships, behind rule 49's proxy, and
+    is the rehearsal rather than the loop.*
 
 ## Auth
 
@@ -213,8 +226,11 @@ timeout defence.
     means the caching would be caching a build that takes seconds.
 
 30. **`apps/` for deployables, `libs/` for shared code, per the existing
-    standards.** `libs/simulation` and `libs/content` are the two shared
-    packages; `apps/api` divides into `auth`, `player`, `character` and `hunt`.
+    standards.** `libs/simulation`, `libs/content` and `libs/contracts` are the
+    shared packages — *corrected 2026-08-28; this read "the two shared packages",
+    which [`architecture-api.md`](architecture-api.md) rule 62 had already
+    outgrown when it added `libs/contracts` for the socket message types, noting
+    that this rule "names two because the socket message types had no home yet"*; `apps/api` divides into `auth`, `player`, `character` and `hunt`.
     *Revised 2026-08-28; this rule named three modules — `character`, `hunt` and
     `auth` — which left the game's own idea of a player with nowhere to live.
     [`auth.md`](auth.md) rule 6 forbids product data in Better Auth's tables and
@@ -431,3 +447,66 @@ is and who consumes it; these two say how the document is produced.
     `allOf`/`anyOf`/`oneOf` by default, which pushes the same way — so a
     `.meta({ id })` is what puts a schema in `components.schemas` and a `$ref` at
     every use of it.
+
+## Deployment, revisited
+
+Added 2026-08-28 by the **Deployment** requirements (`UN.17`–`UN.20`). Rules 22
+and 25 were revised in the same pass. The decision underneath all of it: the
+deployment is rehearsed on the developer's own machine, in the arrangement a
+server would use, because an arrangement that only exists in production is one
+whose first real test is production.
+
+48. **Serve the web files and forward the API and the socket from one origin,
+    through the proxy.** One origin means there is no cross-origin request
+    anywhere in the system, which removes CORS entirely, makes the session cookie
+    first-party, and lets the web ship with no base URL compiled into it
+    ([`architecture-web.md`](architecture-web.md)'s runtime-configuration note).
+    It is also what makes [`auth.md`](auth.md) gotcha 29's hardest branch
+    unreachable rather than merely avoided. The price is the second image rule 22
+    now ships and one more service to deploy.
+
+49. **Caddy is the proxy, and it is the swap point rather than a component.**
+    Locally it issues its own certificate — anything under `.localhost` gets one
+    automatically, with no `tls internal` directive — so the rehearsal runs over
+    real HTTPS; on a VPS the same file terminates real TLS, and on a platform
+    that terminates TLS itself the image is simply not deployed. Nothing in the
+    application changes in either direction, which is the whole reason the proxy
+    is a separate image. Three facts that are not obvious and cost real time.
+    Its certificate authority lives in `/data`, so that path must be a **named
+    volume** or `docker compose down -v` regenerates the CA and silently
+    invalidates the certificate every developer installed. Its `reverse_proxy`
+    sets `X-Forwarded-For` and deliberately **ignores** any incoming one, which
+    is what makes [`auth.md`](auth.md) gotcha 34 answerable rather than
+    open-ended — and Fastify needs `trustProxy` set, or `req.ip` and every log
+    line name the proxy instead of the player. And the WebSocket upgrade is
+    automatic: the `Connection`/`Upgrade` header dance copied from nginx guides
+    is a no-op here.
+
+50. **Run migrations as their own step that must finish before the API starts,
+    never on boot.** Migrating inside `onModuleInit` works for exactly as long as
+    rule 24's single process holds, and the day a second one starts they race
+    against each other on the same schema. Making it a separate step now is free;
+    it is also the shape every platform's release command already expects, so the
+    cloud move inherits it.
+
+51. **Answer a health check, and shut down on `SIGTERM` by refusing new work and
+    finishing what is in flight.** Every host on earth needs both, and a process
+    that ignores `SIGTERM` is killed mid-request — which for this project means
+    mid-hunt. Rule 49's proxy uses the same health check locally, so it is
+    exercised from the first day rather than written blind against a platform's
+    documentation.
+
+52. **Publish both images to a registry, tagged by commit.** With no host yet,
+    this is what makes the eventual switch a configuration change: a host is
+    pointed at an image that already exists rather than at a build pipeline that
+    has to be invented on the day. It also means the publish step itself — the
+    one that fails on permissions — is exercised now rather than then.
+
+53. **Stand the full stack up in CI and run the end-to-end path against it, over
+    HTTPS.** A rehearsal nobody runs is a rehearsal that has already drifted, and
+    this is the one check that covers the proxy, the TLS, the socket upgrade
+    through a proxy, the migration step and both images at once. Take the
+    proxy's certificate out of the running stack — `docker compose cp`, then
+    `NODE_EXTRA_CA_CERTS` — rather than disabling verification: a test that skips
+    the certificate check tests everything except the part most likely to be
+    wrong when it is deployed.

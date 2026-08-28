@@ -104,3 +104,22 @@ their roadmap item and "account" turned out to name three different things.
     leaves: `player_account` is keyed by `user.id`, so the two words meet on
     exactly one column, and rule 5's discipline applies — the word is reserved,
     so nothing else in the domain is called a user.
+
+Rule 15 was added 2026-08-28, when [`architecture-api.md`](architecture-api.md)
+rules 37–42 replaced this project's `ApiError` hierarchy with NestJS exceptions
+carrying a `code`, and the vocabulary of codes arrived with no convention for
+spelling one.
+
+15. **Spell an error `code` in `SCREAMING_SNAKE_CASE`, naming the situation and
+    never the HTTP status: `EMAIL_TAKEN`, not `CONFLICT` or `error409`.** The
+    status is already on the response and the client already has it, so a code
+    that repeats it carries nothing — while the whole reason
+    [`architecture-web.md`](architecture-web.md) rule 27 switches on the code is
+    that one 400 has to be told from another in order to pick a sentence in two
+    languages. The casing follows rule 12's injection tokens rather than the
+    camelCase used elsewhere, for the same reason: this is a value that survives
+    into a wire payload and a translation key, where a compiler is not watching.
+    There is one collision to keep straight and it is not resolvable by renaming:
+    `architecture-api.md` rule 41 matches on a driver's SQLSTATE `code`, which is
+    a different vocabulary that happens to share the word — a SQLSTATE is never
+    assigned to an error code, it is translated into one.

@@ -607,3 +607,22 @@ numbered here and stated there — never both.
     column does not go in the obvious place. *Revised 2026-08-28: the table was
     `user_preference` and had no owning module until `stack-api.md` rule 30 grew a
     fourth.*
+
+## The test database
+
+Added 2026-08-28 by the **Project scaffolding** requirements (`FR.15.3`). Rules
+80 and 81 chose Testcontainers and made the migrations the schema under test;
+neither said how the container is shared, and the default answer is the
+expensive one.
+
+91. **Start one database container per Jest project in `globalSetup`, apply the
+    migrations there once, and isolate each worker with its own schema.** Jest
+    defaults to one worker per core, so the naive arrangement starts a Postgres
+    per worker — four image pulls and four boots competing on a runner with four
+    cores — while a single shared database makes every worker collide on the same
+    tables instead. A schema per worker, keyed off `JEST_WORKER_ID` with
+    `search_path` set, buys the isolation without the containers. Two mechanical
+    notes: `globalSetup` runs in its own process, so the connection string
+    reaches the tests through the environment rather than through an import; and
+    `.withReuse()` belongs on a development machine and never in CI, because it
+    deliberately does not reap and therefore leaks state between runs.

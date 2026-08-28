@@ -30,6 +30,14 @@ length, its behaviour during a hunt, and what a delete actually does — plus a
 Rules 34–35 and the revision to rule 17 came from the same pass, once Better
 Auth 1.7.2's rate limiter had been read rather than assumed.
 
+Gotchas 29 and 34 were narrowed later on 2026-08-28 by the **Scaffolding**
+requirements. Both closed by saying the deployment was undecided and that the
+trap "will be met"; `stack-api.md` rules 48 and 49 decided it. One origin behind
+one proxy makes gotcha 29's cross-domain branch unreachable, and a proxy that
+writes `X-Forwarded-For` and ignores incoming ones leaves gotcha 34 with one
+header to name rather than a chain to trust. Neither gotcha is deleted — what
+each has left is the half that still bites.
+
 ## What is chosen
 
 | Concern | Choice | Why this one |
@@ -285,9 +293,15 @@ as everything above, and appended to the same way.
     sends `credentials: 'include'`. The cookie's `sameSite`/`secure` pair matches
     the deployment — same-site over `localhost` works with `lax`, while a
     cross-domain deploy needs `sameSite: 'none'` **and** `secure: true`, which
-    means HTTPS at both ends. The last one is the one that passes locally and
-    fails deployed, and `stack-api.md` rule 22 leaves the host undecided, so it
-    will be met.
+    means HTTPS at both ends. *Revised 2026-08-28: this closed "The last one is
+    the one that passes locally and fails deployed, and `stack-api.md` rule 22
+    leaves the host undecided, so it will be met." It will not be met.
+    `stack-api.md` rule 48 puts the web and the API on one origin behind one
+    proxy, so `sameSite: 'lax'` is correct in development and in production
+    alike and the `'none'` branch is unreachable by construction rather than
+    merely avoided. The other two — `credentials: true` with an explicit origin
+    list, and `credentials: 'include'` on the mutator — still apply and still
+    produce this 401 when either is missing.*
 
 30. **jsdom has no cookie, so a session in a test is written rather than
     assumed.** *Symptom:* a test of a protected screen renders the signed-out
@@ -352,8 +366,16 @@ are a different kind of thing from rules 29–30.
     `socket.remoteAddress` fallback — defaulting to `x-forwarded-for`; when no
     trusted header reaches it the address is `null` and every attempt in the world
     lands in one bucket keyed `no-trusted-ip|/sign-in/email`. Set
-    `advanced.ipAddress.ipAddressHeaders` to the single header the deployment's
-    proxy actually writes, plus `trustedProxies` if the chain is multi-hop. Like
+    `advanced.ipAddress.ipAddressHeaders` to `x-forwarded-for`. *Narrowed
+    2026-08-28: this read "to the single header the deployment's proxy actually
+    writes, plus `trustedProxies` if the chain is multi-hop", and closed by
+    calling it "the class of thing that passes locally and fails deployed …
+    decided late and by someone not reading this file". It is decided now.
+    `stack-api.md` rule 49's proxy writes `X-Forwarded-For` and deliberately
+    ignores any incoming one, so there is no chain to trust and `trustedProxies`
+    has nothing to configure. The other half of that rule is the half that still
+    bites: Fastify needs `trustProxy` set, or `req.ip` is the proxy on every log
+    line and in every rate-limit bucket.* Like
     gotcha 29 this is the class of thing that passes locally and fails deployed,
     for the same underlying reason: `stack-api.md` rule 22 leaves the host
     undecided, so anything derived from the proxy in front of it is decided late
