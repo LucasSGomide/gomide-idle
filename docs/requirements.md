@@ -168,6 +168,14 @@ in a roadmap item's own Key Areas section, not here.
     a wiki and in a bug report. *Load-bearing underneath it:* Portuguese runs roughly 40%
     longer than English on short labels, so nothing translated truncates.
 
+**The Scaffolding module is deliberately absent from the list above.** That list
+is one sentence per player experience, and nothing a player experiences is
+scaffolding. Its rows say what a developer or an operator needs, the way
+`FR.5.3` already does. Added 2026-08-28, before **Account sign-up and login**
+was started, because the whole foundation would otherwise have been built inside
+that feature — and because every other feature depends on the scaffold rather
+than on login.
+
 | Module | Feature | User Need Code | User Need Details | Functional Requirement Code | Functional Requirement Details | Addition Date |
 | ------ | ------- | --------------- | ------------------ | ---------------------------- | -------------------------------- | -------------- |
 | Account | Account sign-up and login | UN.1 | A player needs an account that outlives the browser tab, so characters, gear and progress are still there when they come back. | — | — | 2026-08-25 |
@@ -240,3 +248,65 @@ in a roadmap item's own Key Areas section, not here.
 | Client | Language and localisation | UN.8 | A player needs a monster, hunt or skill to be called the same thing in the client, in a wiki, in chat and in a bug report. | — | — | 2026-08-27 |
 | Client | Language and localisation | UN.8 | — | FR.8.1 | Hunt, monster, skill, prefix and suffix names are one authored English string, identical in both languages, and adding one stays a single content edit. | 2026-08-27 |
 | Client | Language and localisation | UN.8 | — | FR.8.2 | A name the client cannot resolve renders as its raw id rather than as an empty label. | 2026-08-27 |
+| Scaffolding | Project scaffolding | UN.9 | A developer needs every part of the system to have one obvious home, so building a feature is writing code rather than inventing structure alongside it. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.9 | — | FR.9.1 | The repository is a pnpm workspace holding `apps/api`, `apps/web` and the shared packages `libs/contracts`, `libs/simulation` and `libs/content`. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.9 | — | FR.9.2 | `libs/simulation` declares no dependencies at all, which is what makes its determinism rules enforced rather than remembered. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.9 | — | FR.9.3 | `apps/api` divides into the four modules `auth`, `player`, `character` and `hunt`, each with `domain`, `application`, `infrastructure` and `entrypoint` layers. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.9 | — | FR.9.4 | `apps/web/src` holds exactly `routes`, `features`, `renderer`, `transport`, `ui` and `lib`, with nothing beside them but the entry point and the generated files. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.9 | — | FR.9.5 | `libs/simulation` and `libs/content` exist as empty packages: the homes for combat and content are placed, not populated. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.9 | — | FR.9.6 | The repository runs on NestJS 12 and Node 24. The Node floor is forced rather than chosen — the generated-code and test tooling requires at least 22.18. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.10 | A developer needs proof that every layer of the system connects to the next, before any feature is built on top of it. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.10 | — | FR.10.1 | One path runs end to end: a web route renders data fetched by a generated hook from an API endpoint that reads Postgres through the ORM. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.10 | — | FR.10.2 | That path reads a `server_meta` row seeded by the first migration and returns the socket protocol version, the content-pack version and the build id. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.10 | — | FR.10.3 | A socket connection carries that same protocol version at its handshake, and the client refuses to proceed on a mismatch. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.10 | — | FR.10.4 | Nothing on that path is a throwaway fixture. Every part of it is required by a rule that already exists and survives into the alpha. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | A developer needs generated code that cannot silently disagree with the source it came from. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | — | FR.11.1 | Zod schemas in `libs/contracts` are the single source for request validation, the OpenAPI document and the socket message types. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | — | FR.11.2 | The OpenAPI document is produced by booting the API in preview mode, opening no port and connecting to no database, so generating it needs nothing running. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | — | FR.11.3 | The API client, the query hooks and the network fakes used in tests are all generated from that document; none of the three is hand-written. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | — | FR.11.4 | Every reusable schema and every enum carries an explicit name in the OpenAPI document, so no generated type is ever named after its position. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | — | FR.11.5 | Every generated file is committed, and CI regenerates them and fails on any difference. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.11 | — | FR.11.6 | One command regenerates all of them, so a fresh clone type-checks after a single step rather than failing in a way that looks like broken code. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.12 | A developer needs the architecture rules checked by a machine, because a boundary that is only documented is one nobody notices being crossed. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.12 | — | FR.12.1 | A linter runs over every package in the repository. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.12 | — | FR.12.2 | A separate dependency check fails on an outward import between layers, a cross-import between sibling features, or any import into `renderer/` other than the generated theme module. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.12 | — | FR.12.3 | That check counts type-only imports, which otherwise vanish at compile time and pass a boundary rule that should have failed. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.13 | A developer needs one shape for every error and every log line, fixed before the first feature writes one. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.13 | — | FR.13.1 | Every HTTP error response has the shape `{ statusCode, code, message }`, normalised in one place, where `code` is a machine-readable value and `message` is for developers. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.13 | — | FR.13.2 | A socket error reply carries that same `code` plus the correlation id of the message that caused it, and never closes the connection. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.13 | — | FR.13.3 | The web renders an error from its `code` through the translation catalogue, never from the server's message. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.13 | — | FR.13.4 | A logger is injected and never constructed in place, and HTTP request context is initialised once, before any handler runs. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.13 | — | FR.13.5 | The API takes the client address from the proxy's forwarded header, so a log line and a rate-limit counter see the real caller rather than the proxy. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.14 | An operator needs a misconfigured deployment to fail immediately and name the value that is wrong. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.14 | — | FR.14.1 | Every environment variable is declared in a schema validated at start-up; a missing or malformed value stops the process and names the field. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.14 | — | FR.14.2 | A committed example file lists every variable the system reads. No file holding real values is ever committed. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.14 | — | FR.14.3 | The web has no runtime configuration: the API and the socket are same-origin relative paths, so nothing about the host is compiled into the client. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.15 | A developer needs every tier that has code tested by the tool that understands that tier. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.15 | — | FR.15.1 | Repository and data-access tests run against real Postgres in a disposable container, on the same engine version development runs. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.15 | — | FR.15.2 | Those tests apply the project's own migrations rather than creating tables themselves, so the schema under test is the schema that ships. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.15 | — | FR.15.3 | One database container is started per test project and each parallel worker is isolated by its own schema, so tests neither collide nor start a container each. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.15 | — | FR.15.4 | Web tests fake the network at the network boundary, with fakes generated from the same document the hooks came from, and never by mocking a module. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.15 | — | FR.15.5 | CI runs every check on every change: lint, the dependency boundaries, type-checking, generated-file drift, and all test tiers. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.16 | A player's very first screen needs the finished visual system, so no screen is ever built against provisional styling and redone later. | — | — | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.16 | — | FR.16.1 | The theme is generated from the design token file, and no component contains a raw colour, size, radius or duration. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.16 | — | FR.16.2 | The app shell renders the top bar specified for a signed-out screen: the wordmark and a standalone language switcher. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.16 | — | FR.16.3 | Both interface fonts load with a declared fallback stack and swap in without a flash of invisible text. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.16 | — | FR.16.4 | English and Portuguese catalogues both ship, typed so that a missing or misspelled key fails the build instead of rendering the key on screen. | 2026-08-28 |
+| Scaffolding | Project scaffolding | UN.16 | — | FR.16.5 | An error boundary sits at the application root and on every route, so a broken screen never renders as a blank page. | 2026-08-28 |
+| Scaffolding | Deployment | UN.17 | An operator needs to run the real deployment on their own machine, so the deployment path is exercised long before any server exists. | — | — | 2026-08-28 |
+| Scaffolding | Deployment | UN.17 | — | FR.17.1 | The system ships as two images: the API, and a web image holding the built static files and the proxy configuration. | 2026-08-28 |
+| Scaffolding | Deployment | UN.17 | — | FR.17.2 | Neither image contains anything specific to a host. Every difference between one environment and another is an environment variable. | 2026-08-28 |
+| Scaffolding | Deployment | UN.17 | — | FR.17.3 | A single command runs both images with Postgres over HTTPS at a local hostname, using a certificate the proxy issues itself. | 2026-08-28 |
+| Scaffolding | Deployment | UN.17 | — | FR.17.4 | The proxy serves the web files and forwards the API and the socket on one origin, so there is no cross-origin request anywhere and the session cookie is first-party. | 2026-08-28 |
+| Scaffolding | Deployment | UN.17 | — | FR.17.5 | The proxy's certificate authority is kept in a named volume, so tearing down containers does not regenerate it and silently invalidate the certificate the developer trusted. | 2026-08-28 |
+| Scaffolding | Deployment | UN.18 | An operator needs moving to a cloud host to be configuration rather than a rebuild. | — | — | 2026-08-28 |
+| Scaffolding | Deployment | UN.18 | — | FR.18.1 | The local arrangement and a hosted one are the same two images in the same topology; only DNS, the secret values and where the certificate comes from change. | 2026-08-28 |
+| Scaffolding | Deployment | UN.18 | — | FR.18.2 | CI builds both images and publishes them to a registry tagged by commit, so a host can be pointed at an image that already exists rather than at a build pipeline that does not. | 2026-08-28 |
+| Scaffolding | Deployment | UN.18 | — | FR.18.3 | Secrets reach a container through its environment and are never read from a file baked into an image. | 2026-08-28 |
+| Scaffolding | Deployment | UN.19 | An operator needs a restart or a schema change never to leave the system in a broken state. | — | — | 2026-08-28 |
+| Scaffolding | Deployment | UN.19 | — | FR.19.1 | Migrations run as their own step that must finish before the API starts, never as part of booting it. | 2026-08-28 |
+| Scaffolding | Deployment | UN.19 | — | FR.19.2 | The API answers a health check that the proxy uses to decide whether to send it traffic. | 2026-08-28 |
+| Scaffolding | Deployment | UN.19 | — | FR.19.3 | On a shutdown signal the API refuses new work and finishes what is already in flight rather than dropping it. | 2026-08-28 |
+| Scaffolding | Deployment | UN.20 | An operator needs the deployment path to fail loudly here rather than quietly on a server. | — | — | 2026-08-28 |
+| Scaffolding | Deployment | UN.20 | — | FR.20.1 | CI stands up the full deployment stack on every change and runs the end-to-end path from UN.10 against it, over HTTPS. | 2026-08-28 |
+| Scaffolding | Deployment | UN.20 | — | FR.20.2 | That test obtains the proxy's certificate from the running stack rather than disabling verification, so it exercises the same TLS path a browser will. | 2026-08-28 |
