@@ -1,0 +1,59 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/server-meta": {
+      "get": {
+        "operationId": "ServerMetaController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServerMetaResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "system"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "gomide_idle API",
+    "description": "",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "ServerMetaResponse": {
+        "type": "object",
+        "properties": {
+          "socketProtocolVersion": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "contentPackVersion": {
+            "type": "string"
+          },
+          "buildId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "socketProtocolVersion",
+          "contentPackVersion",
+          "buildId"
+        ]
+      }
+    }
+  }
+}

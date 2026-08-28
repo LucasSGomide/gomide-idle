@@ -1,8 +1,11 @@
-import { serverMetaResponseSchema } from '../src/server-meta.schema.js';
+import {
+  SERVER_META_RESPONSE_SCHEMA_ID,
+  serverMetaResponseSchema,
+} from '../src/server-meta.schema.js';
 
 describe('serverMetaResponseSchema', () => {
-  it('carries an explicit .meta({ id }) so its generated type is named, not positional (stack-api rule 47)', () => {
-    expect(serverMetaResponseSchema.meta()).toEqual({ id: 'ServerMetaResponse' });
+  it('declares the explicit name its OpenAPI component must carry (stack-api rule 47)', () => {
+    expect(SERVER_META_RESPONSE_SCHEMA_ID).toBe('ServerMetaResponse');
   });
 
   it('accepts a well-formed server_meta payload', () => {

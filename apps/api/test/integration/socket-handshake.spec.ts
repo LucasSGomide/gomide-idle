@@ -25,12 +25,11 @@ describe('the socket handshake and its error twin (FR.10.3, FR.13.2)', () => {
     url = (await app.getUrl()).replace('[::1]', '127.0.0.1').replace('0.0.0.0', '127.0.0.1');
   });
 
-  afterEach(() => {
-    while (open.length) open.pop()?.close();
-  });
-
   afterAll(async () => {
-    while (open.length) open.pop()?.disconnect();
+    // Closing the server drops the client connections; closing the socket.io
+    // polling client explicitly throws inside engine.io-parser under Jest's
+    // vm-modules loader, so we let the server-side close do it.
+    for (const socket of open) socket.removeAllListeners();
     await app.close();
   });
 

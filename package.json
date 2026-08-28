@@ -12,7 +12,8 @@
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
-    "depcruise": "pnpm --filter @gomide/api depcruise"
+    "depcruise": "pnpm --filter @gomide/api depcruise",
+    "generate": "pnpm --filter @gomide/api generate"
   },
   "devDependencies": {
     "oxlint": "catalog:",
