@@ -40,6 +40,10 @@
   catalogue, never the server's `message`.
 - **States** — protocol mismatch: a full-screen "your client is out of date,
   reload" message, per `stack-web.md` rule 22.
+- **States** — a route's subtree throwing renders the boundary's block in place
+  of that region alone; the top bar and the footer stay on screen. The
+  application-root boundary renders the same block full-width, with the bar
+  still drawn. Decided 2026-08-28.
 - **New pattern** — a persistent footer carrying the protocol, content-pack and
   build values. Nothing in [`design.md`](../design.md) describes a footer; the
   design doc owes a rule once this ships.
