@@ -22,6 +22,12 @@ settled it rather than restating it.
 One numbering sequence runs through the whole file, the Gotchas included, so a
 roadmap item citing "auth.md rule 30" lands on exactly one thing.
 
+Rules 31–33 were added 2026-08-28, and rules 6, 7 and 10 revised in the same
+pass, by an audit of the **Account sign-up and login** requirements before their
+roadmap item. It found three requirements with no mechanism — the session's
+length, its behaviour during a hunt, and what a delete actually does — plus a
+`user_preference` table this file had forbidden a home for and never given one.
+
 ## What is chosen
 
 | Concern | Choice | Why this one |
@@ -29,7 +35,7 @@ roadmap item citing "auth.md rule 30" lands on exactly one thing.
 | Library | Better Auth | Owns credentials and sessions, has a Drizzle adapter, and needs no service of its own (`stack-api.md` rule 26) |
 | Session store | The project's own Postgres | The server hits the database on every request anyway, so revoking is a `DELETE` (`stack-api.md` rule 27) |
 | Session transport | A cookie | Nothing to hold in JavaScript, so no interceptor, no refresh logic and no token to leak |
-| Web client | Better Auth's React client | The same library as the API, talking to the same routes, with the types already written |
+| Web client | Better Auth's React client | The same library as the API, talking to the same routes, with the types already written (`stack-web.md` rule 59) |
 | Sending mail | Nothing at all | The address is an identifier and is never sent to (FR.1.2) |
 | Roles | None | One kind of user; the only authorization question is ownership |
 
@@ -64,23 +70,36 @@ roadmap item citing "auth.md rule 30" lands on exactly one thing.
 
 6. **Put no product data in Better Auth's tables.** Credentials, sessions and
    linked providers are the library's; everything the game means by a player is
-   the domain's own, in `user_preference` keyed by the Better Auth user id.
-   Declaring extra fields on `user` instead would put a HUD preference inside a
-   generated file and make every new setting an edit to the auth config plus a
-   regeneration. The price of the split is a second read: the language is not in
-   the row the session lookup already loaded.
+   the domain's own, in `player_account` — the `player` module's table, keyed by
+   the Better Auth user id (`stack-api.md` rule 30). Declaring extra fields on
+   `user` instead would put a HUD preference inside a generated file and make
+   every new setting an edit to the auth config plus a regeneration. The price of
+   the split is a second read: the language is not in the row the session lookup
+   already loaded. *Revised 2026-08-28; this rule named a `user_preference` table
+   and no module to hold it, so it forbade the obvious home without naming an
+   alternative. Two things changed: the table is the player's own row rather than
+   a preferences side-table, so a setting is a column on it; and it uses the
+   game's word rather than the library's — `user` is Better Auth's identity row
+   (`naming.md` rule 14).*
 
 7. **Scope a preference to the account or to the character, in two tables, and
    never to both.** The language and the death setting belong to the player
    (FR.7.2, `alpha.md`); a saved build or a HUD layout belongs to one character.
    One table for both would carry a null character id on half its rows and lose
-   the only thing that makes the boundary checkable. The character-scoped table
-   is named and ruled by the character module, not here.
+   the only thing that makes the boundary checkable. Neither table is ruled here:
+   the account-scoped one is `player_account`, named and ruled by the `player`
+   module, and the character-scoped one by the `character` module. *Revised
+   2026-08-28: the account-scoped half had no stated home, which is what
+   `stack-api.md` rule 30's fourth module now gives it.*
 
-8. **Read a preference row that does not exist as the defaults, never as an
-   error.** Nothing writes that row at sign-up — there is no create hook — so
-   absence is the ordinary state of a new account, and a reader that treats it
-   as a fault breaks every account on its first request.
+8. **Read a missing `player_account` row as the defaults, never as an error.**
+   Nothing writes that row at sign-up — there is no create hook — so absence is
+   the ordinary state of a new account, and a reader that treats it as a fault
+   breaks every account on its first request. *Revised 2026-08-28 for rule 6's
+   rename. It matters more now: the row is the player rather than a side-table of
+   their settings, so "the player does not exist yet" has to be an ordinary read
+   rather than a missing parent — which is also why `stack-api.md` rule 26's
+   foreign key on `character` points at `user.id` and not at this row.*
 
 9. **Treat `language: null` as "never chosen on this account", and let the
    client write its local choice once when it sees it.** `stack-web.md` rule 53
@@ -90,11 +109,14 @@ roadmap item citing "auth.md rule 30" lands on exactly one thing.
    frame while it settles. A stored `'en'` therefore means the player chose
    English, and is never overwritten.
 
-10. **Keep counters and quotas out of the preference tables.** The daily Hard-run
-    count (`docs/requirements.md` feature 28) is state the server resets on a
-    schedule, not something a player set; sharing a row between the client's
-    writes and the game's would put a language switch and a quota decrement in
-    contention for no reason.
+10. **Keep counters and quotas off `player_account`.** The daily Hard-run count
+    (`docs/requirements.md` feature 28) is state the server resets on a schedule,
+    not something a player set; sharing a row between the client's writes and the
+    game's would put a language switch and a quota decrement in contention for no
+    reason. *Revised 2026-08-28 for rule 6's rename only; the imperative is
+    unchanged and it matters more now that the row holds the player rather than
+    just their preferences — "it is already the player's row" is exactly the
+    argument that puts a counter on it.*
 
 ## The API side
 
@@ -266,3 +288,37 @@ as everything above, and appended to the same way.
     session handler is one of the few written by hand, in the test setup.
     Seeding the session query directly is the other way; pick one per tier and
     keep it there, because a test doing both hides which one it is relying on.
+
+## The session's lifetime
+
+Added 2026-08-28. FR.2.2 and FR.2.3 promise a 30-day sliding session that never
+ends a running hunt, and nothing here said how either was met — so the library's
+own 7-day default silently decided the first, and the second had no mechanism at
+all. These three rules are one design and are best read together.
+
+31. **Configure the session to 30 days, with its expiry extended on activity —
+    never leave Better Auth's defaults.** FR.2.2 is the requirement and the
+    library ships 7 days with a 1-day refresh, so the gap between what is written
+    down and what runs is a config value nobody would think to check. The same
+    goes for FR.1.3's 8-to-128 password bounds, which happen to match the
+    defaults today: pin them, because a requirement met by coincidence is met
+    until the next minor version.
+
+32. **Read the session once, at the socket handshake, and never again for that
+    connection's life.** FR.2.3 says expiry never terminates a running hunt, and
+    a hunting player sends no HTTP requests for hours — the socket carries
+    everything — so rule 31's sliding renewal cannot reach them and a re-check
+    mid-flight would end the fight that the requirement exists to protect. The
+    price is that a session revoked on purpose would otherwise outlive the
+    revocation, which is the whole reason rule 33 exists.
+
+33. **Delete a session and close the sockets that session opened, storing the
+    session id on the connection at the handshake.** FR.2.1 promises that ending
+    a session is a `DELETE`, and rule 32 means nothing will notice that delete on
+    its own — so without this the promise is false for exactly the players who are
+    hunting. The session id rather than the account id is what makes FR.2.4 work:
+    signing out on a phone must not close the socket a laptop is hunting on, and
+    `stack-api.md` rule 35's online-slot registry is keyed by account, so it
+    cannot tell those two connections apart. Signing out while hunting then needs
+    nothing of its own — the close starts the ordinary five-second leave (FR.2.5),
+    which is what makes quitting, crashing and signing out one event.

@@ -4,6 +4,14 @@ Append-only log of user needs and functional requirements. Written by
 `msg-pre-roadmap`, read by `msg-roadmap-plan-item`'s gate-check. Never edit or
 delete a row — add new ones.
 
+**`UN`/`FR` codes are unique across the whole file, not per module.** `Client`
+continues `Account`'s sequence at `UN.7` rather than restarting at `UN.1`. This
+is deliberate and was confirmed 2026-08-28: `auth.md` rule 7 cites `FR.7.2` and
+`stack-api.md` rule 39 cites `FR.5.1` with no module qualifier, so a bare code
+already has to resolve to exactly one row. The `msg-pre-roadmap` skill describes
+per-module numbering; where the two disagree, this file wins, because the rule
+docs cite it and not the skill.
+
 ## The alpha's features, in plain English
 
 Seeded 2026-08-24 from [`alpha.md`](../alpha.md) by
@@ -174,6 +182,7 @@ in a roadmap item's own Key Areas section, not here.
 | Account | Account sign-up and login | UN.2 | — | FR.2.3 | Session expiry never terminates a running hunt; only a game rule ends a fight. | 2026-08-25 |
 | Account | Account sign-up and login | UN.2 | — | FR.2.4 | Signing out destroys that device's session on the server; other signed-in devices keep their own. | 2026-08-25 |
 | Account | Account sign-up and login | UN.2 | — | FR.2.5 | Signing out while hunting runs the same five-second leave as any other disconnect. | 2026-08-25 |
+| Account | Account sign-up and login | UN.2 | — | FR.2.6 | Deleting a session closes the sockets that session opened, so revoking a session takes effect at once rather than when the player happens to disconnect. The close runs the ordinary five-second leave. | 2026-08-28 |
 | Account | Account sign-up and login | UN.3 | A player needs "online" and "away" to be unambiguous, because the game pays out differently for each. | — | — | 2026-08-25 |
 | Account | Account sign-up and login | UN.3 | — | FR.3.1 | An open socket connection is what "online" means; it opens when a character is selected, and the hunt runs over it. | 2026-08-25 |
 | Account | Account sign-up and login | UN.3 | — | FR.3.2 | The socket handshake is authenticated against the same server-side session as ordinary requests, and the server checks the request's Origin on every connection. | 2026-08-25 |

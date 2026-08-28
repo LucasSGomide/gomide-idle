@@ -242,9 +242,10 @@ runs one read and returns the flat shape its caller wants.
     serialization failure are.
 
 42. **Translate a SQLSTATE the use case is deliberately racing on into a named
-    `ApiError` instead.** Two tabs logging in at once (`stack-api.md` rule 21)
-    is an expected outcome, not a server fault, and a 500 would tell the player
-    to file a bug.
+    `ApiError` instead.** Two attempts to bring the same character online at once
+    (`stack-api.md` rule 21) is an expected outcome, not a server fault, and a 500
+    would tell the player to file a bug. *Revised 2026-08-28 with that rule, and
+    for its reason: the race is at character select, not at sign-in.*
 
 Socket errors. The source material this section was adapted from was entirely
 HTTP-shaped, and the main transport here is a socket, so rules 43–47 are new.
@@ -264,10 +265,17 @@ HTTP-shaped, and the main transport here is a socket, so rules 43–47 are new.
     `{ correlationId, type, message, children? }`.** Same `ErrorTypeEnum` as
     HTTP, so an error is rendered by the same client code however it arrived.
 
-46. **Close a socket for exactly two reasons: a failed handshake and a
-    protocol-version mismatch.** Both mean nothing the client sends next can be
-    trusted, and `stack-web.md` rule 22 already has the client showing a reload
-    screen for the second.
+46. **Close a socket for exactly three reasons: a failed handshake, a
+    protocol-version mismatch, and the deletion of the session that opened it.**
+    All three mean nothing the client sends next can be trusted, and
+    `stack-web.md` rule 22 already has the client showing a reload screen for the
+    second. *Revised 2026-08-28; this rule said "exactly two" and
+    [`auth.md`](auth.md) rule 33 needed a third. The stated reason is unchanged —
+    a deleted session is precisely the case where nothing further can be trusted
+    — it was simply not on the list, which left signing out mid-hunt with no rule
+    that allowed it.* The third is the only one the server initiates while
+    everything is healthy, so it is also the only one that starts the ordinary
+    five-second leave rather than ending a broken connection.
 
 47. **Treat a throw out of `runTicks` as the end of that run, logged with the
     run header.** The header is the entire reproduction — seed, content version,
@@ -527,7 +535,10 @@ numbered here and stated there — never both.
     30–34's, so a reader adding a DAO needs to meet it here.
 
 90. **See [`auth.md`](auth.md) rules 5–7: Better Auth's generated tables hold no
-    product data, and a player's own settings live in the domain's `user_preference`.**
-    Rule 22 already refuses to let a Drizzle row type become the domain's shape;
-    this is the same boundary drawn around a schema file the project does not
-    write, and the reason a new column does not go in the obvious place.
+    product data, and a player's own settings live on the `player` module's
+    `player_account`, keyed by the Better Auth user id.** Rule 22 already refuses
+    to let a Drizzle row type become the domain's shape; this is the same boundary
+    drawn around a schema file the project does not write, and the reason a new
+    column does not go in the obvious place. *Revised 2026-08-28: the table was
+    `user_preference` and had no owning module until `stack-api.md` rule 30 grew a
+    fourth.*

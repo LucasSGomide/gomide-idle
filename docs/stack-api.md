@@ -142,10 +142,15 @@ timeout defence.
     otherwise breaks every stored hunt log the first time it happens.
 
 21. **Guard a catch-up with an advisory lock and a compare-and-swap on the run's
-    status.** Two tabs logging in at once must not bank the same outcome twice;
-    the lock avoids the wasted work, the CAS is what guarantees correctness when
-    the lock is lost — and retry is free only because the simulation has no side
-    effects until the final write.
+    status.** Two attempts to bring the same character online at once must not
+    bank the same outcome twice; the lock avoids the wasted work, the CAS is what
+    guarantees correctness when the lock is lost — and retry is free only because
+    the simulation has no side effects until the final write. *Revised
+    2026-08-28; this read "two tabs logging in at once", which named the wrong
+    moment. `requirements.md` FR.6.2 replays a sealed session when its character
+    comes online, not when the account signs in, and rule 35's claim is what two
+    attempts actually race for — so a guard built at the sign-in path would sit
+    where the race is not.*
 
 ## Deployment
 
@@ -185,7 +190,16 @@ timeout defence.
 
 30. **`apps/` for deployables, `libs/` for shared code, per the existing
     standards.** `libs/simulation` and `libs/content` are the two shared
-    packages; `apps/api` divides into `character`, `hunt` and `auth`.
+    packages; `apps/api` divides into `auth`, `player`, `character` and `hunt`.
+    *Revised 2026-08-28; this rule named three modules — `character`, `hunt` and
+    `auth` — which left the game's own idea of a player with nowhere to live.
+    [`auth.md`](auth.md) rule 6 forbids product data in Better Auth's tables and
+    did not say where it goes instead, so a language setting had a rule against
+    its obvious home and no stated alternative.* `auth` holds the library and
+    nothing else; `player` holds `player_account`, the game's row for an account,
+    keyed by the Better Auth user id. `character` and `hunt` are unchanged — an
+    account owning its characters is a foreign key, not module membership, and
+    the character aggregate is the largest in the game.
 
 31. **`libs/content` exports the JSON and the validator together.** Shape and
     referential integrity are checked in one place used by both apps, which is

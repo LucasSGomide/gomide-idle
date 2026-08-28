@@ -86,3 +86,21 @@ Rule 13 was added later on 2026-08-26, when `architecture-api.md` rules 87 and
     decision gets reversed by accident: one file at a time, with nobody ever
     arguing against it. The price is rule 87's own — adopting translation later
     renames the field in every content file rather than adding a key beside it.
+
+Rule 14 was added 2026-08-28, when the Accounts requirements were audited before
+their roadmap item and "account" turned out to name three different things.
+
+14. **In code, `account` is Better Auth's generated table and nothing else; the
+    game's row for a player is `player_account`, and the human it belongs to is a
+    _player_, never a user.** Better Auth generates an `account` table holding
+    linked credentials and a `user` table holding the identity — while
+    `alpha.md`, `design.md` and `requirements.md` all use "account" for the
+    player's login, and `design.md` §1 puts an "account menu" on every screen.
+    Three meanings for one word, two of them owned by a library that will not
+    rename its tables for us, is how a query gets written against the wrong one.
+    So the library keeps `user` and `account`, the domain gets `player_account`
+    (`auth.md` rule 6), and prose and UI copy keep saying "account" for the login
+    because that is what a player calls it. The price is the one seam this
+    leaves: `player_account` is keyed by `user.id`, so the two words meet on
+    exactly one column, and rule 5's discipline applies — the word is reserved,
+    so nothing else in the domain is called a user.
