@@ -4,3 +4,4 @@
 // the handshake (roadmap tasks 05 and 06).
 export * from './errors.js';
 export * from './protocol.js';
+export * from './server-meta.schema.js';
