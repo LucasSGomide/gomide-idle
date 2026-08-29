@@ -16,16 +16,23 @@ permanent ID, never renumbered**. Ordering lives in this table only.
 - The prose above the table is hand-written and says **why** the next item is
   next. The table sorts by estimate; that sort is not a priority.
 
-**Nothing is queued.** [01](01-the-api-foundation.md) and
-[02](02-the-web-foundation.md) shipped the API and web foundations end to end —
-the pnpm workspace, both stacks, the normalised error and log shapes, and the
-`server_meta` path from Postgres to a rendered screen. The next items —
-**Deployment** (`requirements.md` `UN.17`–`UN.20`) and **Account sign-up and
-login** — are referenced but not yet written.
+**Pick up [03](03-account-sign-up-and-login.md).** [01](01-the-api-foundation.md)
+and [02](02-the-web-foundation.md) shipped the API and web foundations end to end
+— the pnpm workspace, both stacks, the normalised error and log shapes, and the
+`server_meta` path from Postgres to a rendered screen. `02` deliberately left `/`
+as the shell over an empty body for `03` to fill, and `01` left the socket
+handshake unauthenticated for `03` to check, so `03` is the item those two were
+shaped around. It is also the gate: every feature after it belongs to somebody.
+
+**Deployment** (`requirements.md` `UN.17`–`UN.20`) is still referenced and not yet
+written. It does not block `03` — `01` already ships the Postgres this repository
+needs to run its own migrations and tests.
 
 ## Ready
 
-_(none)_
+| # | Item | Est | Depends on | Status |
+|---|---|---|---|---|
+| [03](03-account-sign-up-and-login.md) | Account sign-up and login: accounts, sessions and the first guarded screen | 9 | 01, 02 | not-started |
 
 ## Blocked
 
