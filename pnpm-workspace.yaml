@@ -27,6 +27,7 @@ allowBuilds:
   msw: false
   '@prisma/client': false
   better-sqlite3: false
+  '@swc/core': false
 
 # Single-sourced dependency versions. Every package references these with the
 # `catalog:` protocol so a bump happens in one place.

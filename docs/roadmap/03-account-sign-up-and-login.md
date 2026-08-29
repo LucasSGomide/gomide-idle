@@ -264,6 +264,13 @@ on completion. The decisions and deviations that outlive it:
   `server.proxy['/api']` rewrites to the API root and `/socket.io` proxies with
   `ws: true` and no `changeOrigin`; the API keeps no global prefix and no CORS.
 
+- **The API runtime moved from `tsx` to `@swc-node/register`.** `tsx` (esbuild)
+  does not emit `emitDecoratorMetadata`, so NestJS could not resolve any
+  class-type constructor dependency at runtime — the app never actually
+  booted under `make dev` before this item exercised it. SWC emits the
+  metadata; `apps/api`'s `dev` and `generate:openapi` scripts and a new
+  `.swcrc` are the change. Only the seed row in the first migration exists —
+  there is no account seeder; a demo account is made by signing up.
 - **The OpenAPI generator boots in tsx preview mode, which emits no
   `design:paramtypes`.** A single `@Inject()` on a controller constructor then
   makes Nest resolve every param and fail on the class-type ones — so config a

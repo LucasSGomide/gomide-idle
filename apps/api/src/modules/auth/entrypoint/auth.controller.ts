@@ -53,11 +53,11 @@ import {
 // (auth.md rule 3), copies the library's set-cookie onto the Fastify reply
 // (auth.md gotcha 29) and maps the library's error to one `code` (rule 27).
 //
-// No `@Inject()` in this constructor: the OpenAPI generator boots in preview
-// mode under tsx, which emits no `design:paramtypes`. A bare class-type param is
-// left unresolved by preview mode (as it was before task 03); one explicit
-// `@Inject` here would force Nest to resolve every param and fail on the others.
-// Config the handlers need lives on the use cases instead.
+// Class-type constructor params, no `@Inject` — like every other class here.
+// The runtime and the OpenAPI generator both run under `@swc-node/register`,
+// which emits `emitDecoratorMetadata`; `tsx` did not, and switching the runner
+// is what makes NestJS's class-type DI resolve. Config a handler needs is still
+// injected into its use case (all-token `@Inject`) rather than here.
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
