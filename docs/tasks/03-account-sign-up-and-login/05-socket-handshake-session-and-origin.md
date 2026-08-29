@@ -13,7 +13,9 @@
   `stack-api.md` rule 38 still requires it on every connection.
 - **Open:** which module owns the session-id-to-connection map, and whether
   `system` may depend on `auth` for it. The only gateway in the repository is
-  `system`'s. This slice decides it and records why.
+  `system`'s. This slice decides it and records why — under `auth.md` rule 1,
+  whichever way it goes, `system` may depend on the auth module but never import
+  `better-auth` itself.
 - **Open:** what the allowed origin list holds in development, where
   `stack-web.md` rule 62's Vite proxy is the only origin. Decided here, and task
   `06` depends on the answer.
@@ -49,6 +51,8 @@
 
 ## References
 
+- `auth.md` rule 1 — every Better Auth import stays inside the auth module,
+  which bounds the ownership decision above.
 - `auth.md` rules 32–33 — read the session once at the handshake; a delete closes
   that session's sockets.
 - `stack-api.md` rule 38 — the handshake session check and the `Origin` check.

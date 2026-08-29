@@ -41,7 +41,9 @@
 - **Front-end** — build `/` and `/sign-up` from the generated mutation hooks; no
   hand-written request; `stack-web.md` rules 57–59.
 - **Front-end** — add the single 401 handler to the fetch mutator in
-  `lib/api/fetcher.ts`, not to either screen; `auth.md` rules 23–28.
+  `lib/api/fetcher.ts`, not to either screen: it clears the session query and
+  redirects to sign-in carrying the route the player was on; `auth.md` rule 26,
+  rules 23–28, `architecture-web.md` rule 11.
 - **Front-end** — both routes redirect to `/characters` when a session already
   exists, reading it through `features/session/` from task `07`.
 - **Front-end** — sign-in lands on the search param's target when present and
@@ -66,7 +68,7 @@
 - [ ] `(unit)` a field error puts `danger` on the border and renders helper text with its trailing icon
 - [ ] `(unit)` `EMAIL_TAKEN`, `INVALID_CREDENTIALS` and `TOO_MANY_ATTEMPTS` each render their catalogue string and never the server's `message`
 - [ ] `(unit)` with registration closed, `/sign-up` resolves and renders the closed notice in place of the form, and `/` no longer shows the link
-- [ ] `(unit)` a 401 from any request is handled once in the fetch mutator and returns the player to `/`
+- [ ] `(unit)` a 401 from any request is handled once in the fetch mutator: it clears the session query and returns the player to `/` with the route they were on preserved in the search param
 - [ ] `(unit)` every new string exists in both `en.ts` and `pt.ts`, so the catalogue type spec stays satisfied
 - [ ] `(unit)` both forms render their Portuguese strings without truncation at the narrowest supported width
 
