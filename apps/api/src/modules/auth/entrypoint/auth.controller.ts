@@ -113,7 +113,16 @@ export class AuthController {
     @Req() request: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<SignOutResponseType> {
-    const result = await this.signOut.execute({ headers: toHeaders(request) });
+    // The session guard ran (sign-out is not @Public) and put the session id on
+    // the request; the use case publishes it so the socket registry can close
+    // that session's connections (auth.md rule 33).
+    const { sessionId } = request as FastifyRequest & {
+      sessionId: string | null;
+    };
+    const result = await this.signOut.execute({
+      headers: toHeaders(request),
+      sessionId: sessionId ?? null,
+    });
     return relay(result, reply, signOutResponseSchema);
   }
 

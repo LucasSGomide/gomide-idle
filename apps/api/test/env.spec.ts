@@ -26,6 +26,10 @@ describe('loadEnv', () => {
       LOG_LEVEL: 'info',
       BUILD_ID: 'dev',
       AUTH_REGISTRATION_OPEN: true,
+      SOCKET_ALLOWED_ORIGINS: [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+      ],
       OBSERVE_SERVICE_ID: 'gomide-api',
     });
   });

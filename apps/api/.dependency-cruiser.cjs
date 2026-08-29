@@ -63,10 +63,14 @@ module.exports = {
       name: 'no-sibling-module-import',
       comment:
         'stack-api.md rule 42 / FR.12.2: hunt reaching into character. The $2 ' +
-        'back-reference is the shape neither linter can state at all.',
+        'back-reference is the shape neither linter can state at all. `auth` is ' +
+        'the exception: auth.md rule 1 lets any module depend on the auth ' +
+        'module (it is @Global and holds the session read), it just may never ' +
+        'import better-auth itself — roadmap item 03 task 05 pulled on this for ' +
+        "the socket handshake's session check.",
       severity: 'error',
       from: { path: MODULE },
-      to: { path: MODULE, pathNot: '(^|/)modules/$2/' },
+      to: { path: MODULE, pathNot: '(^|/)modules/($2|auth)/' },
     },
   ],
   options: {

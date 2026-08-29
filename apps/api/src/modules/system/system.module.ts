@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { GetServerMetaUseCase } from './application/get-server-meta.use-case.js';
 import { GET_SERVER_META_DAO } from './application/tokens.js';
 import { ServerMetaController } from './entrypoint/server-meta.controller.js';
+import { SessionSocketRegistry } from './entrypoint/session-socket.registry.js';
 import { SystemGateway } from './entrypoint/system.gateway.js';
 import { GetServerMetaDao } from './infrastructure/database/dao/get-server-meta.dao.js';
 
@@ -14,6 +15,7 @@ import { GetServerMetaDao } from './infrastructure/database/dao/get-server-meta.
   providers: [
     GetServerMetaUseCase,
     SystemGateway,
+    SessionSocketRegistry,
     { provide: GET_SERVER_META_DAO, useClass: GetServerMetaDao },
   ],
 })

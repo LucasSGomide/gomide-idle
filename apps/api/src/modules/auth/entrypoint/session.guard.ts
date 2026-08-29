@@ -43,7 +43,7 @@ export class SessionGuard implements CanActivate {
       }
     }
 
-    const { user } = await this.getSession.execute({ headers });
+    const { user, sessionId } = await this.getSession.execute({ headers });
     if (!user) {
       throw new CodedException(
         'NO_SESSION',
@@ -52,7 +52,12 @@ export class SessionGuard implements CanActivate {
       );
     }
 
-    (request as FastifyRequest & { userId: string }).userId = user.id;
+    const scoped = request as FastifyRequest & {
+      userId: string;
+      sessionId: string | null;
+    };
+    scoped.userId = user.id;
+    scoped.sessionId = sessionId;
     return true;
   }
 }

@@ -17,6 +17,7 @@ describe('assertSituationCode', () => {
   it('accepts a code that names the situation', () => {
     expect(() => assertSituationCode('EMAIL_TAKEN')).not.toThrow();
     expect(() => assertSituationCode('VALIDATION_FAILED')).not.toThrow();
+    expect(() => assertSituationCode('NO_SESSION')).not.toThrow();
     expect(isSituationCode('CHARACTER_ALREADY_ONLINE')).toBe(true);
   });
 

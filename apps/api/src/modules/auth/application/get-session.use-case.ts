@@ -11,6 +11,10 @@ export type GetSessionInputType = {
 
 export type GetSessionResultType = {
   user: AuthUserType | null;
+  // auth.md rule 33 / FR.2.6: the session row's id, so the socket handshake can
+  // store it on the connection and a delete can close exactly that session's
+  // sockets. Null when there is no session.
+  sessionId: string | null;
   // FR.5.2 / auth.md rule 18: the registration flag rides on the session read so
   // the web hides the sign-up link rather than guessing.
   registrationOpen: boolean;
@@ -30,9 +34,11 @@ export class GetSessionUseCase {
   async execute(input: GetSessionInputType): Promise<GetSessionResultType> {
     const session = await this.auth.api.getSession({ headers: input.headers });
     const registrationOpen = this.env.AUTH_REGISTRATION_OPEN;
-    if (!session?.user) return { user: null, registrationOpen };
+    if (!session?.user)
+      return { user: null, sessionId: null, registrationOpen };
     return {
       user: { id: session.user.id, email: session.user.email },
+      sessionId: session.session.id,
       registrationOpen,
     };
   }

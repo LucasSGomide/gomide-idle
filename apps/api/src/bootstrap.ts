@@ -3,13 +3,13 @@ import {
   FastifyAdapter,
   type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 
 import { AppModule } from './app.module.js';
 import { type EnvType } from './config/env.js';
 import { createRootLogger } from './logging/pino.js';
 import { installRequestLogging } from './logging/request-logging.js';
 import { resolveObservability } from './observability/observability.js';
+import { OriginCheckedIoAdapter } from './realtime/origin-checked-io.adapter.js';
 
 type NestAppFactoryType = (
   module: Parameters<typeof NestFactory.create>[0],
@@ -57,7 +57,11 @@ export async function createApiApp(
   );
 
   // The socket is presence (stack-api.md rule 12); Socket.IO is the transport.
-  app.useWebSocketAdapter(new IoAdapter(app));
+  // The adapter checks the handshake Origin against the environment's allow-list
+  // (stack-api.md rule 38) — CORS does not govern the WebSocket upgrade.
+  app.useWebSocketAdapter(
+    new OriginCheckedIoAdapter(app, env.SOCKET_ALLOWED_ORIGINS),
+  );
 
   installRequestLogging(app.getHttpAdapter().getInstance(), rootLogger);
 

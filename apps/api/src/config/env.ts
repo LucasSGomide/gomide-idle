@@ -39,6 +39,21 @@ export const envSchema = z.object({
     .default('true')
     .transform((value) => value === 'true'),
 
+  // stack-api.md rule 38 / FR.3.2: the socket handshake's Origin is checked
+  // against this list on every connection (CORS does not govern the WebSocket
+  // upgrade). Comma-separated; in development it holds the Vite dev origin
+  // (stack-web.md rule 62's proxy is served from there). A request with no
+  // Origin header — a native client, a same-origin call — is allowed.
+  SOCKET_ALLOWED_ORIGINS: z
+    .string()
+    .default('http://localhost:5173,http://127.0.0.1:5173')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0),
+    ),
+
   // Observability (stack-api.md rules 43-44, UN.21). The agent activates only
   // when BOTH credentials are present; development and CI leave them unset and it
   // then sends nothing at all (FR.21.2). See src/observability/observability.ts.
