@@ -1,0 +1,53 @@
+{
+  "name": "@gomide/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "depcruise": "depcruise src --config .dependency-cruiser.cjs",
+    "generate": "pnpm generate:theme && pnpm generate:routes && pnpm generate:api",
+    "generate:theme": "node --import tsx ./scripts/generate-theme.ts",
+    "generate:routes": "tsr generate",
+    "generate:api": "orval --config orval.config.ts"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.102.8",
+    "@tanstack/react-router": "^1.170.32",
+    "i18next": "^26.4.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-i18next": "^17.0.12",
+    "socket.io-client": "catalog:"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/router-cli": "^1.167.33",
+    "@tanstack/router-plugin": "^1.168.35",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
+    "@types/node": "catalog:",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dependency-cruiser": "catalog:",
+    "jsdom": "^30.0.1",
+    "msw": "^2.15.0",
+    "orval": "^8.26.0",
+    "pretty-format": "^27.5.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
+  },
+  "msw": {
+    "workerDirectory": []
+  }
+}

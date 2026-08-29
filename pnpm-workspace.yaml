@@ -22,6 +22,9 @@ allowBuilds:
   protobufjs: false
   ssh2: false
   '@scarf/scarf': false
+  # msw's postinstall only copies its browser worker into a public dir; the web
+  # tests use msw/node, so it stays off.
+  msw: false
 
 # Single-sourced dependency versions. Every package references these with the
 # `catalog:` protocol so a bump happens in one place.

@@ -12,8 +12,8 @@
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build",
-    "depcruise": "pnpm --filter @gomide/api depcruise",
-    "generate": "pnpm --filter @gomide/api generate",
+    "depcruise": "pnpm --filter @gomide/api depcruise && pnpm --filter @gomide/web depcruise",
+    "generate": "pnpm --filter @gomide/api generate && pnpm --filter @gomide/web generate",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

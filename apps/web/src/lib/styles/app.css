@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@import '../../theme.css';
+
+/*
+ * stack-web.md rule 45 / design.md §12: the theme is the generated token file
+ * and nothing here adds a raw colour, size, radius or duration. design.md §3 is
+ * one committed dark theme — no light variant — so the palette is unconditional.
+ */
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+  }
+}
