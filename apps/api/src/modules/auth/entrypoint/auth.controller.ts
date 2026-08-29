@@ -30,6 +30,7 @@ import {
 } from '@gomide/contracts';
 
 import { CodedException } from '../../../errors/coded-exception.js';
+import { Public } from '../../../http/public.decorator.js';
 import type { AuthApiResultType } from '../application/auth-api-result.type.js';
 import { GetSessionUseCase } from '../application/get-session.use-case.js';
 import { SignInUseCase } from '../application/sign-in.use-case.js';
@@ -49,6 +50,12 @@ import {
 // body shape (rule 26), calls the use case that owns the `auth.api` call
 // (auth.md rule 3), copies the library's set-cookie onto the Fastify reply
 // (auth.md gotcha 29) and maps the library's error to one `code` (rule 27).
+//
+// No `@Inject()` in this constructor: the OpenAPI generator boots in preview
+// mode under tsx, which emits no `design:paramtypes`. A bare class-type param is
+// left unresolved by preview mode (as it was before task 03); one explicit
+// `@Inject` here would force Nest to resolve every param and fail on the others.
+// Config the handlers need lives on the use cases instead.
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -60,6 +67,7 @@ export class AuthController {
   ) {}
 
   @Post('sign-up')
+  @Public()
   @ApiBody({ type: SignUpRequest })
   @ApiCreatedResponse({ type: SignUpResponse })
   async postSignUp(
@@ -77,6 +85,7 @@ export class AuthController {
   }
 
   @Post('sign-in')
+  @Public()
   @HttpCode(HttpStatus.OK)
   @ApiBody({ type: SignInRequest })
   @ApiOkResponse({ type: SignInResponse })
@@ -106,14 +115,17 @@ export class AuthController {
   }
 
   @Get('session')
+  @Public()
   @ApiOkResponse({ type: SessionResponse })
   async getCurrentSession(
     @Req() request: FastifyRequest,
   ): Promise<SessionResponseType> {
-    const { user } = await this.getSession.execute({
+    const { user, registrationOpen } = await this.getSession.execute({
       headers: toHeaders(request),
     });
-    return sessionResponseSchema.parse({ user });
+    // FR.5.2 / auth.md rule 18: the registration flag rides on the session read
+    // both signed in and signed out, so the web hides the sign-up link.
+    return sessionResponseSchema.parse({ user, registrationOpen });
   }
 }
 

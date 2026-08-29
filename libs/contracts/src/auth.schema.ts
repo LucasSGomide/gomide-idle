@@ -56,10 +56,13 @@ export type SignOutResponseType = z.infer<typeof signOutResponseSchema>;
 
 // FR.2.1: the session is a server-side row read from the cookie. `user` is null
 // when there is no session, so a signed-out caller gets a 200 with a null body
-// rather than a 401 (GET auth/session is public — task 03). Task 03 adds the
-// registration flag to this same response.
+// rather than a 401 (GET auth/session is public — task 03).
+//
+// FR.5.2 / auth.md rule 18: `registrationOpen` is reported here both signed in
+// and signed out, so the web hides the sign-up link rather than guessing at it.
 export const sessionResponseSchema = z.object({
   user: authUserSchema.nullable(),
+  registrationOpen: z.boolean(),
 });
 export const SESSION_RESPONSE_SCHEMA_ID = 'SessionResponse';
 export type SessionResponseType = z.infer<typeof sessionResponseSchema>;

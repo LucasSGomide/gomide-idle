@@ -30,6 +30,15 @@ export const envSchema = z.object({
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'])
     .default('info'),
 
+  // FR.5.2 / auth.md rule 18: registration closes by configuration — new
+  // sign-ups are refused with REGISTRATION_CLOSED while existing accounts keep
+  // working. A string 'true' | 'false' because env values are strings; anything
+  // else stops start-up (FR.14.1). Open by default.
+  AUTH_REGISTRATION_OPEN: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((value) => value === 'true'),
+
   // Observability (stack-api.md rules 43-44, UN.21). The agent activates only
   // when BOTH credentials are present; development and CI leave them unset and it
   // then sends nothing at all (FR.21.2). See src/observability/observability.ts.

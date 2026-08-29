@@ -15,11 +15,13 @@ export const ERROR_CODES = {
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   // Auth (roadmap item 03). Declared here before being thrown: EMAIL_TAKEN and
   // INVALID_CREDENTIALS in task 02's controller, TOO_MANY_ATTEMPTS in task 04's
-  // throttler, REGISTRATION_CLOSED in task 03's sign-up guard.
+  // throttler, REGISTRATION_CLOSED in task 03's sign-up path, NO_SESSION in
+  // task 03's global guard (401) and reused by task 05's socket handshake.
   EMAIL_TAKEN: 'EMAIL_TAKEN',
   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
   TOO_MANY_ATTEMPTS: 'TOO_MANY_ATTEMPTS',
   REGISTRATION_CLOSED: 'REGISTRATION_CLOSED',
+  NO_SESSION: 'NO_SESSION',
 } as const;
 
 export type ErrorCodeType = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

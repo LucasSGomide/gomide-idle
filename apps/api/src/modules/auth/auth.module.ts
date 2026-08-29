@@ -1,4 +1,5 @@
 import { Global, Module, type OnModuleDestroy } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
@@ -9,6 +10,7 @@ import { SignOutUseCase } from './application/sign-out.use-case.js';
 import { SignUpUseCase } from './application/sign-up.use-case.js';
 import { AUTH_INSTANCE } from './auth.tokens.js';
 import { AuthController } from './entrypoint/auth.controller.js';
+import { SessionGuard } from './entrypoint/session.guard.js';
 import { createAuthInstance } from './infrastructure/auth.instance.js';
 
 // The auth module (stack-api.md rule 30: `auth` holds the library and nothing
@@ -40,6 +42,10 @@ import { createAuthInstance } from './infrastructure/auth.instance.js';
     SignInUseCase,
     SignOutUseCase,
     GetSessionUseCase,
+    // auth.md rule 12: the session guard is applied globally, not per
+    // controller, so the guard missing from next week's controller cannot
+    // happen. Public routes opt out with @Public().
+    { provide: APP_GUARD, useClass: SessionGuard },
   ],
   exports: [AUTH_INSTANCE, GetSessionUseCase],
 })

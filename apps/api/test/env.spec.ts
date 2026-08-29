@@ -25,6 +25,7 @@ describe('loadEnv', () => {
       HOST: '0.0.0.0',
       LOG_LEVEL: 'info',
       BUILD_ID: 'dev',
+      AUTH_REGISTRATION_OPEN: true,
       OBSERVE_SERVICE_ID: 'gomide-api',
     });
   });
@@ -37,6 +38,19 @@ describe('loadEnv', () => {
     expect(() => loadEnv({ ...validEnv(), PORT: 'not-a-number' })).toThrow(
       /PORT/,
     );
+  });
+
+  it('refuses a malformed registration switch (FR.5.2)', () => {
+    expect(() =>
+      loadEnv({ ...validEnv(), AUTH_REGISTRATION_OPEN: 'maybe' }),
+    ).toThrow(/AUTH_REGISTRATION_OPEN/);
+  });
+
+  it('reads the registration switch as a boolean', () => {
+    expect(
+      loadEnv({ ...validEnv(), AUTH_REGISTRATION_OPEN: 'false' })
+        .AUTH_REGISTRATION_OPEN,
+    ).toBe(false);
   });
 });
 

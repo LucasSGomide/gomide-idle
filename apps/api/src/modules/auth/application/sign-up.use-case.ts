@@ -1,5 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 
+import { ERROR_CODES } from '@gomide/contracts';
+
+import { ENV, type EnvType } from '../../../config/env.js';
+import { CodedException } from '../../../errors/coded-exception.js';
 import { AUTH_INSTANCE, type AuthInstanceType } from '../auth.tokens.js';
 import {
   toAuthApiResult,
@@ -18,9 +22,26 @@ export type SignUpInputType = {
 
 @Injectable()
 export class SignUpUseCase {
-  constructor(@Inject(AUTH_INSTANCE) private readonly auth: AuthInstanceType) {}
+  // Both constructor params are token `@Inject`s: the OpenAPI generator boots in
+  // preview mode under tsx, which emits no `design:paramtypes`, so a use case
+  // that leaned on a class-type param would not resolve there.
+  constructor(
+    @Inject(AUTH_INSTANCE) private readonly auth: AuthInstanceType,
+    @Inject(ENV) private readonly env: EnvType,
+  ) {}
 
   async execute(input: SignUpInputType): Promise<AuthApiResultType> {
+    // FR.5.2 / auth.md rule 18: with registration closed a new sign-up is
+    // refused with a stated reason before the library is called, so no row is
+    // written; sign-in on an existing account is untouched.
+    if (!this.env.AUTH_REGISTRATION_OPEN) {
+      throw new CodedException(
+        ERROR_CODES.REGISTRATION_CLOSED,
+        'New accounts are closed for now.',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
     // FR.1.1: autoSignIn is on (auth.options.ts), so a successful sign-up also
     // sets the session cookie. Better Auth requires a `name`; nothing in this
     // item surfaces it, so the e-mail's local part stands in.

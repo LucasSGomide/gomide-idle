@@ -3,6 +3,7 @@ import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import type { ServerMetaResponseType } from '@gomide/contracts';
 
+import { Public } from '../../../http/public.decorator.js';
 import { GetServerMetaUseCase } from '../application/get-server-meta.use-case.js';
 import { ServerMetaResponse } from './dto/server-meta.dto.js';
 
@@ -15,6 +16,7 @@ export class ServerMetaController {
   constructor(private readonly getServerMeta: GetServerMetaUseCase) {}
 
   @Get()
+  @Public()
   @ApiOkResponse({ type: ServerMetaResponse })
   get(): Promise<ServerMetaResponseType> {
     return this.getServerMeta.execute({});

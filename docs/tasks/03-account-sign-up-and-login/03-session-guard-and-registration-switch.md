@@ -40,13 +40,36 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` a guarded route with no cookie returns 401 carrying a `code`, and with a valid session cookie returns 200
-- [ ] `(integration)` `POST auth/sign-up`, `POST auth/sign-in`, `GET auth/session` and `GET server-meta` all answer with no session
-- [ ] `(integration)` a session row written with an expiry in the past is refused by the guard, and one inside its window is accepted
-- [ ] `(integration)` activity inside the refresh window extends the stored expiry rather than leaving it fixed
-- [ ] `(unit)` the environment schema refuses a malformed registration switch and `.env.example` declares it, so `test/env.spec.ts` stays green
-- [ ] `(integration)` with registration off, `POST auth/sign-up` returns `REGISTRATION_CLOSED` and creates no row, while `POST auth/sign-in` on an existing account still succeeds
-- [ ] `(integration)` `GET auth/session` carries the registration flag both signed in and signed out
+- [x] `(integration)` a guarded route with no cookie returns 401 carrying a `code`, and with a valid session cookie returns 200
+- [x] `(integration)` `POST auth/sign-up`, `POST auth/sign-in`, `GET auth/session` and `GET server-meta` all answer with no session
+- [x] `(integration)` a session row written with an expiry in the past is refused by the guard, and one inside its window is accepted
+- [x] `(integration)` activity inside the refresh window extends the stored expiry rather than leaving it fixed
+- [x] `(unit)` the environment schema refuses a malformed registration switch and `.env.example` declares it, so `test/env.spec.ts` stays green
+- [x] `(integration)` with registration off, `POST auth/sign-up` returns `REGISTRATION_CLOSED` and creates no row, while `POST auth/sign-in` on an existing account still succeeds
+- [x] `(integration)` `GET auth/session` carries the registration flag both signed in and signed out
+
+## As built
+
+- **`NO_SESSION` is the 401 code** and was added to `ERROR_CODES` here rather
+  than in task 05: the situation-named code the guard needs is the same one the
+  socket handshake refuses with (auth.md rule 14), so it is declared once.
+- **`@Public()` lives in `src/http/`,** not the auth module, so `server-meta`'s
+  controller in the `system` module opts out without importing across a module
+  boundary. `IS_PUBLIC_KEY` is `'auth:isPublic'`.
+- **The guard is HTTP-only** (`context.getType() !== 'http'` returns true); the
+  socket handshake gets its own check in task 05. It reads the session through
+  the one `GetSessionUseCase` caller and puts `request.userId` on the request
+  (auth.md rule 20).
+- **`registrationOpen` rides on `GetSessionUseCase`'s result**, not an `ENV`
+  inject on `AuthController`. The OpenAPI generator boots in preview mode under
+  tsx, which emits no `design:paramtypes`; a single `@Inject()` on the
+  controller constructor makes Nest resolve every param and fail on the
+  class-type ones. Config the handlers need is injected into the use cases
+  (both their params are token `@Inject`s) and returned as data instead.
+- **`SignUpUseCase` reads `AUTH_REGISTRATION_OPEN` from injected `ENV`** and
+  throws `REGISTRATION_CLOSED` (403) before calling the library, so no row is
+  written; `sign-out` is guarded (not `@Public`).
+- `sessionResponseSchema` gained a required `registrationOpen: boolean`.
 
 ## References
 
