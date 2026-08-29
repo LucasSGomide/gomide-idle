@@ -51,11 +51,19 @@ export async function fetcher<T>(
   url: string,
   options: RequestInit = {},
 ): Promise<T> {
+  // Only a request that actually carries a body may declare one. Fastify
+  // rejects `Content-Type: application/json` with an empty body outright —
+  // `FST_ERR_CTP_EMPTY_JSON_BODY`, a 400 raised before the route's handler runs
+  // — so sending the header unconditionally broke every bodyless write. Sign-out
+  // is the first of those: it 400'd, the session survived, and `/`'s guard
+  // bounced the player straight back to the screen they were leaving.
+  const hasBody = options.body !== undefined && options.body !== null;
+
   const response = await fetch(`${API_BASE_PATH}${url}`, {
     ...options,
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
       ...options.headers,
     },
   });

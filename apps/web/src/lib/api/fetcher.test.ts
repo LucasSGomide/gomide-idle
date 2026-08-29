@@ -35,6 +35,37 @@ describe('the fetch mutator', () => {
     expect((init as RequestInit).credentials).toBe('include');
   });
 
+  // Fastify raises FST_ERR_CTP_EMPTY_JSON_BODY — a 400 before the handler runs
+  // — for `Content-Type: application/json` with no body. Declaring the header on
+  // a bodyless POST is what made sign-out 400 and the player never leave the
+  // screen, so the header rides with the body or not at all.
+  it('omits Content-Type on a request with no body', async () => {
+    const spy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(
+        new Response(JSON.stringify({ success: true }), { status: 200 }),
+      );
+
+    await fetcher('/auth/sign-out', { method: 'POST' });
+
+    const init = spy.mock.calls[0]![1] as RequestInit;
+    expect(init.headers).not.toHaveProperty('Content-Type');
+  });
+
+  it('sends Content-Type on a request that carries a body', async () => {
+    const spy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({}), { status: 200 }));
+
+    await fetcher('/auth/sign-in', {
+      method: 'POST',
+      body: JSON.stringify({ email: 'a@b.c', password: 'x' }),
+    });
+
+    const init = spy.mock.calls[0]![1] as RequestInit;
+    expect(init.headers).toHaveProperty('Content-Type', 'application/json');
+  });
+
   it('resolves the Orval envelope on success', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ buildId: 'x' }), { status: 200 }),
