@@ -2,11 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
+    "noEmit": true,
     "types": ["node", "jest"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false,
-    "baseUrl": ".",
     "paths": {
       "@gomide/contracts": ["../../libs/contracts/src/index.ts"],
       "@gomide/contracts/*": ["../../libs/contracts/src/*"]
