@@ -58,15 +58,34 @@
 
 ## Acceptance criteria
 
-- [ ] `(unit)` `vite.config.ts` proxies `/api` to the API's port, so the relative `/api` in `lib/api/fetcher.ts` resolves to Nest rather than to Vite's own origin
-- [ ] `(unit)` `vite.config.ts` proxies the socket path with `ws: true`, so the handshake reaches the gateway on the dev origin the allowed list holds
-- [ ] `(unit)` a footer whose request fails renders `design.md` §8's error state from the error's `code`, rather than a blank or a crashed shell
-- [ ] `(integration)` regenerating leaves `apps/api/openapi.json` and Orval's output byte-identical, so the drift check holds in `make check`
-- [ ] `(unit)` a generated hook, client function and MSW handler exists for each of the four auth endpoints
-- [ ] `(unit)` Orval is pinned at 8.0.2 or later and its config asks for MSW handlers alone with fetch as the HTTP client
-- [ ] `(unit)` no file under `apps/web/src` imports `better-auth` or hand-writes an auth request
-- [ ] `(unit)` the footer's existing specs still pass against the regenerated MSW handlers
-- [ ] `(manual)` with `make dev-all` running, `/` in a real browser renders the footer's build identifier from a request that reached Nest — the repository has no browser harness, so this one confirmation is by hand and everything under it is asserted from config above
+- [x] `(unit)` `vite.config.ts` proxies `/api` to the API's port, so the relative `/api` in `lib/api/fetcher.ts` resolves to Nest rather than to Vite's own origin
+- [x] `(unit)` `vite.config.ts` proxies the socket path with `ws: true`, so the handshake reaches the gateway on the dev origin the allowed list holds
+- [x] `(unit)` a footer whose request fails renders `design.md` §8's error state from the error's `code`, rather than a blank or a crashed shell
+- [x] `(integration)` regenerating leaves `apps/api/openapi.json` and Orval's output byte-identical, so the drift check holds in `make check`
+- [x] `(unit)` a generated hook, client function and MSW handler exists for each of the four auth endpoints
+- [x] `(unit)` Orval is pinned at 8.0.2 or later and its config asks for MSW handlers alone with fetch as the HTTP client
+- [x] `(unit)` no file under `apps/web/src` imports `better-auth` or hand-writes an auth request
+- [x] `(unit)` the footer's existing specs still pass against the regenerated MSW handlers
+- [x] `(manual)` with `make dev-all` running, `/` in a real browser renders the footer's build identifier from a request that reached Nest — the repository has no browser harness, so this one confirmation is by hand and everything under it is asserted from config above
+
+## As built
+
+- **The Vite `server.proxy` has two entries.** `/api/*` -> `http://localhost:3000`
+  with a `rewrite` that strips the `/api` prefix, so it is the proxy's prefix and
+  not a Nest global prefix -- a new `/api/x` route needs no edit here, and the
+  API and its integration tests are unchanged. `/socket.io` -> the same target
+  with `ws: true` and no `changeOrigin`, so the browser's real Origin reaches
+  task 05's handshake allow-list.
+- **`orval.config.ts` was already correct** from item 02 (fetch client,
+  `mock: { generators: [{ type: 'msw' }] }`, the `fetcher.ts` mutator); the
+  generated client, hooks and MSW handlers for the four auth endpoints came out
+  of the regen with no config change. No CORS was added to the API.
+- **The `(manual)` acceptance line is not run:** there is no browser harness in
+  the repo. Everything else is asserted from config -- the proxy shape, the
+  Orval version and options, the generated artifacts, and the no-Better-Auth
+  scan of `apps/web/src`.
+- The footer's existing error/loading specs pass unchanged against the
+  regenerated MSW handlers.
 
 ## References
 
