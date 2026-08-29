@@ -59,14 +59,23 @@ each has left is the half that still bites.
 
 ## Where it lives
 
-1. **Keep every Better Auth import inside `apps/api/src/auth`.** One module owns
-   the dependency, so an upgrade or a swap is one folder rather than a grep —
-   and `stack-api.md` rule 30 already gave auth a module of its own.
+1. **Keep every Better Auth import inside `apps/api/src/modules/auth`.** One
+   module owns the dependency, so an upgrade or a swap is one folder rather than
+   a grep — and `stack-api.md` rule 30 already gave auth a module of its own.
+   *Corrected 2026-08-29; this read `apps/api/src/auth`, which is not where the
+   modules live. `FR.9.3` puts every module under `apps/api/src/modules/`, and
+   `01` built it that way.*
 
-2. **Build the instance in the auth module's `infrastructure/`, and mount it
-   from its `entrypoint/`.** The library is an adapter and mounting is an
-   entrypoint concern, which is `architecture-api.md` rule 19's split applied to
-   a dependency that would otherwise sit in neither layer.
+2. **Build the instance in the auth module's `infrastructure/`, and let only its
+   `entrypoint/` controllers reach it.** The library is an adapter, so it is
+   built where the adapters are — `architecture-api.md` rule 19's split applied
+   to a dependency that would otherwise sit in neither layer. *Revised
+   2026-08-29 with rule 3's reversal. This read "and mount it from its
+   `entrypoint/`", which described mounting the library's HTTP handler — the
+   thing rule 3 now forbids outright. There is nothing left to mount: the
+   entrypoint's relationship to the instance is that its controllers call
+   `auth.api`, and this rule is what keeps that call from being made from
+   `application/` instead.*
 
 3. **Expose auth through this project's own Nest controllers, each calling
    Better Auth's server-side `auth.api` object as a function; never mount the
@@ -170,7 +179,7 @@ each has left is the half that still bites.
     (`architecture-api.md` rules 24 and 25) and only one of those has a request.
 
 14. **Authenticate the socket handshake with that same guard's session read, per
-    `stack-api.md` rule 38, and refuse it with an `ErrorTypeEnum` member rather
+    `stack-api.md` rule 38, and refuse it with a declared error `code` rather
     than a bare disconnect.** A refused handshake has at least three causes —
     no session, an account already playing (FR.4.2), a stale protocol
     (`stack-web.md` rule 22) — and a client that cannot tell them apart has to
@@ -216,13 +225,17 @@ each has left is the half that still bites.
     route.** Rule 3's controllers are ordinary Nest controllers over
     `libs/contracts` schemas, so `architecture-api.md` rule 56 applies to them
     unchanged — Orval generates their client, their hooks and their network
-    fakes, the codegen drift check covers them, and their errors are
-    `ErrorTypeEnum` members. *Reversed 2026-08-29 by roadmap item
+    fakes, the codegen drift check covers them, and their errors are codes in the one
+    vocabulary `architecture-api.md` rule 39 keeps in `libs/contracts`. *Reversed 2026-08-29 by roadmap item
     [03](roadmap/03-account-sign-up-and-login.md). This rule read "Keep
     `/api/auth/*` outside the OpenAPI document, deliberately", and named three
     prices for it: no generated client, so auth was the one hand-written client
     on the web; no codegen check; and errors outside `ErrorTypeEnum`. Not paying
-    those three is what rule 3's reversal was for. Rules 4, 23 and 27 here and
+    those three is what rule 3's reversal was for. `ErrorTypeEnum` itself is a
+    dead name — it was retired on 2026-08-28 with this project's `ApiError`
+    hierarchy ([`architecture-api.md`](architecture-api.md) rule 39) and the
+    vocabulary is `ERROR_CODES` in `libs/contracts`; it survives here and in
+    rule 27's note only because both quote what an older rule said. Rules 4, 23 and 27 here and
     `stack-web.md` rules 58 and 59 all existed because of them.*
 
 ## Authorization
@@ -283,11 +296,11 @@ signed-in user is copied into a store and no credential is held in JavaScript.
     sign-in with the current route preserved.** An expired session surfaces on
     whichever query happens to run next, so a component that branches on 401 is
     a branch that has to exist in every component. A refused handshake carrying
-    `UNAUTHORIZED` (rule 14) calls that same function; the other refusal reasons
+    `NO_SESSION` (rule 14) calls that same function; the other refusal reasons
     do not, because being already online elsewhere is not a reason to sign
     anybody out.
 
-27. **Translate the library's error into an `ErrorTypeEnum` member in the
+27. **Translate the library's error into a declared error `code` in the
     controller, and let the web render it from that code like any other.** Rule
     19 puts these routes in the document, so `architecture-web.md` rule 27 —
     render from the type, never the message — reaches them directly and the web
@@ -343,7 +356,14 @@ as everything above, and appended to the same way.
     alike and the `'none'` branch is unreachable by construction rather than
     merely avoided. The other two — `credentials: true` with an explicit origin
     list, and `credentials: 'include'` on the mutator — still apply and still
-    produce this 401 when either is missing.*
+    produce this 401 when either is missing.* *Revised again 2026-08-29: the
+    first of those two went the same way as the `'none'` branch. Rule 48 removes
+    CORS from the deployed system and [`stack-web.md`](stack-web.md) rule 62
+    removes it from development, so there is no CORS middleware anywhere to set
+    `credentials: true` on — a rule asking for one described a layer this
+    repository does not have. What survives is `credentials: 'include'` on the
+    mutator, which is still required and still produces exactly this 401 when it
+    is missing.*
 
 30. **jsdom has no cookie, so a session in a test is written rather than
     assumed.** *Symptom:* a test of a protected screen renders the signed-out

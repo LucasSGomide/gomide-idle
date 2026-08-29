@@ -239,7 +239,15 @@ timeout defence.
     nothing else; `player` holds `player_account`, the game's row for an account,
     keyed by the Better Auth user id. `character` and `hunt` are unchanged — an
     account owning its characters is a foreign key, not module membership, and
-    the character aggregate is the largest in the game.
+    the character aggregate is the largest in the game. *Corrected 2026-08-29:
+    there is a fifth module, `system`, and this rule never named it. `FR.9.7`
+    added it for what belongs to the running server rather than to a game
+    system — the `server_meta` read path and the health check of `FR.19.2` —
+    and `01` built it. Naming four here is what left roadmap item
+    [03](roadmap/03-account-sign-up-and-login.md) with no rule saying whether
+    `system` may hold the session-id-to-connection map [`auth.md`](auth.md)
+    rule 33 needs, since this rule also says `auth` holds the library and
+    nothing else.*
 
 31. **`libs/content` exports the JSON and the validator together.** Shape and
     referential integrity are checked in one place used by both apps, which is

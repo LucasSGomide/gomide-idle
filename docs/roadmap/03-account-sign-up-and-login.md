@@ -16,7 +16,7 @@
   Better Auth's server-side `auth.api` as a function. Decided 2026-08-29, against
   the previous rule, so that auth is described by `libs/contracts` like every
   other endpoint — in the OpenAPI document, with a generated client, generated
-  network fakes and `ErrorTypeEnum` errors.
+  network fakes and declared error codes.
 - That reversal was written into the rule docs before this item, in the same
   pass: [`auth.md`](../auth.md) rules 3 and 19 reversed, rules 4, 17, 23 and 27
   and gotchas 30, 34 and 35 rewritten, [`stack-api.md`](../stack-api.md) rule 39
@@ -51,8 +51,8 @@
   same size and never resizes. Field errors put `danger` on the border and helper
   text with a trailing icon.
 - **States** — duplicate e-mail, wrong credentials, too many attempts and
-  registration closed each carry their own `ErrorTypeEnum` code and render
-  through the catalogue, never from the server's message. With registration
+  registration closed each carry their own error `code` and render through the
+  catalogue, never from the server's message. With registration
   closed, `/sign-up` still resolves and renders the closed notice in place of the
   form, and sign-in hides the link.
 - **Pattern** — forms are `design.md` §5's Inputs and Buttons and §8's error
@@ -74,8 +74,8 @@
   only session reader, no feature importing a feature; `architecture-web.md`
   rules 6–13, 22, 27, 33.
 - **Web stack** — generated hooks and MSW handlers now covering auth, the
-  `localStorage` language mirror unchanged; `stack-web.md` rules 39, 52–53,
-  57–59, 61.
+  `localStorage` language mirror unchanged, the dev server on one origin;
+  `stack-web.md` rules 39, 52–53, 57–59, 61–62.
 - **Design** — §1's Character-select top bar, §5's Inputs and Buttons, §8's error
   and loading states, §13's in-menu switcher; every control sized against the
   Portuguese string.
@@ -86,8 +86,10 @@
    `auth/infrastructure/`: Drizzle adapter, e-mail and password on, no mail
    sender, verification and reset switched off, password bounds pinned to 8–128,
    session `expiresIn` 30 days with the refresh window extending it on activity.
-2. Run `make api-auth-schema` into the auth module's Drizzle schema, commit the
-   generated file unedited, and produce the migration with `drizzle-kit`.
+2. Add the `api-auth-schema` target to the `Makefile` — `auth.md`'s Commands
+   table names it and nothing defines it — then run it into the auth module's
+   Drizzle schema, commit the generated file unedited, and produce the migration
+   with `drizzle-kit`.
 3. Write the auth schemas in `libs/contracts` — sign-up, sign-in, sign-out and
    session, request and response — naming each OpenAPI component the way `01`'s
    `As built` settled for `serverMetaResponseSchema` rather than assuming a
@@ -96,9 +98,11 @@
    `auth/entrypoint/` — `POST sign-up`, `POST sign-in`, `POST sign-out`,
    `GET session` — each calling `auth.api.*` and copying the library's
    `set-cookie` onto the Fastify reply.
-5. Add an `ErrorTypeEnum` member for each auth failure and translate the
-   library's error into it in the controller: duplicate e-mail (`FR.1.4`), bad
-   credentials, too many attempts, registration closed.
+5. Add a code to `libs/contracts`'s `ERROR_CODES` for each auth failure and
+   translate the library's error into it in the controller: duplicate e-mail
+   (`FR.1.4`), bad credentials, too many attempts, registration closed. Each
+   names the situation and never the status (`naming.md` rule 15) —
+   `EMAIL_TAKEN`, not `CONFLICT`; `assertSituationCode` rejects the second.
 6. Add the session guard over `auth.api.getSession`, register it globally in the
    app module, and mark sign-up, sign-in and `01`'s `server-meta` public with one
    decorator.
@@ -109,15 +113,22 @@
    returning the source address, one the submitted e-mail — and confirm Fastify's
    `trustProxy` is on, or the first key is the proxy for every player at once.
 9. Read the session at the socket handshake and store its id on the connection;
-   refuse a handshake with no session using the `UNAUTHORIZED` member rather than
-   a bare disconnect; close a session's connections when that session is deleted.
+   refuse a handshake with no session using a `NO_SESSION` code rather than a
+   bare disconnect; close a session's connections when that session is deleted.
+   Replace the gateway's `cors: { origin: true }` with the `Origin` check
+   `stack-api.md` rule 38 requires — as it stands it reflects whatever origin
+   asks.
 10. Regenerate and verify the loop closed: emit the OpenAPI document, run Orval,
     and confirm the auth hooks, client and MSW handlers are generated — no
     hand-written auth client is left anywhere.
-11. Build `features/session/` over the generated hooks, `_authed.tsx` resolving
+11. Add Vite's `server.proxy` for `/api` and the socket path per `stack-web.md`
+    rule 62, so `make dev-all` serves the web and the API from one origin. Until
+    it exists the relative `/api` in `lib/api/fetcher.ts` resolves to Vite's own
+    origin and no request reaches Nest at all.
+12. Build `features/session/` over the generated hooks, `_authed.tsx` resolving
     the session in `beforeLoad` and redirecting with the target search param, and
     `_authed/characters.tsx` rendering the signed-in top bar over an empty body.
-12. Build `/` and `/sign-up` from the generated mutation hooks, add the single 401
+13. Build `/` and `/sign-up` from the generated mutation hooks, add the single 401
     handler to the fetch mutator, and add both catalogues' entries for every new
     error code, form label and helper string.
 
@@ -143,12 +154,16 @@
   mirror, generated hooks, MSW, and no Better Auth on the web.
 - `architecture-web.md` rules 22, 27, 33 — one guard, render from the code, who
   may read the session.
-- `architecture-api.md` rules 19–24, 37, 40 — the layers, the two error
-  categories, and refusing a second error type.
+- `architecture-api.md` rules 19–24, 37, 39, 40 — the layers, the two error
+  categories, the one `code` vocabulary in `libs/contracts`, and refusing a
+  second error type.
 - `design.md` §1 ([`design.md:54`](../design.md)), §5, §8 and §13
   ([`design.md:675`](../design.md)).
-- `naming.md` rule 14 — `account` is Better Auth's generated table; the game's
-  word for a person is player.
+- `naming.md` rules 14–15 — `account` is Better Auth's generated table and the
+  game's word for a person is player; an error `code` spells the situation and
+  never the HTTP status.
+- `stack-web.md` rule 62 — the dev server proxies `/api`, so development is one
+  origin like the deployment.
 
 ## Blockers:
 
@@ -160,7 +175,11 @@
 - Better Auth's `Origin` check lives in the HTTP handler rule 3 no longer mounts.
   `stack-api.md` rule 48's single origin removes the cross-site case for HTTP, but
   `stack-api.md` rule 38 still requires the check on every socket connection and
-  no rule says what performs it now.
+  nothing performs it: `system.gateway.ts` is
+  `@WebSocketGateway({ cors: { origin: true } })`, which reflects whatever origin
+  asks. Technical Detail 9 replaces it, and what the allowed list holds in
+  development — where `stack-web.md` rule 62's proxy is the only origin — is
+  decided there.
 - `@nestjs/throttler` appears nowhere in `apps/api/package.json` and
   `stack-api.md` rule 39 named it only on 2026-08-29. Two named throttlers, one of
   them reading the submitted e-mail out of the request body inside a guard, is
@@ -173,6 +192,22 @@
   `cleanupOpenApiDoc`'s own hoist, so `serverMetaResponseSchema` carries none. The
   four auth DTOs meet the same constraint, and `stack-api.md` rule 47 still asks
   every reusable schema to be explicitly named.
+- Nothing in this repository has ever made a browser request from the web to the
+  API, so the whole transport is unexercised. `lib/api/fetcher.ts` holds a
+  relative `/api`, the API enables no CORS, `vite.config.ts` has no proxy, and
+  `docker-compose.yml` runs Postgres alone — `stack-api.md` rule 48's Caddy is
+  Deployment work (`UN.17`–`UN.20`) and is not written. `02` never found this
+  because its footer read `server_meta` through MSW in tests and `/` rendered
+  nothing in the browser. Technical Detail 11 and `stack-web.md` rule 62 are the
+  answer; this item is the first to find out whether they are enough.
+
+- The two items this one defers to do not exist yet. `UN.3`'s remainder and all
+  of `UN.4` go to **Character creation and selection**, and `FR.7.2`–`FR.7.3` to
+  **Language and localisation**; both are still `TODO` rows in
+  `requirements.md` with no roadmap doc of their own. `make roadmap-check`
+  validates numbered dependencies only, so nothing will notice if either
+  deferral is never picked up.
+
 - `FR.2.2`'s sliding expiry has no test tier that can advance thirty days.
   `apps/api/test/integration` runs against real Postgres, so renewal is checkable
   only by writing an expiry directly and asserting the guard's behaviour either

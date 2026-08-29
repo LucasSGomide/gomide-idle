@@ -420,8 +420,10 @@ writing a migration.
     generic failure.
 
 62. **Add `libs/contracts` as a third shared package alongside `libs/simulation`
-    and `libs/content`.** `stack-api.md` rule 30 names two because the socket
-    message types had no home yet; the web client and the API must import the
+    and `libs/content`.** `stack-api.md` rule 30 named two because the socket
+    message types had no home yet — *corrected 2026-08-29: that rule was itself
+    corrected on 2026-08-28 and names all three now, citing this one as the
+    reason*; the web client and the API must import the
     same schema object, and neither existing package can hold it without taking
     a dependency it is not allowed to have.
 

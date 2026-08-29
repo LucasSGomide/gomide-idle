@@ -567,3 +567,28 @@ they are ruled once in [`stack-api.md`](stack-api.md) and pointed at here.
     `allOf`/`anyOf`/`oneOf` by default, which pulls against rule 60 of
     [`architecture-api.md`](architecture-api.md); `stack-api.md` rule 47 is the
     answer, applied on the producing side where the names are actually assigned.
+
+## The development origin
+
+Added 2026-08-29 by roadmap item
+[03](roadmap/03-account-sign-up-and-login.md), the first item whose screens make
+a real request from a browser. Until it, nothing had: `02`'s footer read
+`server_meta` through MSW in every test and rendered against an empty body in
+the browser, so the gap below was invisible.
+
+62. **Proxy `/api` and the socket through Vite's dev server, so development runs
+    on one origin exactly as the deployment does.**
+    [`stack-api.md`](stack-api.md) rule 48 removes CORS from the system by
+    putting the web files and the API behind one proxy, and
+    [`architecture-web.md`](architecture-web.md) rule 11's mutator is written
+    for that world — `lib/api/fetcher.ts` holds a relative `/api` and knows no
+    host. But `stack-api.md` rule 25's fast loop runs Vite and the API as two
+    processes on two ports with no proxy between them, so that relative path
+    resolves to Vite's own origin and every request 404s before it reaches Nest.
+    A `server.proxy` entry is the whole fix, and it is what keeps the one-origin
+    invariant true in the loop developers actually use. The alternative —
+    enabling CORS in development only — reintroduces the exact layer rule 48
+    deleted, and makes [`auth.md`](auth.md) gotcha 29 a live hazard in the one
+    environment nobody deploys. The price is that the proxy's path list is a
+    second place the API's routes are named, so a new top-level path is two
+    edits rather than one.
