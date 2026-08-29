@@ -5,4 +5,6 @@ slice, each with acceptance criteria that double as its tests.
 
 A folder lives only while the item is open. Items 01 and 02 are `done`.
 
-_No breakdown is open. Create one with `/msg-roadmap-task-breakdown NN`._
+| # | Roadmap item | Tasks | Progress | Status |
+|---|---|---|---|---|
+| [03](03-account-sign-up-and-login/) | Account sign-up and login: accounts, sessions and the first guarded screen | 8 | 0/8 | not-started |
