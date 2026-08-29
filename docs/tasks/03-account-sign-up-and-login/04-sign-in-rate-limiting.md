@@ -39,12 +39,33 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` sign-in attempts from one address past the limit return `TOO_MANY_ATTEMPTS`, and an attempt under the limit still succeeds
-- [ ] `(integration)` attempts against one e-mail past the limit return `TOO_MANY_ATTEMPTS` even when each arrives from a different source address
-- [ ] `(integration)` a throttled sign-in returns the project's error body with a `code` and no `@nestjs/throttler` default message
-- [ ] `(unit)` the e-mail tracker reads the submitted e-mail, and falls back to the source address when the body has none
-- [ ] `(integration)` `POST auth/sign-up` and `GET auth/session` are refused by neither key
-- [ ] `(unit)` `trustProxy` is enabled on the Fastify adapter, so a forwarded address reaches the address tracker rather than the proxy's own
+- [x] `(integration)` sign-in attempts from one address past the limit return `TOO_MANY_ATTEMPTS`, and an attempt under the limit still succeeds
+- [x] `(integration)` attempts against one e-mail past the limit return `TOO_MANY_ATTEMPTS` even when each arrives from a different source address
+- [x] `(integration)` a throttled sign-in returns the project's error body with a `code` and no `@nestjs/throttler` default message
+- [x] `(unit)` the e-mail tracker reads the submitted e-mail, and falls back to the source address when the body has none
+- [x] `(integration)` `POST auth/sign-up` and `GET auth/session` are refused by neither key
+- [x] `(unit)` `trustProxy` is enabled on the Fastify adapter, so a forwarded address reaches the address tracker rather than the proxy's own
+
+## As built
+
+- **The rate limit is a guard of ours, not `@nestjs/throttler`.** That package
+  tops out at 6.5.0, which is CJS-only, peers `@nestjs/common` `<=11`, and its
+  `require()` of NestJS 12's ESM `@nestjs/common` throws a `require(esm)` cycle
+  under Jest's `--experimental-vm-modules` loader -- every integration suite
+  fails to load. `stack-api.md` rule 39's own case for the package is "fewer
+  moving parts", so `SignInRateLimitGuard` is one in-process sliding-window
+  guard: no dependency, one `Map`, one 60s window, two keys. `stack-api.md`
+  rule 39 and `auth.md` rule 17 name the package and should be revisited.
+- **Two keys, checked together:** `addressTracker` -> `addr:<ip>` (limit 10),
+  `emailTracker` -> `email:<lowercased>` or `addr:<ip>` fallback (limit 5). Both
+  are recorded on every attempt; a refusal on either throws
+  `CodedException('TOO_MANY_ATTEMPTS', 429)`.
+- **Applied via `@UseGuards(SignInRateLimitGuard)` on `postSignIn` only;**
+  sign-up, sign-out and the session read carry no guard.
+- `trustProxy` was already on the Fastify adapter (`bootstrap.ts`, task 01) --
+  confirmed by the forwarded-header test.
+- The web's `generated.spec.ts` (Orval drift) is red from task 02 onward because
+  `openapi.json` moved ahead of the committed client; task 06 regenerates it.
 
 ## References
 

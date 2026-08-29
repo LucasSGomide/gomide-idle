@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -37,6 +38,7 @@ import { SignInUseCase } from '../application/sign-in.use-case.js';
 import { SignOutUseCase } from '../application/sign-out.use-case.js';
 import { SignUpUseCase } from '../application/sign-up.use-case.js';
 import { translateAuthError } from './auth-error.js';
+import { SignInRateLimitGuard } from './sign-in-throttle.js';
 import {
   SessionResponse,
   SignInRequest,
@@ -86,6 +88,7 @@ export class AuthController {
 
   @Post('sign-in')
   @Public()
+  @UseGuards(SignInRateLimitGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBody({ type: SignInRequest })
   @ApiOkResponse({ type: SignInResponse })

@@ -26,7 +26,6 @@
     "@nestjs/platform-fastify": "catalog:",
     "@nestjs/platform-socket.io": "catalog:",
     "@nestjs/swagger": "catalog:",
-    "@nestjs/throttler": "^6.5.0",
     "@nestjs/websockets": "catalog:",
     "better-auth": "1.7.2",
     "drizzle-orm": "catalog:",

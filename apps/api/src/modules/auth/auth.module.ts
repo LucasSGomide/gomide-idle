@@ -11,6 +11,7 @@ import { SignUpUseCase } from './application/sign-up.use-case.js';
 import { AUTH_INSTANCE } from './auth.tokens.js';
 import { AuthController } from './entrypoint/auth.controller.js';
 import { SessionGuard } from './entrypoint/session.guard.js';
+import { SignInRateLimitGuard } from './entrypoint/sign-in-throttle.js';
 import { createAuthInstance } from './infrastructure/auth.instance.js';
 
 // The auth module (stack-api.md rule 30: `auth` holds the library and nothing
@@ -42,6 +43,9 @@ import { createAuthInstance } from './infrastructure/auth.instance.js';
     SignInUseCase,
     SignOutUseCase,
     GetSessionUseCase,
+    // FR.5.1: the sign-in rate limit, applied only to POST auth/sign-in via
+    // @UseGuards in the controller.
+    SignInRateLimitGuard,
     // auth.md rule 12: the session guard is applied globally, not per
     // controller, so the guard missing from next week's controller cannot
     // happen. Public routes opt out with @Public().
