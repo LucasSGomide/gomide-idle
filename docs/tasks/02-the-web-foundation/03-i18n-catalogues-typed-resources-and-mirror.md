@@ -39,13 +39,13 @@
 
 ## Acceptance criteria
 
-- [ ] `(unit)` the Portuguese catalogue fails to type-check when a key present in English is missing from it
-- [ ] `(unit)` an unknown key is a compile error against `CustomTypeOptions['resources']`
-- [ ] `(unit)` `t` returns a `string` and never `null`, with `returnNull: false` in force
-- [ ] `(unit)` startup reads the mirrored language from `localStorage` synchronously, before the first render
-- [ ] `(unit)` startup falls back to English when `localStorage` holds nothing, or holds an unknown value
-- [ ] `(unit)` the writer stores the chosen language in `localStorage` and issues no network call
-- [ ] `(unit)` switching language re-renders every mounted string at once
+- [x] `(unit)` the Portuguese catalogue fails to type-check when a key present in English is missing from it
+- [x] `(unit)` an unknown key is a compile error against `CustomTypeOptions['resources']`
+- [x] `(unit)` `t` returns a `string` and never `null`, with `returnNull: false` in force
+- [x] `(unit)` startup reads the mirrored language from `localStorage` synchronously, before the first render
+- [x] `(unit)` startup falls back to English when `localStorage` holds nothing, or holds an unknown value
+- [x] `(unit)` the writer stores the chosen language in `localStorage` and issues no network call
+- [x] `(unit)` switching language re-renders every mounted string at once
 
 ## References
 

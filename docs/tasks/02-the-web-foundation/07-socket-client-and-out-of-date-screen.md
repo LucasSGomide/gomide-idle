@@ -35,12 +35,12 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` the client connects to `01`'s unauthenticated handshake over a same-origin relative path and reads the protocol integer
-- [ ] `(unit)` a matching protocol leaves the shell rendered and shows nothing extra
-- [ ] `(e2e)` a mismatched protocol replaces the page with the full-screen out-of-date message
-- [ ] `(unit)` the out-of-date message renders through the catalogue in the mirrored language, without truncation in Portuguese
-- [ ] `(integration)` dependency-cruiser fails when a file outside `transport/` imports Socket.IO
-- [ ] `(unit)` nothing but the protocol integer is compared, and no content-pack version check runs
+- [x] `(integration)` the client connects to `01`'s unauthenticated handshake over a same-origin relative path and reads the protocol integer
+- [x] `(unit)` a matching protocol leaves the shell rendered and shows nothing extra
+- [x] `(e2e)` a mismatched protocol replaces the page with the full-screen out-of-date message
+- [x] `(unit)` the out-of-date message renders through the catalogue in the mirrored language, without truncation in Portuguese
+- [x] `(integration)` dependency-cruiser fails when a file outside `transport/` imports Socket.IO
+- [x] `(unit)` nothing but the protocol integer is compared, and no content-pack version check runs
 
 ## References
 

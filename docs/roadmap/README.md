@@ -30,9 +30,7 @@ still has no item.
 
 ## Blocked
 
-| # | Item | Est | Depends on | Status |
-|---|---|---|---|---|
-| [02](02-the-web-foundation.md) | The web foundation: shell, design system and the first rendered screen | 9 | 01 | not-started |
+_(none)_
 
 ## Parked
 
@@ -40,4 +38,6 @@ _(none)_
 
 ## Done
 
-_(none)_
+| # | Item | Est | Depends on | Status |
+|---|---|---|---|---|
+| [02](02-the-web-foundation.md) | The web foundation: shell, design system and the first rendered screen | 9 | 01 | done |

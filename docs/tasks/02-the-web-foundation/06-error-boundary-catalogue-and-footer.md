@@ -48,14 +48,14 @@
 
 ## Acceptance criteria
 
-- [ ] `(e2e)` `/` renders the protocol, content-pack and build values fetched by the generated hook
-- [ ] `(unit)` while the query is pending the footer renders no line and no spinner, and the shell is the whole page
-- [ ] `(unit)` an error response renders the catalogue entry for its `code`, and the server's `message` appears nowhere in the document
-- [ ] `(unit)` an unrecognised error `code` renders a generic catalogue entry rather than the raw code
-- [ ] `(unit)` a component throwing under a route renders the boundary's block in place of that region alone, with the top bar and the footer still on screen
-- [ ] `(unit)` a throw outside every route renders the same block full-width, with the top bar still drawn and no blank page
-- [ ] `(unit)` no content-pack version check runs anywhere on the footer's path
-- [ ] `(unit)` the footer renders its Portuguese strings without truncation at the narrowest supported width
+- [x] `(e2e)` `/` renders the protocol, content-pack and build values fetched by the generated hook
+- [x] `(unit)` while the query is pending the footer renders no line and no spinner, and the shell is the whole page
+- [x] `(unit)` an error response renders the catalogue entry for its `code`, and the server's `message` appears nowhere in the document
+- [x] `(unit)` an unrecognised error `code` renders a generic catalogue entry rather than the raw code
+- [x] `(unit)` a component throwing under a route renders the boundary's block in place of that region alone, with the top bar and the footer still on screen
+- [x] `(unit)` a throw outside every route renders the same block full-width, with the top bar still drawn and no blank page
+- [x] `(unit)` no content-pack version check runs anywhere on the footer's path
+- [x] `(unit)` the footer renders its Portuguese strings without truncation at the narrowest supported width
 
 ## References
 

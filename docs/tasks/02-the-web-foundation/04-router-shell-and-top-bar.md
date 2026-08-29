@@ -53,14 +53,14 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` the route tree regenerates from `routes/` and matches the committed `routeTree.gen.ts`
-- [ ] `(e2e)` loading `/` renders the top bar over an empty body
-- [ ] `(unit)` the top bar is 56px tall, with the wordmark left and the switcher right
-- [ ] `(unit)` the wordmark renders on one line as `GAME_NAME` bold, `": "`, then `ACTIVE_SEASON` italic, both from the `brand` module and neither spelled as a literal anywhere else in the app
-- [ ] `(unit)` the wordmark and season render identically under a Portuguese `localStorage` mirror as under English — neither is a translation key
-- [ ] `(e2e)` a load with Portuguese mirrored in `localStorage` paints the bar in Portuguese, with no English frame first
-- [ ] `(e2e)` switching to Portuguese re-renders every string in the bar at once and writes only to `localStorage`
-- [ ] `(unit)` the top bar renders its Portuguese strings without truncation at the narrowest supported width
+- [x] `(integration)` the route tree regenerates from `routes/` and matches the committed `routeTree.gen.ts`
+- [x] `(e2e)` loading `/` renders the top bar over an empty body
+- [x] `(unit)` the top bar is 56px tall, with the wordmark left and the switcher right
+- [x] `(unit)` the wordmark renders on one line as `GAME_NAME` bold, `": "`, then `ACTIVE_SEASON` italic, both from the `brand` module and neither spelled as a literal anywhere else in the app
+- [x] `(unit)` the wordmark and season render identically under a Portuguese `localStorage` mirror as under English — neither is a translation key
+- [x] `(e2e)` a load with Portuguese mirrored in `localStorage` paints the bar in Portuguese, with no English frame first
+- [x] `(e2e)` switching to Portuguese re-renders every string in the bar at once and writes only to `localStorage`
+- [x] `(unit)` the top bar renders its Portuguese strings without truncation at the narrowest supported width
 
 ## References
 

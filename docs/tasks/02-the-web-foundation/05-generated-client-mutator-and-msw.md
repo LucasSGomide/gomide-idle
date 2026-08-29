@@ -36,11 +36,11 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` regenerating from the committed document reproduces the committed client, hooks and handlers exactly
-- [ ] `(integration)` CI fails when the committed document changes and Orval's output is not regenerated
-- [ ] `(unit)` every generated request goes through the single mutator
-- [ ] `(unit)` the mutator sends a relative base path and `credentials` on every call, with no host compiled into the client
-- [ ] `(integration)` a Vitest test using the generated MSW handlers resolves a typed response with no live server and no module mock
+- [x] `(integration)` regenerating from the committed document reproduces the committed client, hooks and handlers exactly
+- [x] `(integration)` CI fails when the committed document changes and Orval's output is not regenerated
+- [x] `(unit)` every generated request goes through the single mutator
+- [x] `(unit)` the mutator sends a relative base path and `credentials` on every call, with no host compiled into the client
+- [x] `(integration)` a Vitest test using the generated MSW handlers resolves a typed response with no live server and no module mock
 
 ## References
 

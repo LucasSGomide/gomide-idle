@@ -41,14 +41,14 @@
 
 ## Acceptance criteria
 
-- [ ] `(unit)` the generator maps `color.accent.default` to `--color-accent` and `spacing.5` to `--spacing-5`
-- [ ] `(unit)` the generator emits a `theme.ts` whose exported names match the custom properties in `theme.css`
-- [ ] `(integration)` running the generator over the committed `docs/design-tokens.json` reproduces the committed `theme.css` and `theme.ts` exactly
-- [ ] `(integration)` CI fails when `docs/design-tokens.json` changes and the outputs are not regenerated
-- [ ] `(integration)` a Tailwind utility resolves to a generated custom property in the built CSS
-- [ ] `(integration)` no file under `ui/` contains a raw colour, size, radius or duration
-- [ ] `(unit)` both fonts declare a fallback stack and are loaded with a swap that renders fallback text immediately
-- [ ] `(unit)` each copied primitive renders its Portuguese label without truncation at the shell's narrowest supported width
+- [x] `(unit)` the generator maps `color.accent.default` to `--color-accent` and `spacing.5` to `--spacing-5`
+- [x] `(unit)` the generator emits a `theme.ts` whose exported names match the custom properties in `theme.css`
+- [x] `(integration)` running the generator over the committed `docs/design-tokens.json` reproduces the committed `theme.css` and `theme.ts` exactly
+- [x] `(integration)` CI fails when `docs/design-tokens.json` changes and the outputs are not regenerated
+- [x] `(integration)` a Tailwind utility resolves to a generated custom property in the built CSS
+- [x] `(integration)` no file under `ui/` contains a raw colour, size, radius or duration
+- [x] `(unit)` both fonts declare a fallback stack and are loaded with a swap that renders fallback text immediately
+- [x] `(unit)` each copied primitive renders its Portuguese label without truncation at the shell's narrowest supported width
 
 ## References
 

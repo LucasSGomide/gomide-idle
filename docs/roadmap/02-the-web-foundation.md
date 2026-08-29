@@ -1,6 +1,6 @@
 # 02 — The web foundation: shell, design system and the first rendered screen
 
-**Depends on:** 01 · **Status:** not-started · **Estimate:** 9
+**Depends on:** 01 · **Status:** done · **Estimate:** 9
 
 ## Context
 

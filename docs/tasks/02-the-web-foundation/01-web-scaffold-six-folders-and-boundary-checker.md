@@ -35,14 +35,14 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` `pnpm build` in `apps/web` produces a Vite bundle from the TypeScript entry point
-- [ ] `(unit)` a placeholder component renders under Vitest with jsdom, proving the runner and the environment are wired
-- [ ] `(integration)` dependency-cruiser run from `apps/web` passes on the empty six-folder tree
-- [ ] `(integration)` dependency-cruiser fails when a file in one feature imports from a sibling feature
-- [ ] `(integration)` dependency-cruiser fails when a file in `ui/` imports from `features/`
-- [ ] `(integration)` dependency-cruiser fails on an import into `renderer/` that is not the generated theme module
-- [ ] `(integration)` dependency-cruiser fails on a seventh folder added under `src/`
-- [ ] `(integration)` the CI workflow runs the web's type-check, Vitest and dependency-cruiser jobs on a change under `apps/web`
+- [x] `(integration)` `pnpm build` in `apps/web` produces a Vite bundle from the TypeScript entry point
+- [x] `(unit)` a placeholder component renders under Vitest with jsdom, proving the runner and the environment are wired
+- [x] `(integration)` dependency-cruiser run from `apps/web` passes on the empty six-folder tree
+- [x] `(integration)` dependency-cruiser fails when a file in one feature imports from a sibling feature
+- [x] `(integration)` dependency-cruiser fails when a file in `ui/` imports from `features/`
+- [x] `(integration)` dependency-cruiser fails on an import into `renderer/` that is not the generated theme module
+- [x] `(integration)` dependency-cruiser fails on a seventh folder added under `src/`
+- [x] `(integration)` the CI workflow runs the web's type-check, Vitest and dependency-cruiser jobs on a change under `apps/web`
 
 ## References
 
