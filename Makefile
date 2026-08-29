@@ -4,6 +4,7 @@
         db-up db-down db-reset db-studio migrate migrate-generate \
         dev-api dev-web dev-all \
         lint fmt fmt-check typecheck build depcruise gen-open-api generate \
+        api-auth-schema \
         test test-unit test-integration check clean
 
 help:  ## print this help
@@ -81,6 +82,9 @@ gen-open-api:  ## regenerate apps/api/openapi.json from the running contract
 generate:  ## regenerate every generated file (OpenAPI, theme, route tree, Orval client)
 	pnpm generate
 
+api-auth-schema:  ## regenerate the Better Auth Drizzle schema (auth.md rule 5)
+	pnpm --filter @gomide/api exec tsx scripts/generate-auth-schema.ts
+
 ## --- test ----------------------------------------------------------------
 
 test:  ## run every package's tests (Jest unit + Postgres integration)
@@ -96,8 +100,10 @@ test-integration:  ## run only the API Postgres integration test project
 
 check: lint fmt-check typecheck depcruise test  ## run the full CI gate locally
 	$(MAKE) generate
+	$(MAKE) api-auth-schema
 	git diff --exit-code \
 		apps/api/openapi.json \
+		apps/api/src/modules/auth/infrastructure/database/schema/auth.schema.ts \
 		apps/web/src/theme.css \
 		apps/web/src/theme.ts \
 		apps/web/src/routeTree.gen.ts \

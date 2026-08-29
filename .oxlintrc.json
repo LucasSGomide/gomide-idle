@@ -15,7 +15,8 @@
     "apps/web/test/fixtures/**",
     "apps/web/src/routeTree.gen.ts",
     "apps/web/src/theme.ts",
-    "apps/web/src/lib/api/generated/**"
+    "apps/web/src/lib/api/generated/**",
+    "apps/api/src/modules/auth/infrastructure/database/schema/auth.schema.ts"
   ],
   "rules": {
     "no-console": "error"

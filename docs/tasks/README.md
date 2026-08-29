@@ -7,4 +7,4 @@ A folder lives only while the item is open. Items 01 and 02 are `done`.
 
 | # | Roadmap item | Tasks | Progress | Status |
 |---|---|---|---|---|
-| [03](03-account-sign-up-and-login/) | Account sign-up and login: accounts, sessions and the first guarded screen | 8 | 0/8 | not-started |
+| [03](03-account-sign-up-and-login/) | Account sign-up and login: accounts, sessions and the first guarded screen | 8 | 1/8 | in-progress |

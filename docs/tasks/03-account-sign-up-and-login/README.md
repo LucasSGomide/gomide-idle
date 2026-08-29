@@ -26,7 +26,7 @@ so neither deferral is enforced by anything but this paragraph.
 
 | # | Task | Scope | Depends on | Criteria | Status |
 |---|---|---|---|---|---|
-| [01](01-better-auth-instance-and-generated-schema.md) | The Better Auth instance, its generated schema and the migration | back-end | — | 0/7 | not-started |
+| [01](01-better-auth-instance-and-generated-schema.md) | The Better Auth instance, its generated schema and the migration | back-end | — | 7/7 | done |
 | [02](02-auth-contracts-and-the-four-endpoints.md) | The auth contracts, the four endpoints and their error codes | back-end | 01 | 0/8 | not-started |
 | [03](03-session-guard-and-registration-switch.md) | The global session guard and the registration switch | back-end | 02 | 0/7 | not-started |
 | [04](04-sign-in-rate-limiting.md) | Rate-limiting sign-in, by address and by account | back-end | 02 | 0/6 | not-started |

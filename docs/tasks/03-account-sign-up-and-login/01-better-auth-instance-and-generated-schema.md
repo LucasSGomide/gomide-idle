@@ -43,13 +43,36 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` `make migrate` on a reset database applies the new migration and creates `user`, `session`, `account` and `verification`
-- [ ] `(integration)` `make api-auth-schema` regenerates the committed schema file byte-identical, so a drift check can run in `make check`
-- [ ] `(unit)` the instance enables e-mail and password with a minimum length of 8 and a maximum of 128, and registers no mail sender
-- [ ] `(unit)` e-mail verification and password reset are both off
-- [ ] `(unit)` the session lasts 30 days and its refresh window extends the expiry on activity
-- [ ] `(integration)` a password written through the instance is stored hashed, and the plain text appears in no column
-- [ ] `(unit)` no file outside `apps/api/src/modules/auth` imports `better-auth`, checked the way `test/module-structure.spec.ts` already checks the other boundaries
+- [x] `(integration)` `make migrate` on a reset database applies the new migration and creates `user`, `session`, `account` and `verification`
+- [x] `(integration)` `make api-auth-schema` regenerates the committed schema file byte-identical, so a drift check can run in `make check`
+- [x] `(unit)` the instance enables e-mail and password with a minimum length of 8 and a maximum of 128, and registers no mail sender
+- [x] `(unit)` e-mail verification and password reset are both off
+- [x] `(unit)` the session lasts 30 days and its refresh window extends the expiry on activity
+- [x] `(integration)` a password written through the instance is stored hashed, and the plain text appears in no column
+- [x] `(unit)` no file outside `apps/api/src/modules/auth` imports `better-auth`, checked the way `test/module-structure.spec.ts` already checks the other boundaries
+
+## As built
+
+- **`make api-auth-schema` runs a generator of ours, not `@better-auth/cli`.**
+  That package (`auth.md`'s Commands table names `better-auth generate`) tops out
+  at `1.5.0-beta` and its `account` table is missing the `issuer` column and the
+  `(issuer, accountId)` unique index that `better-auth` 1.7.2 validates at
+  adapter init — a CLI-generated schema makes every `auth.api` call throw.
+  `apps/api/scripts/generate-auth-schema.ts` emits the Drizzle schema from
+  `better-auth/db`'s own `getAuthTables`, the exact metadata the runtime adapter
+  checks, so the file cannot drift from the library. Output is deterministic; the
+  byte-identical drift check still holds.
+- **The auth module owns a small Postgres pool of its own** rather than injecting
+  `system`'s `DATABASE` provider. `architecture-api.md` rule 19's inward-only
+  imports and `auth.md` rule 1 (every `better-auth` dependency, adapter included,
+  inside the auth folder) both forbid the cross-module reach; a second pool to
+  the one Postgres (`stack-api.md` rule 26) is not a second store. It is closed
+  in `onModuleDestroy`.
+- `better-auth`'s narrow generic is kept on `AuthInstanceType` so the token's
+  consumers get a typed `auth.api` rather than `any`.
+- The generated `auth.schema.ts` is added to `.prettierignore` and
+  `.oxlintrc.json` alongside the other generated output; `apps/api/migrations/`
+  was already ignored by both.
 
 ## References
 

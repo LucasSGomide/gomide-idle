@@ -25,3 +25,7 @@ apps/web/test/fixtures/
 # Docs are hand-authored prose and the roadmap engine writes the tables in
 # docs/ — Prettier stays out of both (formats code and config only).
 *.md
+
+# Better Auth owns this file (auth.md rule 5): `make api-auth-schema` regenerates
+# it and CI drift-checks it. Its formatting is the generator's, not Prettier's.
+apps/api/src/modules/auth/infrastructure/database/schema/auth.schema.ts

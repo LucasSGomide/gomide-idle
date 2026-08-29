@@ -32,7 +32,7 @@ needs to run its own migrations and tests.
 
 | # | Item | Est | Depends on | Status |
 |---|---|---|---|---|
-| [03](03-account-sign-up-and-login.md) | Account sign-up and login: accounts, sessions and the first guarded screen | 9 | 01, 02 | not-started |
+| [03](03-account-sign-up-and-login.md) | Account sign-up and login: accounts, sessions and the first guarded screen | 9 | 01, 02 | in-progress |
 
 ## Blocked
 

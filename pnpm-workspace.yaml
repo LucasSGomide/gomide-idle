@@ -25,6 +25,8 @@ allowBuilds:
   # msw's postinstall only copies its browser worker into a public dir; the web
   # tests use msw/node, so it stays off.
   msw: false
+  '@prisma/client': false
+  better-sqlite3: false
 
 # Single-sourced dependency versions. Every package references these with the
 # `catalog:` protocol so a bump happens in one place.

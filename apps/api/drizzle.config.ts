@@ -4,6 +4,9 @@ import { defineConfig } from 'drizzle-kit';
 // timestamped migration folders are the format a greenfield repo starts on.
 export default defineConfig({
   dialect: 'postgresql',
-  schema: './src/modules/system/infrastructure/database/schema/*.schema.ts',
+  // Every module keeps its Drizzle tables in infrastructure/database/schema/.
+  // The auth module's file there is Better Auth's generated output (auth.md
+  // rule 5); drizzle-kit diffs and applies it alongside the game tables.
+  schema: './src/modules/*/infrastructure/database/schema/*.schema.ts',
   out: './migrations',
 });
