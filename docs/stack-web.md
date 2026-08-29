@@ -515,20 +515,27 @@ folder retired.
     for real against handlers Orval generates from the same document they came
     from, so a test fakes the server rather than the code under test — which is
     what lets `architecture-web.md` rule 18 keep banning module mocks now that
-    there is no provider to swap. Three prices, and each has a name. It is a
-    dependency plus a `vitest.setup.ts`. `/api/auth/*` is outside the spec
-    ([`auth.md`](auth.md) rule 19), so its handlers are hand-written and are the
-    only ones that can drift. And MSW cannot intercept Socket.IO, which speaks
-    its own protocol over its own transport — so the arena's stream is faked by
-    handing the screen a fake socket, per `architecture-web.md` rule 19.
+    there is no provider to swap. Two prices, and each has a name. It is a
+    dependency plus a `vitest.setup.ts`. And MSW cannot intercept Socket.IO, which
+    speaks its own protocol over its own transport — so the arena's stream is
+    faked by handing the screen a fake socket, per `architecture-web.md` rule 19.
+    *Revised 2026-08-29: there were three prices, and the middle one was that
+    `/api/auth/*` sat outside the spec, so its handlers were hand-written and were
+    the only ones that could drift. [`auth.md`](auth.md) rule 19 was reversed and
+    those routes are in the document now, so Orval generates their handlers with
+    the rest and no hand-written handler is left in the repository.*
 
-59. **Use Better Auth's own React client on the web.** It is the same library the
-    API runs (`stack-api.md` rule 26) talking to the routes that library mounted,
-    so the request shapes and the error codes are the library's on both sides and
-    there is nothing to keep in step by hand. The price is that it is the one
-    hand-written client in the app — Orval generates nothing for `/api/auth/*` —
-    and [`auth.md`](auth.md) rules 4, 23 and 27 are the three rules that exist
-    because of it.
+59. **Do not install Better Auth on the web at all; reach auth through the
+    generated client like every other endpoint.** [`auth.md`](auth.md) rule 3
+    makes auth this project's own controllers and rule 19 puts them in the
+    OpenAPI document, so rule 57 already covers them — a hand-written auth client
+    would now be the hand-written hook that rule forbids. The library stays a
+    server dependency and the web has one fewer. *Reversed 2026-08-29 by roadmap
+    item [03](roadmap/03-account-sign-up-and-login.md). This rule read "Use Better
+    Auth's own React client on the web", because it was "the same library the API
+    runs talking to the routes that library mounted". The API no longer mounts
+    those routes. The price this rule named — "it is the one hand-written client
+    in the app" — is the price that was bought out.*
 
 ## Tooling and generation, revisited
 

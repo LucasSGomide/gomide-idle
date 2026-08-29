@@ -326,21 +326,26 @@ and login**. Rule 12 was revised in the same pass.
 Added 2026-08-27, when [`auth.md`](auth.md) was written and FR.5.1 needed a
 mechanism rather than an intention.
 
-39. **Rate-limit with Better Auth's own limiter for the per-address half, and a
-    `hooks.before` middleware of ours for the per-account half — not
-    `@nestjs/throttler` and not a second package.** Sign-in is the only endpoint
-    the alpha rate-limits (FR.5.1) and it is the library's own route, so a
-    Nest-side guard would be limiting a handler it does not own, by path, after
-    the library had already counted the attempt. [`auth.md`](auth.md) rule 17 is
-    the policy and names the price: the counters live in this process's memory
-    (FR.5.3), which is correct only while rule 24 holds and fails silently rather
-    than loudly on the day it does not. *Revised 2026-08-28, after Better Auth
-    1.7.2's limiter was read rather than assumed. Its key is hard-coded as
-    `` `${ip}|${path}` `` — there is no configuration surface that changes it,
-    `customRules` only adjusts the window and max for a path, and `customStorage`
-    is handed the key rather than asked to build one. So the library buys FR.5.1's
-    per-address half outright and its per-account half not at all, which this rule
-    previously implied it covered.*
+39. **Rate-limit with `@nestjs/throttler`, as two named throttlers on the
+    sign-in controller — one tracking the source address, one the submitted
+    e-mail.** Sign-in is the only endpoint the alpha rate-limits (FR.5.1) and
+    [`auth.md`](auth.md) rule 3 makes it our own controller, so a Nest guard is
+    now limiting a handler it owns, at the only point the attempt passes through.
+    Named throttlers with a `getTracker` each are how one guard carries two keys;
+    the default in-memory storage is what FR.5.3 already describes.
+    [`auth.md`](auth.md) rule 17 is the policy and names the price: the counters
+    live in this process's memory, correct only while rule 24 holds, and failing
+    silently rather than loudly on the day it does not. *Reversed 2026-08-29 by
+    roadmap item [03](roadmap/03-account-sign-up-and-login.md). This rule chose
+    Better Auth's own limiter for the per-address half and a `hooks.before`
+    middleware for the per-account half, "not `@nestjs/throttler` and not a second
+    package", because "a Nest-side guard would be limiting a handler it does not
+    own, by path, after the library had already counted the attempt". Every clause
+    of that reason is gone: `auth.md` rule 3 stopped mounting the library's HTTP
+    handler, and Better Auth states that server-side calls through `auth.api` are
+    not affected by rate limiting at all — so the library's limiter is not merely
+    awkward here, it never runs. Its hard-coded `` `${ip}|${path}` `` key, read on
+    2026-08-28, stopped mattering with it.*
 
 ## Repo-wide tooling
 

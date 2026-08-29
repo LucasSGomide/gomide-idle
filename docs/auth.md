@@ -30,6 +30,14 @@ length, its behaviour during a hunt, and what a delete actually does — plus a
 Rules 34–35 and the revision to rule 17 came from the same pass, once Better
 Auth 1.7.2's rate limiter had been read rather than assumed.
 
+Rule 3 was **reversed** on 2026-08-29 by roadmap item
+[03](roadmap/03-account-sign-up-and-login.md): auth is exposed through this
+project's own Nest controllers rather than by mounting Better Auth's HTTP
+handler. Rule 19 followed it, and rules 4, 17, 23 and 27 and gotchas 30, 34 and
+35 were all rewritten in the same pass, because every one of them existed to pay
+for the mount. `stack-api.md` rule 39 and `stack-web.md` rules 58 and 59 moved
+with them. The trade is stated in rule 3 and its one real cost in rule 17.
+
 Gotchas 29 and 34 were narrowed later on 2026-08-28 by the **Scaffolding**
 requirements. Both closed by saying the deployment was undecided and that the
 trap "will be met"; `stack-api.md` rules 48 and 49 decided it. One origin behind
@@ -45,7 +53,7 @@ each has left is the half that still bites.
 | Library | Better Auth | Owns credentials and sessions, has a Drizzle adapter, and needs no service of its own (`stack-api.md` rule 26) |
 | Session store | The project's own Postgres | The server hits the database on every request anyway, so revoking is a `DELETE` (`stack-api.md` rule 27) |
 | Session transport | A cookie | Nothing to hold in JavaScript, so no interceptor, no refresh logic and no token to leak |
-| Web client | Better Auth's React client | The same library as the API, talking to the same routes, with the types already written (`stack-web.md` rule 59) |
+| Web client | Orval's generated client, like every other endpoint | Rule 3 makes auth our own controllers, so there is no reason for it to be the one hand-written client (`stack-web.md` rule 59) |
 | Sending mail | Nothing at all | The address is an identifier and is never sent to (FR.1.2) |
 | Roles | None | One kind of user; the only authorization question is ownership |
 
@@ -60,15 +68,30 @@ each has left is the half that still bites.
    entrypoint concern, which is `architecture-api.md` rule 19's split applied to
    a dependency that would otherwise sit in neither layer.
 
-3. **Mount Better Auth as one Fastify route at `/api/auth/*`; never re-declare
-   its endpoints as Nest controllers.** A controller in front of a library route
-   is a second implementation of sign-in, and the two drift the first time the
-   library adds a field.
+3. **Expose auth through this project's own Nest controllers, each calling
+   Better Auth's server-side `auth.api` object as a function; never mount the
+   library's HTTP handler.** One API surface, so auth is described by
+   `libs/contracts` like every other endpoint and inherits everything that
+   follows from being in the document. *Reversed 2026-08-29 by roadmap item
+   [03](roadmap/03-account-sign-up-and-login.md). This rule read "Mount Better
+   Auth as one Fastify route at `/api/auth/*`; never re-declare its endpoints as
+   Nest controllers", because "a controller in front of a library route is a
+   second implementation of sign-in, and the two drift the first time the library
+   adds a field". Delegation is not re-implementation: a controller calling
+   `auth.api.signInEmail({ body, headers, asResponse: true })` is type-checked
+   against the library, so a changed field is a compile error rather than the
+   silent drift that argument feared. Rule 19 named three prices for the mount
+   and this pays none of them. It costs the library's rate limiter outright —
+   rule 17 is what replaces it, and that is the whole cost.*
 
-4. **On the web, build the client in `lib/` and let one `features/session/`
-   folder be its only consumer.** Every screen that cares about who is signed in
-   asks that feature, so there is one place to change when the library does.
-   `architecture-web.md` rule 33 is the other half — who is allowed to ask.
+4. **Let one `features/session/` folder be the only consumer of the generated
+   auth hooks.** Every screen that cares about who is signed in asks that
+   feature, so there is one place to change. `architecture-web.md` rule 33 is the
+   other half — who is allowed to ask. *Revised 2026-08-29 for rule 3's reversal.
+   This read "build the client in `lib/`", which was the hand-written Better Auth
+   client; there is no hand-written client now, and the generated one already
+   lives in `lib/api/generated/`. The single-consumer half is unchanged and
+   matters as much as it did.*
 
 ## It owns its tables
 
@@ -163,34 +186,44 @@ each has left is the half that still bites.
     exactly what it sounds like: a person hashing a password at whatever hour the
     player asks, with no audit trail but the shell history.
 
-17. **Rate-limit sign-in per source address and per account, in two mechanisms
-    sharing one store.** FR.5.1 is the only lock on a door whose key is an
-    unlisted URL. Better Auth already limits `/sign-in/email` to three attempts
-    per ten seconds per address, which is the first half for free; the second half
-    does not exist in the library at all, so it is a `hooks.before` middleware of
-    ours keyed on the submitted e-mail, throwing `TOO_MANY_REQUESTS` — see
-    `stack-api.md` rule 39 for why no configuration surface reaches it. Point
-    `rateLimit.customStorage` at the same module the hook counts in, so the two
-    halves share one eviction policy and one thing to move on the day FR.5.3
-    expires. FR.5.3 is the price and it has that expiry date: the counters are
-    correct only while `stack-api.md` rule 24's single process holds, and nothing
-    fails loudly on the day a second one is added — so this rule and rule 35 of
-    `stack-api.md` expire together. *Revised 2026-08-28; this rule said "with the
-    limiter `stack-api.md` rule 39 chose", which implied one mechanism met both
-    halves of FR.5.1. Reading Better Auth 1.7.2 showed it meets one.*
+17. **Rate-limit sign-in in one guard of our own on the sign-in controller,
+    keyed both per source address and per submitted e-mail.** FR.5.1 is the only
+    lock on a door whose key is an unlisted URL. Better Auth's limiter cannot
+    reach it any more: rule 3 calls `auth.api` server-side, and the library
+    states that server-side requests made through `auth.api` are not affected by
+    rate limiting — so the half that used to be free is now zero. The result is
+    simpler than the two mechanisms it replaces: one store, one window, one
+    eviction policy, two keys. FR.5.3 is still the price and still has its expiry
+    date — the counters live in this process's memory, correct only while
+    `stack-api.md` rule 24's single process holds, and nothing fails loudly on the
+    day a second one is added, so this rule and rule 35 of `stack-api.md` expire
+    together. *Rewritten 2026-08-29 by roadmap item
+    [03](roadmap/03-account-sign-up-and-login.md). This rule read "in two
+    mechanisms sharing one store" — the library's own limiter for the per-address
+    half, a `hooks.before` middleware of ours keyed on the submitted e-mail for
+    the per-account half, and `rateLimit.customStorage` pointed at one module so
+    they shared an eviction policy. Rule 3's reversal takes the library's HTTP
+    layer out of the request path entirely, so both halves are ours. The
+    `hooks.before` middleware goes with it, and so does gotcha 35's reason to
+    exist. Revised 2026-08-28 before that, when reading Better Auth 1.7.2's
+    limiter showed it met one half rather than both.*
 
 18. **Close registration by configuration, refusing a new sign-up with a stated
     reason while every existing account keeps working.** FR.5.2 — when the
     unlisted URL leaks, closing the door is the only lever the alpha has.
 
-19. **Keep `/api/auth/*` outside the OpenAPI document, deliberately.** Better
-    Auth owns those routes and their payloads, and it is mounted as a Fastify
-    handler rather than a Nest controller (rule 3), so there is no place to hang
-    the `libs/contracts` schema `architecture-api.md` rule 56 would otherwise
-    require. Three prices, all real: Orval generates no client for them, so the
-    auth client is the one hand-written client on the web; a codegen check never
-    sees them; and their errors are not `ErrorTypeEnum` members, which is why
-    rule 27 exists.
+19. **Describe the auth routes in the OpenAPI document like every other
+    route.** Rule 3's controllers are ordinary Nest controllers over
+    `libs/contracts` schemas, so `architecture-api.md` rule 56 applies to them
+    unchanged — Orval generates their client, their hooks and their network
+    fakes, the codegen drift check covers them, and their errors are
+    `ErrorTypeEnum` members. *Reversed 2026-08-29 by roadmap item
+    [03](roadmap/03-account-sign-up-and-login.md). This rule read "Keep
+    `/api/auth/*` outside the OpenAPI document, deliberately", and named three
+    prices for it: no generated client, so auth was the one hand-written client
+    on the web; no codegen check; and errors outside `ErrorTypeEnum`. Not paying
+    those three is what rule 3's reversal was for. Rules 4, 23 and 27 here and
+    `stack-web.md` rules 58 and 59 all existed because of them.*
 
 ## Authorization
 
@@ -224,10 +257,13 @@ check sat in the middle — and there is no such thing here.
 The session is server state like any other, so it is a query. Nothing about the
 signed-in user is copied into a store and no credential is held in JavaScript.
 
-23. **Read the session with an ordinary TanStack Query hook over
-    `getSession` — never Better Auth's own `useSession`.** The library's hook
-    keeps its own copy of the session beside the Query cache, and `stack-web.md`
-    rule 2 has exactly one cache for everything the server owns.
+23. **Read the session with the generated query hook for the session endpoint,
+    and never with a hook of the library's.** Better Auth's `useSession` keeps its
+    own copy of the session beside the Query cache, and `stack-web.md` rule 2 has
+    exactly one cache for everything the server owns. *Revised 2026-08-29 for rule
+    3's reversal: the hook is generated now rather than hand-written over
+    `getSession`, which makes this rule mostly automatic — the library's client is
+    not in the app at all. `stack-web.md` rule 57 is what forbids hand-writing it.*
 
 24. **Resolve the session in `_authed.tsx`'s `beforeLoad` before a protected
     screen renders, and redirect to the sign-in route carrying the target in a
@@ -251,12 +287,18 @@ signed-in user is copied into a store and no credential is held in JavaScript.
     do not, because being already online elsewhere is not a reason to sign
     anybody out.
 
-27. **Map Better Auth's error codes to catalogue keys once, in
-    `features/session/`.** Rule 19 keeps those routes out of `ErrorTypeEnum`, so
-    `architecture-web.md` rule 27's "render from the type, never the message"
-    has nothing to switch on here — and rendering the library's own English
-    string would put English on a Portuguese screen, which is the thing that
-    rule was written to stop.
+27. **Translate the library's error into an `ErrorTypeEnum` member in the
+    controller, and let the web render it from that code like any other.** Rule
+    19 puts these routes in the document, so `architecture-web.md` rule 27 —
+    render from the type, never the message — reaches them directly and the web
+    needs no mapping layer of its own. The mapping still exists; it happens once,
+    on the server, where the library's own English string is already in hand.
+    *Rewritten 2026-08-29 by roadmap item
+    [03](roadmap/03-account-sign-up-and-login.md). This read "Map Better Auth's
+    error codes to catalogue keys once, in `features/session/`", and existed only
+    because the old rule 19 kept those routes out of `ErrorTypeEnum`. Rendering
+    the library's English string on a Portuguese screen is still the thing being
+    stopped; the place it is stopped moved from the client to the server.*
 
 28. **Send the cookie on every request and keep no credential in JavaScript.**
     It is what makes the session invisible to the client, and it is also the
@@ -274,7 +316,7 @@ signed-in user is copied into a store and no credential is held in JavaScript.
 | --- | --- | --- |
 | Outbound e-mail | An `EmailPort` in the API that Better Auth's hooks resolve — never a provider SDK in the auth config | Registration opening to anyone who is not a friend |
 | Self-service password reset | Better Auth's own reset flow, which needs the e-mail above first | The same trigger, or the second recovery done by hand |
-| Shared rate-limit storage | Both of rule 17's halves pointed at storage two processes can see — they share one store precisely so this is one move | The day a second process is added (`stack-api.md` rule 24) |
+| Shared rate-limit storage | Rule 17's one guard pointed at storage two processes can see — one store was always the point, and rule 3's reversal made it one mechanism as well | The day a second process is added (`stack-api.md` rule 24) |
 | Roles | Nothing is designed, on purpose (rule 22) | The first action only an operator may take |
 | The `verification` table | Generated by rule 5 and permanently empty while rule 15 holds | It fills by itself the day verification or reset is switched on |
 | Social sign-in | Better Auth ships providers and the `account` table is already generated for them | A player who wants to sign in with Google |
@@ -308,11 +350,15 @@ as everything above, and appended to the same way.
     branch forever, or hangs on the session query, while the same screen works
     in the browser. *Rule:* the cookie the API sets does not exist in the test
     environment, so the session is never ambient there. `stack-web.md` rule 58
-    puts MSW at the network boundary, but Orval generates handlers only for
-    documented routes and rule 19 keeps `/api/auth/*` undocumented — so the
-    session handler is one of the few written by hand, in the test setup.
-    Seeding the session query directly is the other way; pick one per tier and
-    keep it there, because a test doing both hides which one it is relying on.
+    puts MSW at the network boundary, and rule 19 now has the session endpoint
+    in the document, so Orval generates its handler with the rest — the session
+    is faked at the network like every other call. Seeding the session query
+    directly is the other way; pick one per tier and keep it there, because a
+    test doing both hides which one it is relying on. *Revised 2026-08-29 for rule
+    19's reversal. This said the session handler was "one of the few written by
+    hand, in the test setup", which was the price of the old rule 19. The symptom
+    above is unchanged — jsdom still has no cookie and a session is still never
+    ambient in a test.*
 
 ## The session's lifetime
 
@@ -355,37 +401,37 @@ NestJS integration. Same numbering as everything above; these sit after the
 session section because the sequence ascends through the file, not because they
 are a different kind of thing from rules 29–30.
 
-34. **Rate limiting behaves one way locally and the opposite way deployed, and
-    both directions are wrong by default.** *Symptom:* nothing is limited at all
-    on your machine, however hard you hammer sign-in — and then in production
+34. **Every sign-in attempt in the world lands in one rate-limit bucket.**
+    *Symptom:* rule 17's guard works perfectly on your machine, and in production
     players start getting 429s after three attempts *between all of them*, as if
-    the limit were global. *Rule:* two separate defaults cause that. `rateLimit`
-    is enabled in production only, so `enabled: true` belongs in the development
-    config or the limiter is never once exercised before it ships. And Better
-    Auth resolves the client address from **headers only** — there is no
-    `socket.remoteAddress` fallback — defaulting to `x-forwarded-for`; when no
-    trusted header reaches it the address is `null` and every attempt in the world
-    lands in one bucket keyed `no-trusted-ip|/sign-in/email`. Set
-    `advanced.ipAddress.ipAddressHeaders` to `x-forwarded-for`. *Narrowed
-    2026-08-28: this read "to the single header the deployment's proxy actually
-    writes, plus `trustedProxies` if the chain is multi-hop", and closed by
-    calling it "the class of thing that passes locally and fails deployed …
-    decided late and by someone not reading this file". It is decided now.
+    the limit were global. *Rule:* the per-address key is only ever as good as
+    the address, and behind a proxy `req.ip` is the proxy on every request unless
+    Fastify is told otherwise. Set `trustProxy`, or the per-address half of FR.5.1
+    silently becomes a global limit and every log line names the proxy too.
     `stack-api.md` rule 49's proxy writes `X-Forwarded-For` and deliberately
-    ignores any incoming one, so there is no chain to trust and `trustedProxies`
-    has nothing to configure. The other half of that rule is the half that still
-    bites: Fastify needs `trustProxy` set, or `req.ip` is the proxy on every log
-    line and in every rate-limit bucket.* Like
-    gotcha 29 this is the class of thing that passes locally and fails deployed,
-    for the same underlying reason: `stack-api.md` rule 22 leaves the host
-    undecided, so anything derived from the proxy in front of it is decided late
-    and by someone not reading this file.
+    ignores any incoming one, so there is exactly one header to trust and no
+    chain to configure. *Rewritten 2026-08-29 for rule 17's rewrite. This gotcha
+    was two defaults of Better Auth's limiter — `rateLimit` being enabled in
+    production only, and the library resolving the client address from headers
+    alone with no `socket.remoteAddress` fallback, needing
+    `advanced.ipAddress.ipAddressHeaders`. That limiter is no longer in the
+    request path (rule 3), so both are moot. The half that survives is the half
+    that was never the library's: `trustProxy`. It is kept, rather than deleted,
+    because the symptom is identical and a guard of our own reproduces it exactly
+    as faithfully.* Like gotcha 29 this is the class of thing that passes locally
+    and fails deployed, for the same underlying reason: `stack-api.md` rule 22
+    leaves the host undecided, so anything derived from the proxy in front of it
+    is decided late and by someone not reading this file.
 
-35. **Nest's body parser and Better Auth want the same request body, and Nest
-    wins by default.** *Symptom:* sign-in fails on a body the client demonstrably
-    sent, or rule 17's per-account hook reads `ctx.body` as `undefined` while the
-    per-address limiter works fine. *Rule:* rule 3 mounts Better Auth as a Fastify
-    handler underneath Nest, so the framework has already consumed the stream by
-    the time the library reads it. Disable Nest's body parser at bootstrap. This
-    is a prerequisite for rule 17's second half rather than a detail of it — a
-    hook keyed on the submitted e-mail cannot key on anything if the body is gone.
+35. **Retired 2026-08-29 — do not disable Nest's body parser.** This gotcha read
+    "Nest's body parser and Better Auth want the same request body, and Nest wins
+    by default", and its rule was to disable Nest's parser at bootstrap, because
+    the old rule 3 mounted Better Auth as a Fastify handler underneath Nest and
+    the framework consumed the stream before the library could read it. Rule 3's
+    reversal removes that handler from the request path: Nest parses the body, the
+    controller validates it against its `libs/contracts` schema, and hands the
+    result to `auth.api` as an ordinary function argument. Disabling the parser
+    now would break every controller in the repository. The number is kept and the
+    entry is not deleted, because the file's numbering never reorders and the next
+    person to read Better Auth's NestJS integration notes will meet this advice
+    there and needs to know it was considered and does not apply here.
