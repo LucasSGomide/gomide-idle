@@ -64,8 +64,9 @@
   sign-up, sign-out and the session read carry no guard.
 - `trustProxy` was already on the Fastify adapter (`bootstrap.ts`, task 01) --
   confirmed by the forwarded-header test.
-- The web's `generated.spec.ts` (Orval drift) is red from task 02 onward because
-  `openapi.json` moved ahead of the committed client; task 06 regenerates it.
+- Orval's web client was regenerated against the `openapi.json` that grew the
+  auth routes in tasks 02-03, so `apps/web` stays green; the transport wiring
+  (Vite proxy, MSW handlers, the manual browser check) is still task 06.
 
 ## References
 
