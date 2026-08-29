@@ -48,8 +48,10 @@ function SignIn() {
         mutation.mutate(
           { data: { email, password } },
           {
-            onSuccess: () => {
-              refreshSession();
+            onSuccess: async () => {
+              // Awaited so the destination's guard and the shell's chrome read
+              // the refreshed session rather than racing the refetch.
+              await refreshSession();
               void navigate({ to: toInternalPath(target) });
             },
           },

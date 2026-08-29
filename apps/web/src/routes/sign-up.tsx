@@ -64,8 +64,10 @@ function SignUp() {
         mutation.mutate(
           { data: { email, password } },
           {
-            onSuccess: () => {
-              refreshSession();
+            onSuccess: async () => {
+              // Awaited for the same reason as sign-in: the chrome and the
+              // `_authed` guard must see the new session, not the stale read.
+              await refreshSession();
               void navigate({ to: '/characters' });
             },
           },
