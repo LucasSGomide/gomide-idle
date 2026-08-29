@@ -13,6 +13,9 @@ export const en = {
     languageSwitcher: {
       label: 'Change language',
     },
+    // wireframe 07: the signed-in account menu trigger and its sign-out row.
+    account: 'Account',
+    signOut: 'Sign out',
   },
   footer: {
     // design.md wireframe: one whole string with a placeholder, never assembled
@@ -28,6 +31,10 @@ export const en = {
     GENERIC: 'Something went wrong. Reload to try again.',
     INTERNAL_ERROR: 'Version details are unavailable. Reload to try again.',
     VALIDATION_FAILED: 'The request was rejected. Reload to try again.',
+  },
+  session: {
+    // wireframe 07: the aria-live label while the session resolves.
+    loading: 'Loading your account.',
   },
   errorBoundary: {
     title: 'This section could not be loaded.',

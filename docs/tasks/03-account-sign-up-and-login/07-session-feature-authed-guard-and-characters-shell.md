@@ -57,13 +57,39 @@
 
 ## Acceptance criteria
 
-- [ ] `(unit)` `_authed` reached with no session redirects to `/` with the attempted path in the search param
-- [ ] `(unit)` `_authed` reached with a session renders the route, and `/characters` shows the signed-in top bar over an empty body
-- [ ] `(unit)` while the session request is in flight the guarded route renders the loading state and never the signed-out shell
-- [ ] `(unit)` a failed session request renders its catalogue string from the `code` and never the server's `message`
-- [ ] `(unit)` the account menu holds the language switcher and the sign-out control, and switching language writes `localStorage` and re-renders every string at once
-- [ ] `(unit)` sign-out calls the generated mutation and lands on `/`
-- [ ] `(unit)` the signed-in top bar renders its Portuguese strings without truncation at the narrowest supported width
+- [x] `(unit)` `_authed` reached with no session redirects to `/` with the attempted path in the search param
+- [x] `(unit)` `_authed` reached with a session renders the route, and `/characters` shows the signed-in top bar over an empty body
+- [x] `(unit)` while the session request is in flight the guarded route renders the loading state and never the signed-out shell
+- [x] `(unit)` a failed session request renders its catalogue string from the `code` and never the server's `message`
+- [x] `(unit)` the account menu holds the language switcher and the sign-out control, and switching language writes `localStorage` and re-renders every string at once
+- [x] `(unit)` sign-out calls the generated mutation and lands on `/`
+- [x] `(unit)` the signed-in top bar renders its Portuguese strings without truncation at the narrowest supported width
+
+## As built
+
+- **The top bar is session-aware, in `routes/-shell/`.** `routes/` may read the
+  session (architecture-web.md rule 33), and the wireframe puts the account menu
+  in the same bar the standalone switcher occupies. While `useSession()` is
+  pending the right slot is empty (no flash); signed in it is `AccountMenu`,
+  signed out `LanguageSwitcher`. The open/close behaviour and the language rows
+  are shared (`use-menu-toggle`, `LanguageMenuItems`).
+- **`_authed.tsx` resolves the session in `beforeLoad`** via
+  `features/session/require-session.ts` through the query cache `useSession`
+  reads, then redirects to `/` with `search.redirect`. `pendingMs: 0` +
+  `pendingMinMs: 0` show `AuthPending` (spinner, `aria-live="polite"`) only
+  during the real async gap; `errorComponent` renders `AuthError` from the
+  `code`.
+- **`orval.config.ts` dropped the `query: { useQuery: true }` override.** It was
+  forcing every operation to a `useQuery` hook, so the POST auth endpoints had
+  no mutation hook. Orval's default (GET -> query, POST -> mutation) is what the
+  footer read and the sign-out write each need; the client was regenerated.
+- **Catalogue additions:** `topBar.account`, `topBar.signOut`, `session.loading`
+  in both `en.ts` and `pt.ts`; `catalogue.test-d.ts` updated.
+- `renderRoute` now returns the `router` so a spec can assert the post-redirect
+  location and search.
+- The signed-in top bar reuses the account menu on every `_authed` screen; the
+  online indicator slot (§1) stays free — the socket opens at character select
+  (next roadmap item).
 
 ## References
 

@@ -27,9 +27,9 @@ export default defineConfig({
           path: './src/lib/api/fetcher.ts',
           name: 'fetcher',
         },
-        query: {
-          useQuery: true,
-        },
+        // Orval's default hook kind by method: GET -> useQuery, POST -> use
+        // useMutation. That is exactly what the footer's read and the auth
+        // screens' writes each need, so `query` is left unset.
       },
     },
   },

@@ -19,8 +19,8 @@ t('errorBoundary.does_not_exist');
 
 // The Portuguese catalogue must cover every English key: a catalogue missing one
 // does not satisfy `typeof en`.
-// @ts-expect-error — footer, errors, errorBoundary and outOfDate are absent.
+// @ts-expect-error — topBar, footer, errors, session and outOfDate are absent.
 const incompletePortuguese: typeof en = {
-  topBar: { languageSwitcher: { label: 'Alterar idioma' } },
+  errorBoundary: { title: 'x', reload: 'y' },
 };
 void incompletePortuguese;

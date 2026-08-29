@@ -5,16 +5,20 @@
  * OpenAPI spec version: 0.1.0
  */
 import {
+  useMutation,
   useQuery
 } from '@tanstack/react-query';
 import type {
   DataTag,
   DefinedInitialDataOptions,
   DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
   QueryFunction,
   QueryKey,
   UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -102,77 +106,48 @@ return fetcher<authControllerPostSignUpResponse>(getAuthControllerPostSignUpUrl(
 
 
 
-export const getAuthControllerPostSignUpQueryKey = (signUpRequest?: SignUpRequest,) => {
-    return [
-    'POST', `/auth/sign-up`, signUpRequest
-    ] as const;
+export const getAuthControllerPostSignUpMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError,AuthControllerPostSignUpMutationVariables, TContext>, request?: SecondParameter<typeof fetcher>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError,AuthControllerPostSignUpMutationVariables, TContext> => {
+
+const mutationKey = ['authControllerPostSignUp'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerPostSignUp>>, AuthControllerPostSignUpMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerPostSignUp(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerPostSignUpMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerPostSignUp>>>
+    export type AuthControllerPostSignUpMutationBody = SignUpRequest
+    export type AuthControllerPostSignUpMutationError = unknown
+    export type AuthControllerPostSignUpMutationVariables = {data: SignUpRequest}
+
+    export const useAuthControllerPostSignUp = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError,AuthControllerPostSignUpMutationVariables, TContext>, request?: SecondParameter<typeof fetcher>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerPostSignUp>>,
+        TError,
+        AuthControllerPostSignUpMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthControllerPostSignUpMutationOptions(options), queryClient);
     }
-
-
-export const getAuthControllerPostSignUpQueryOptions = <TData = Awaited<ReturnType<typeof authControllerPostSignUp>>, TError = unknown>(signUpRequest: SignUpRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAuthControllerPostSignUpQueryKey(signUpRequest);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerPostSignUp>>> = ({ signal }) => authControllerPostSignUp(signUpRequest, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AuthControllerPostSignUpQueryResult = NonNullable<Awaited<ReturnType<typeof authControllerPostSignUp>>>
-export type AuthControllerPostSignUpQueryError = unknown
-
-
-export function useAuthControllerPostSignUp<TData = Awaited<ReturnType<typeof authControllerPostSignUp>>, TError = unknown>(
- signUpRequest: SignUpRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPostSignUp>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPostSignUp>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPostSignUp<TData = Awaited<ReturnType<typeof authControllerPostSignUp>>, TError = unknown>(
- signUpRequest: SignUpRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPostSignUp>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPostSignUp>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPostSignUp<TData = Awaited<ReturnType<typeof authControllerPostSignUp>>, TError = unknown>(
- signUpRequest: SignUpRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useAuthControllerPostSignUp<TData = Awaited<ReturnType<typeof authControllerPostSignUp>>, TError = unknown>(
- signUpRequest: SignUpRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignUp>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAuthControllerPostSignUpQueryOptions(signUpRequest,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 
 export type authControllerPostSignInResponse200 = {
   data: SignInResponse
@@ -215,77 +190,48 @@ return fetcher<authControllerPostSignInResponse>(getAuthControllerPostSignInUrl(
 
 
 
-export const getAuthControllerPostSignInQueryKey = (signInRequest?: SignInRequest,) => {
-    return [
-    'POST', `/auth/sign-in`, signInRequest
-    ] as const;
+export const getAuthControllerPostSignInMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError,AuthControllerPostSignInMutationVariables, TContext>, request?: SecondParameter<typeof fetcher>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError,AuthControllerPostSignInMutationVariables, TContext> => {
+
+const mutationKey = ['authControllerPostSignIn'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerPostSignIn>>, AuthControllerPostSignInMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerPostSignIn(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerPostSignInMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerPostSignIn>>>
+    export type AuthControllerPostSignInMutationBody = SignInRequest
+    export type AuthControllerPostSignInMutationError = unknown
+    export type AuthControllerPostSignInMutationVariables = {data: SignInRequest}
+
+    export const useAuthControllerPostSignIn = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError,AuthControllerPostSignInMutationVariables, TContext>, request?: SecondParameter<typeof fetcher>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerPostSignIn>>,
+        TError,
+        AuthControllerPostSignInMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAuthControllerPostSignInMutationOptions(options), queryClient);
     }
-
-
-export const getAuthControllerPostSignInQueryOptions = <TData = Awaited<ReturnType<typeof authControllerPostSignIn>>, TError = unknown>(signInRequest: SignInRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAuthControllerPostSignInQueryKey(signInRequest);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerPostSignIn>>> = ({ signal }) => authControllerPostSignIn(signInRequest, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AuthControllerPostSignInQueryResult = NonNullable<Awaited<ReturnType<typeof authControllerPostSignIn>>>
-export type AuthControllerPostSignInQueryError = unknown
-
-
-export function useAuthControllerPostSignIn<TData = Awaited<ReturnType<typeof authControllerPostSignIn>>, TError = unknown>(
- signInRequest: SignInRequest, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPostSignIn>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPostSignIn>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPostSignIn<TData = Awaited<ReturnType<typeof authControllerPostSignIn>>, TError = unknown>(
- signInRequest: SignInRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPostSignIn>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPostSignIn>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPostSignIn<TData = Awaited<ReturnType<typeof authControllerPostSignIn>>, TError = unknown>(
- signInRequest: SignInRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useAuthControllerPostSignIn<TData = Awaited<ReturnType<typeof authControllerPostSignIn>>, TError = unknown>(
- signInRequest: SignInRequest, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignIn>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAuthControllerPostSignInQueryOptions(signInRequest,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 
 export type authControllerPostSignOutResponse200 = {
   data: SignOutResponse
@@ -322,77 +268,48 @@ export const authControllerPostSignOut = async ( options?: Parameters<typeof fet
 
 
 
-export const getAuthControllerPostSignOutQueryKey = () => {
-    return [
-    'POST', `/auth/sign-out`
-    ] as const;
+export const getAuthControllerPostSignOutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError,void, TContext>, request?: SecondParameter<typeof fetcher>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError,void, TContext> => {
+
+const mutationKey = ['authControllerPostSignOut'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerPostSignOut>>, void> = () => {
+
+
+          return  authControllerPostSignOut(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerPostSignOutMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerPostSignOut>>>
+
+    export type AuthControllerPostSignOutMutationError = unknown
+
+
+    export const useAuthControllerPostSignOut = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError,void, TContext>, request?: SecondParameter<typeof fetcher>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerPostSignOut>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getAuthControllerPostSignOutMutationOptions(options), queryClient);
     }
-
-
-export const getAuthControllerPostSignOutQueryOptions = <TData = Awaited<ReturnType<typeof authControllerPostSignOut>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAuthControllerPostSignOutQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerPostSignOut>>> = ({ signal }) => authControllerPostSignOut({ signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AuthControllerPostSignOutQueryResult = NonNullable<Awaited<ReturnType<typeof authControllerPostSignOut>>>
-export type AuthControllerPostSignOutQueryError = unknown
-
-
-export function useAuthControllerPostSignOut<TData = Awaited<ReturnType<typeof authControllerPostSignOut>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPostSignOut>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPostSignOut>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPostSignOut<TData = Awaited<ReturnType<typeof authControllerPostSignOut>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerPostSignOut>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerPostSignOut>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerPostSignOut<TData = Awaited<ReturnType<typeof authControllerPostSignOut>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useAuthControllerPostSignOut<TData = Awaited<ReturnType<typeof authControllerPostSignOut>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerPostSignOut>>, TError, TData>>, request?: SecondParameter<typeof fetcher>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAuthControllerPostSignOutQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
 
 export type authControllerGetCurrentSessionResponse200 = {
   data: SessionResponse

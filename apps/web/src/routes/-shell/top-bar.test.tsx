@@ -15,14 +15,18 @@ describe('the signed-out top bar', () => {
   afterEach(() => vi.restoreAllMocks());
 
   // wireframe 04 / FR.16.2: 56px tall, wordmark left, standalone switcher right.
-  it('is 56px tall with the wordmark left and the switcher right', () => {
+  // The right slot follows the session, so the switcher appears once the
+  // (signed-out) session query resolves through MSW.
+  it('is 56px tall with the wordmark left and the switcher right', async () => {
     renderWithProviders(<TopBar />);
     const bar = screen.getByRole('banner');
     // h-14 is Tailwind's 3.5rem === 56px.
     expect(bar.className).toContain('h-14');
 
     const wordmark = screen.getByText(GAME_NAME).parentElement!;
-    const trigger = screen.getByRole('button', { name: /change language/i });
+    const trigger = await screen.findByRole('button', {
+      name: /change language/i,
+    });
     expect(bar).toContainElement(wordmark);
     expect(bar).toContainElement(trigger);
     // DOM order: wordmark before the switcher.
@@ -59,7 +63,9 @@ describe('the signed-out top bar', () => {
   it('exposes the switcher trigger with aria-expanded and aria-controls', async () => {
     const user = userEvent.setup();
     renderWithProviders(<TopBar />);
-    const trigger = screen.getByRole('button', { name: /change language/i });
+    const trigger = await screen.findByRole('button', {
+      name: /change language/i,
+    });
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     expect(trigger).toHaveAttribute('aria-controls');
 
@@ -79,12 +85,14 @@ describe('the signed-out top bar', () => {
   // every string in the bar at once.
   it('writes only localStorage and re-renders the bar on switch to Portuguese', async () => {
     const user = userEvent.setup();
-    const fetchSpy = vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response('{}'));
-
     const { i18n } = renderWithProviders(<TopBar />, { i18n: createAppI18n() });
-    await user.click(screen.getByRole('button', { name: /change language/i }));
+
+    await user.click(
+      await screen.findByRole('button', { name: /change language/i }),
+    );
+    // The language choice itself issues no request (stack-web.md rule 53) —
+    // measured against the fetch count after the switcher is already on screen.
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
     await act(async () => {
       await user.click(
         screen.getByRole('menuitemradio', { name: 'Português' }),

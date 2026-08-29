@@ -8,6 +8,9 @@ export const pt = {
     languageSwitcher: {
       label: 'Alterar idioma',
     },
+    // wireframe 07: the signed-in account menu trigger and its sign-out row.
+    account: 'Conta',
+    signOut: 'Sair',
   },
   footer: {
     protocol: 'protocolo {{version}}',
@@ -20,6 +23,10 @@ export const pt = {
       'Os detalhes da versão estão indisponíveis. Recarregue para tentar novamente.',
     VALIDATION_FAILED:
       'A solicitação foi rejeitada. Recarregue para tentar novamente.',
+  },
+  session: {
+    // wireframe 07: the aria-live label while the session resolves.
+    loading: 'Carregando sua conta.',
   },
   errorBoundary: {
     title: 'Esta seção não pôde ser carregada.',
