@@ -365,7 +365,8 @@ can be silently wrong.
 ## Design tokens
 
 45. **Generate `apps/web/src/theme.css` from
-    [`docs/design-tokens.json`](design-tokens.json), commit the output, and have
+    [`apps/web/design-tokens.json`](../apps/web/design-tokens.json), commit the
+    output, and have
     CI regenerate it and fail on any difference.** `design.md` already declares
     the JSON correct and the prose stale when the two disagree, so the Tailwind
     v4 theme should be derived from it rather than typed a second time. The
@@ -456,7 +457,8 @@ and 46 cannot reach and rules 48–52 do not translate.
 what may be drawn there, and what `renderer/` is allowed to import.
 
 54. **Generate `apps/web/src/theme.ts` from
-    [`docs/design-tokens.json`](design-tokens.json) with rule 45's generator and
+    [`apps/web/design-tokens.json`](../apps/web/design-tokens.json) with rule 45's
+    generator and
     on rule 45's terms — committed, regenerated in CI, failing on any
     difference.** A Pixi text style takes a number (`0xF97316`), not a Tailwind
     utility and not a CSS custom property, so `renderer/` cannot read the theme

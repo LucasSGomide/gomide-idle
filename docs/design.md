@@ -16,7 +16,8 @@ specified in §2 and §9, because it is user-facing type and nothing else covere
 it.
 
 Every literal value below (color, type scale, spacing, radius, motion) is
-also published as a token file: [`docs/design-tokens.json`](design-tokens.json).
+also published as a token file:
+[`apps/web/design-tokens.json`](../apps/web/design-tokens.json).
 That file is what the Tailwind theme is generated from (`docs/stack-web.md`
 rule 45); this file is the reasoning behind each value in it. If the two ever disagree, the JSON file is
 correct and this doc is stale — fix the doc.
@@ -617,7 +618,7 @@ Firefox, Edge, and Safari. No IE11, no legacy Edge.
 light/dark token pair. See §3.
 
 **Token format:** literal values are published as JSON —
-[`docs/design-tokens.json`](design-tokens.json) — covering color, font
+[`apps/web/design-tokens.json`](../apps/web/design-tokens.json) — covering color, font
 families (the arena's included), type scale, spacing scale, radii, and motion
 durations/easing. It is not pasted into
 the codebase by hand: `docs/stack-web.md` rule 45 generates the Tailwind v4

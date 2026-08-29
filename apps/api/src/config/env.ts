@@ -62,8 +62,8 @@ export const envSchema = z.object({
     emptyAsUndefined,
     z.string().min(1).optional(),
   ),
-  OBSERVE_SERVICE_ID: z.string().min(1).default('gomide-api'),
-  OBSERVE_ENDPOINT: z.preprocess(emptyAsUndefined, z.string().url().optional()),
+  OBSERVE_SERVICE_ID: z.string().min(1).default('tormented-path-api'),
+  OBSERVE_ENDPOINT: z.preprocess(emptyAsUndefined, z.url().optional()),
 });
 
 export type EnvType = z.infer<typeof envSchema>;

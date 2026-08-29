@@ -27,7 +27,7 @@ export const authUserSchema = z
 export type AuthUserType = z.infer<typeof authUserSchema>;
 
 export const signUpRequestSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
 });
 export const SIGN_UP_REQUEST_SCHEMA_ID = 'SignUpRequest';

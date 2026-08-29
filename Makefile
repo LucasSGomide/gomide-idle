@@ -21,8 +21,6 @@ env:  ## create .env from .env.example if it does not exist yet
 
 ## --- develop -------------------------------------------------------------
 
-dev: dev-api  ## alias for dev-api (Postgres + API in watch mode)
-
 dev-api:  ## start Postgres, then run the API in watch mode
 	docker compose up -d --wait postgres
 	pnpm --filter @gomide/api dev

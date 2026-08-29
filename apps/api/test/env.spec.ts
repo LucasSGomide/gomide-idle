@@ -30,7 +30,7 @@ describe('loadEnv', () => {
         'http://localhost:5173',
         'http://127.0.0.1:5173',
       ],
-      OBSERVE_SERVICE_ID: 'gomide-api',
+      OBSERVE_SERVICE_ID: 'tormented-path-api',
     });
   });
 

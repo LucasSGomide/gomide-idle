@@ -12,8 +12,7 @@ import {
 } from './tokens-to-theme.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const repoRoot = join(here, '..', '..', '..', '..');
-const tokensPath = join(repoRoot, 'docs', 'design-tokens.json');
+const tokensPath = join(here, '..', '..', 'design-tokens.json');
 const srcDir = join(here, '..', '..', 'src');
 
 const tokens = JSON.parse(readFileSync(tokensPath, 'utf8')) as TokenTree;
