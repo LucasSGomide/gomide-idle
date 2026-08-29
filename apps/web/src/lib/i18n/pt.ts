@@ -23,10 +23,37 @@ export const pt = {
       'Os detalhes da versão estão indisponíveis. Recarregue para tentar novamente.',
     VALIDATION_FAILED:
       'A solicitação foi rejeitada. Recarregue para tentar novamente.',
+    EMAIL_TAKEN: 'Esse endereço já tem uma conta. Entre em vez disso.',
+    INVALID_CREDENTIALS:
+      'E-mail ou senha incorretos. Verifique os dois e tente novamente.',
+    TOO_MANY_ATTEMPTS:
+      'Tentativas demais. Aguarde um momento e tente novamente.',
+    REGISTRATION_CLOSED:
+      'Novas contas estão fechadas por enquanto. Entre se você já tiver uma.',
   },
   session: {
     // wireframe 07: the aria-live label while the session resolves.
     loading: 'Carregando sua conta.',
+  },
+  auth: {
+    email: 'E-mail',
+    password: 'Senha',
+  },
+  signIn: {
+    title: 'Entrar',
+    submit: 'Entrar',
+    createLink: 'Ainda não tem conta? Criar uma',
+  },
+  signUp: {
+    title: 'Criar conta',
+    submit: 'Criar conta',
+    emailHelper: 'Usado para entrar. Nunca enviamos e-mails.',
+    passwordHelper: 'De 8 a 128 caracteres.',
+    signInLink: 'Já tem uma conta? Entrar',
+    closedTitle: 'Os cadastros estão fechados',
+    closedBody:
+      'Novas contas estão fechadas por enquanto. Entre se você já tiver uma.',
+    closedCta: 'Entrar',
   },
   errorBoundary: {
     title: 'Esta seção não pôde ser carregada.',

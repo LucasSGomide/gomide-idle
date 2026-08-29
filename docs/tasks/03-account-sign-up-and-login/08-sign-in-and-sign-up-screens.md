@@ -61,16 +61,46 @@
 
 ## Acceptance criteria
 
-- [ ] `(unit)` submitting sign-up with a valid e-mail and password calls the generated mutation and lands on `/characters`
-- [ ] `(unit)` submitting sign-in lands on the search param's target when present and `/characters` otherwise, and refuses a target that is not an internal path
-- [ ] `(unit)` `/` and `/sign-up` both redirect to `/characters` when a session already exists
-- [ ] `(unit)` while a submit is in flight the button renders a spinner in place of its label and its width does not change
-- [ ] `(unit)` a field error puts `danger` on the border and renders helper text with its trailing icon
-- [ ] `(unit)` `EMAIL_TAKEN`, `INVALID_CREDENTIALS` and `TOO_MANY_ATTEMPTS` each render their catalogue string and never the server's `message`
-- [ ] `(unit)` with registration closed, `/sign-up` resolves and renders the closed notice in place of the form, and `/` no longer shows the link
-- [ ] `(unit)` a 401 from any request is handled once in the fetch mutator: it clears the session query and returns the player to `/` with the route they were on preserved in the search param
-- [ ] `(unit)` every new string exists in both `en.ts` and `pt.ts`, so the catalogue type spec stays satisfied
-- [ ] `(unit)` both forms render their Portuguese strings without truncation at the narrowest supported width
+- [x] `(unit)` submitting sign-up with a valid e-mail and password calls the generated mutation and lands on `/characters`
+- [x] `(unit)` submitting sign-in lands on the search param's target when present and `/characters` otherwise, and refuses a target that is not an internal path
+- [x] `(unit)` `/` and `/sign-up` both redirect to `/characters` when a session already exists
+- [x] `(unit)` while a submit is in flight the button renders a spinner in place of its label and its width does not change
+- [x] `(unit)` a field error puts `danger` on the border and renders helper text with its trailing icon
+- [x] `(unit)` `EMAIL_TAKEN`, `INVALID_CREDENTIALS` and `TOO_MANY_ATTEMPTS` each render their catalogue string and never the server's `message`
+- [x] `(unit)` with registration closed, `/sign-up` resolves and renders the closed notice in place of the form, and `/` no longer shows the link
+- [x] `(unit)` a 401 from any request is handled once in the fetch mutator: it clears the session query and returns the player to `/` with the route they were on preserved in the search param
+- [x] `(unit)` every new string exists in both `en.ts` and `pt.ts`, so the catalogue type spec stays satisfied
+- [x] `(unit)` both forms render their Portuguese strings without truncation at the narrowest supported width
+
+## As built
+
+- **One shared `CredentialsForm`** in `routes/-auth/` drives both screens: the
+  card (§5), the e-mail and password fields (`ui/input.tsx`, a new primitive),
+  the `SubmitButton` (label stays in the layout `invisible` with the spinner
+  overlaid, so width is fixed — §5's loading state), and the error rendering.
+  The error's `code` picks the message (`resolveErrorMessage`, never the
+  server's text) and — via `fieldForCode` — the owning field:
+  `INVALID_CREDENTIALS` on the password, `EMAIL_TAKEN` on the e-mail,
+  `TOO_MANY_ATTEMPTS` / `REGISTRATION_CLOSED` under the submit control.
+- **The 401 handler is a registered callback.** `fetcher.ts` gains
+  `setUnauthorizedHandler`; `main.tsx` wires the concrete one (drop the session
+  query, `navigate` to `/` with `search.redirect`). `fetcher.ts` still knows no
+  router or cache, and the 401 still surfaces as an `ApiError`.
+- **`useRefreshSession()`** drops the cached `GET auth/session` on sign-in /
+  sign-up success, so the redirect target's guard and the shell's chrome
+  re-read the now-signed-in state.
+- **`toInternalPath`** validates the `redirect` search param — a same-origin
+  absolute path is kept, anything else (protocol, `//`, backslash, relative)
+  falls back to `/characters`.
+- **Catalogue:** `auth.email/password`, `signIn.*`, `signUp.*` (incl. the closed
+  notice), and `errors.EMAIL_TAKEN/INVALID_CREDENTIALS/TOO_MANY_ATTEMPTS/
+  REGISTRATION_CLOSED` in both `en.ts` and `pt.ts`; a runtime
+  `catalogue-parity.spec.ts` beside the compile-time `.test-d.ts`.
+- These screens are the first consumers of the generated *mutation* hooks —
+  task 07 dropped the `query: { useQuery: true }` override that had been forcing
+  every operation to a query hook.
+- Route-tree config: `tsr.config.json` added so the CLI (`tsr generate`) ignores
+  `*.test`/`*.e2e` files in `routes/`, matching the Vite plugin.
 
 ## References
 

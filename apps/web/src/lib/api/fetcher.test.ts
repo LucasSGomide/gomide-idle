@@ -1,10 +1,19 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ApiError, errorCode, fetcher, API_BASE_PATH } from './fetcher';
+import {
+  ApiError,
+  errorCode,
+  fetcher,
+  setUnauthorizedHandler,
+  API_BASE_PATH,
+} from './fetcher';
 
 describe('the fetch mutator', () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.restoreAllMocks();
+    setUnauthorizedHandler(undefined);
+  });
 
   // architecture-web.md rule 11 / FR.14.3: a relative base path and
   // `credentials` on every call, with no host compiled in.
@@ -56,5 +65,35 @@ describe('the fetch mutator', () => {
     expect(errorCode(new ApiError(400, 'VALIDATION_FAILED', 'x'))).toBe(
       'VALIDATION_FAILED',
     );
+  });
+
+  // task 08 AC8 / auth.md rule 26: a 401 on any request runs the one registered
+  // handler (main.tsx clears the session query and returns to sign-in), and the
+  // error still surfaces as an ApiError.
+  it('runs the unauthorized handler exactly once on a 401 and still throws', async () => {
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ code: 'NO_SESSION', message: 'x' }), {
+        status: 401,
+      }),
+    );
+
+    const error = await fetcher('/characters/gear').catch((caught) => caught);
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 401 });
+  });
+
+  it('does not run the unauthorized handler on a non-401 error', async () => {
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ code: 'INTERNAL_ERROR' }), { status: 500 }),
+    );
+
+    await fetcher('/server-meta').catch(() => undefined);
+    expect(handler).not.toHaveBeenCalled();
   });
 });

@@ -30,9 +30,7 @@ needs to run its own migrations and tests.
 
 ## Ready
 
-| # | Item | Est | Depends on | Status |
-|---|---|---|---|---|
-| [03](03-account-sign-up-and-login.md) | Account sign-up and login: accounts, sessions and the first guarded screen | 9 | 01, 02 | in-progress |
+_(none)_
 
 ## Blocked
 
@@ -48,3 +46,4 @@ _(none)_
 |---|---|---|---|---|
 | [01](01-the-api-foundation.md) | The API foundation: workspace, contract and the server's half of the first path | 10 | — | done |
 | [02](02-the-web-foundation.md) | The web foundation: shell, design system and the first rendered screen | 9 | 01 | done |
+| [03](03-account-sign-up-and-login.md) | Account sign-up and login: accounts, sessions and the first guarded screen | 9 | 01, 02 | done |

@@ -52,7 +52,7 @@ export default defineConfig({
       generatedRouteTree: './src/routeTree.gen.ts',
       autoCodeSplitting: true,
       // Keep colocated specs and the `-shell/` chrome out of the route tree.
-      routeFileIgnorePattern: '\\.(test|spec)\\.[tj]sx?$',
+      routeFileIgnorePattern: '\\.(test|spec|e2e)\\.[tj]sx?$',
     }),
     react(),
     tailwindcss(),

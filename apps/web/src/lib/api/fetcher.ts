@@ -28,6 +28,18 @@ export function errorCode(error: unknown): string {
   return error instanceof ApiError ? error.code : 'INTERNAL_ERROR';
 }
 
+// auth.md rule 26: a 401 is handled in exactly one place — here — by clearing
+// the session query and returning the player to sign-in with the route they
+// were on. This file knows no router or query cache, so main.tsx registers the
+// concrete handler; the 401 still surfaces as an ApiError to the caller.
+let unauthorizedHandler: (() => void) | undefined;
+
+export function setUnauthorizedHandler(
+  handler: (() => void) | undefined,
+): void {
+  unauthorizedHandler = handler;
+}
+
 // Orval's fetch client expects the mutator to resolve to this envelope.
 type FetchEnvelope<T> = { status: number; data: T; headers: Headers };
 
@@ -53,6 +65,9 @@ export async function fetcher<T>(
 
   if (!response.ok) {
     const errorBody = (body ?? {}) as ErrorBody;
+    // An expired or missing session, surfaced on whichever request ran next:
+    // handled once, here (auth.md rule 26). The error still propagates.
+    if (response.status === 401) unauthorizedHandler?.();
     // architecture-web.md rule 27: the client keeps the machine-readable `code`
     // and never renders the server's `message`.
     throw new ApiError(

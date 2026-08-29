@@ -14,14 +14,17 @@ import { mockServer } from '@/lib/api/mock-server';
 describe('the shell at /', () => {
   beforeEach(() => globalThis.localStorage.clear());
 
-  // wireframe 04 / FR.16.2: loading / renders the top bar over an empty body.
-  it('renders the top bar over an empty body', async () => {
+  // wireframe 08: `/` now carries the sign-in form in the body 02 reserved;
+  // the shell around it (top bar, footer) is unchanged.
+  it('renders the top bar over the sign-in screen', async () => {
     renderRoute('/');
     expect(await screen.findByRole('banner')).toBeInTheDocument();
     expect(screen.getByText(GAME_NAME).parentElement).toHaveTextContent(
       `${GAME_NAME}: ${ACTIVE_SEASON}`,
     );
-    expect(screen.getByRole('main')).toBeEmptyDOMElement();
+    expect(
+      await screen.findByRole('heading', { name: 'Sign in' }),
+    ).toBeInTheDocument();
   });
 
   // wireframe 04: a load with Portuguese mirrored paints the bar in Portuguese,

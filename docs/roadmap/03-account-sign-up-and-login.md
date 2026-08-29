@@ -1,6 +1,6 @@
 # 03 — Account sign-up and login: accounts, sessions and the first guarded screen
 
-**Depends on:** 01, 02 · **Status:** in-progress · **Estimate:** 9
+**Depends on:** 01, 02 · **Status:** done · **Estimate:** 9
 
 ## Context
 

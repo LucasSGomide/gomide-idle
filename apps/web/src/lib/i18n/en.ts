@@ -31,10 +31,38 @@ export const en = {
     GENERIC: 'Something went wrong. Reload to try again.',
     INTERNAL_ERROR: 'Version details are unavailable. Reload to try again.',
     VALIDATION_FAILED: 'The request was rejected. Reload to try again.',
+    // auth.md rule 27: the server translates the library's error into one of
+    // these codes; the web renders the code, never the message.
+    EMAIL_TAKEN: 'That address already has an account. Sign in instead.',
+    INVALID_CREDENTIALS: 'Wrong e-mail or password. Check both and try again.',
+    TOO_MANY_ATTEMPTS: 'Too many attempts. Wait a moment and try again.',
+    REGISTRATION_CLOSED:
+      'New accounts are closed for now. Sign in if you already have one.',
   },
   session: {
     // wireframe 07: the aria-live label while the session resolves.
     loading: 'Loading your account.',
+  },
+  // wireframe 08: design.md §5's Inputs and Buttons, §11's verb-first labels.
+  auth: {
+    email: 'E-mail',
+    password: 'Password',
+  },
+  signIn: {
+    title: 'Sign in',
+    submit: 'Sign in',
+    createLink: 'No account yet? Create one',
+  },
+  signUp: {
+    title: 'Create account',
+    submit: 'Create account',
+    emailHelper: 'Used to sign in. Never mailed.',
+    passwordHelper: '8 to 128 characters.',
+    signInLink: 'Already have an account? Sign in',
+    closedTitle: 'Sign-ups are closed',
+    closedBody:
+      'New accounts are closed for now. Sign in if you already have one.',
+    closedCta: 'Sign in',
   },
   errorBoundary: {
     title: 'This section could not be loaded.',

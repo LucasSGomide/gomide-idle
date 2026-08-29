@@ -118,10 +118,12 @@ describe('the _authed guard and the characters shell (task 07/07)', () => {
   it('sign-out calls the generated mutation and lands on /', async () => {
     const user = userEvent.setup();
     let hit = false;
+    let current = signedIn as { user: unknown; registrationOpen: boolean };
     mockServer.use(
-      http.get('*/auth/session', () => HttpResponse.json(signedIn)),
+      http.get('*/auth/session', () => HttpResponse.json(current)),
       http.post('*/auth/sign-out', () => {
         hit = true;
+        current = signedOut;
         return HttpResponse.json({ success: true });
       }),
     );

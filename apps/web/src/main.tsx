@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { I18nextProvider } from 'react-i18next';
 
+import { setUnauthorizedHandler } from './lib/api/fetcher';
+import { getAuthControllerGetCurrentSessionQueryKey } from './lib/api/generated/tormented-path';
 import { createAppI18n } from './lib/i18n/init';
 import { routeTree } from './routeTree.gen';
 import './lib/styles/app.css';
@@ -23,6 +25,18 @@ declare module '@tanstack/react-router' {
     router: typeof router;
   }
 }
+
+// auth.md rule 26: the one 401 handler, wired here where the router and the
+// cache are in scope. The screens never touch it.
+setUnauthorizedHandler(() => {
+  queryClient.removeQueries({
+    queryKey: getAuthControllerGetCurrentSessionQueryKey(),
+  });
+  void router.navigate({
+    to: '/',
+    search: { redirect: router.state.location.pathname },
+  });
+});
 
 // stack-web.md rule 52: the mirrored language is read synchronously here, before
 // the first render, so a returning Portuguese player never sees an English frame.

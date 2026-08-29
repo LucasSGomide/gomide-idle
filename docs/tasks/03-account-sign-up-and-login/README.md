@@ -33,4 +33,4 @@ so neither deferral is enforced by anything but this paragraph.
 | [05](05-socket-handshake-session-and-origin.md) | The socket handshake's session check and its Origin check | back-end | 02 | 6/6 | done |
 | [06](06-one-origin-dev-server-and-generated-auth-client.md) | One origin in development, and the generated auth client | full-stack | 02, 03, 05 | 9/9 | done |
 | [07](07-session-feature-authed-guard-and-characters-shell.md) | `features/session`, the `_authed` guard and the characters shell | front-end | 06 | 7/7 | done |
-| [08](08-sign-in-and-sign-up-screens.md) | The sign-in and sign-up screens | front-end | 04, 07 | 0/10 | not-started |
+| [08](08-sign-in-and-sign-up-screens.md) | The sign-in and sign-up screens | front-end | 04, 07 | 10/10 | done |
