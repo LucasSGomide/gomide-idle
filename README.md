@@ -382,6 +382,30 @@ check.
 A request with no `Origin` header at all — a native client, a same-origin call —
 is allowed through.
 
+**In production the list gets shorter, never wider.** The deployment puts the web
+files and the API on **one origin behind one proxy**, so a real player's browser
+sends that site's own origin — `SOCKET_ALLOWED_ORIGINS=https://your-domain`, one
+entry. Nothing in the code has to change: it is an environment variable,
+comma-separated, validated at start-up.
+
+It must never become a wildcard, and here is the exact thing it stops. A browser
+sets `Origin` itself and page JavaScript cannot forge it, and a WebSocket upgrade
+is **not** covered by CORS. Without this check, any other website a signed-in
+player visits could open an authenticated socket to this API using that player's
+cookie, and read whatever it says. That is the whole attack, and the allow-list
+is the whole defence.
+
+What it does **not** do is gate access generally — `curl` simply omits the header
+and is let through by the rule above. That is deliberate. The session cookie is
+what says who you are; the allow-list only protects browser users from *other
+websites*.
+
+**One rough edge:** the variable has a default, and the default is the Vite dev
+origin. A deployment that forgets to set it fails *closed* — real browsers get
+refused at the upgrade and the socket never connects — which is the safe
+direction, but the symptom (a game that loads and then does nothing) does not
+name its cause. Set it explicitly in every deployed environment.
+
 **3. `SOCKET_PROTOCOL_VERSION` is how a stale client refuses to play.** It is a
 single integer, declared in
 [`libs/contracts/src/protocol.ts`](libs/contracts/src/protocol.ts), hard-coded
