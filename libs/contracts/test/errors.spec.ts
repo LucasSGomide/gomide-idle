@@ -1,11 +1,19 @@
 import {
   assertSituationCode,
+  ERROR_CODES,
   ErrorCodeConventionError,
   isSituationCode,
 } from '../src/errors.js';
 
 // architecture-api.md rule 39 / naming.md rule 15.
 describe('assertSituationCode', () => {
+  it.each(Object.values(ERROR_CODES))(
+    'every code in the vocabulary passes: %s',
+    (code) => {
+      expect(() => assertSituationCode(code)).not.toThrow();
+    },
+  );
+
   it('accepts a code that names the situation', () => {
     expect(() => assertSituationCode('EMAIL_TAKEN')).not.toThrow();
     expect(() => assertSituationCode('VALIDATION_FAILED')).not.toThrow();

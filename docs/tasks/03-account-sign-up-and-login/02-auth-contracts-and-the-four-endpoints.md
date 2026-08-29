@@ -47,14 +47,42 @@
 
 ## Acceptance criteria
 
-- [ ] `(integration)` `POST auth/sign-up` with a fresh e-mail and a valid password creates the account, signs the player in and sets the session cookie on the response
-- [ ] `(integration)` `POST auth/sign-up` with an e-mail that already has an account returns `EMAIL_TAKEN` and leaves one row
-- [ ] `(integration)` `POST auth/sign-in` with correct credentials sets the session cookie; a wrong password returns `INVALID_CREDENTIALS` and sets none
-- [ ] `(integration)` `POST auth/sign-out` deletes that session's row and clears the cookie, while a second session for the same user still resolves
-- [ ] `(integration)` `GET auth/session` returns the signed-in user's id and e-mail read from the cookie
-- [ ] `(unit)` every code added to `ERROR_CODES` passes `assertSituationCode`
-- [ ] `(integration)` a password outside 8–128 characters is refused with `VALIDATION_FAILED` and creates no row
-- [ ] `(integration)` the emitted OpenAPI document carries one named component per auth request and response schema, with no inline duplicate left by `cleanupOpenApiDoc`
+- [x] `(integration)` `POST auth/sign-up` with a fresh e-mail and a valid password creates the account, signs the player in and sets the session cookie on the response
+- [x] `(integration)` `POST auth/sign-up` with an e-mail that already has an account returns `EMAIL_TAKEN` and leaves one row
+- [x] `(integration)` `POST auth/sign-in` with correct credentials sets the session cookie; a wrong password returns `INVALID_CREDENTIALS` and sets none
+- [x] `(integration)` `POST auth/sign-out` deletes that session's row and clears the cookie, while a second session for the same user still resolves
+- [x] `(integration)` `GET auth/session` returns the signed-in user's id and e-mail read from the cookie
+- [x] `(unit)` every code added to `ERROR_CODES` passes `assertSituationCode`
+- [x] `(integration)` a password outside 8–128 characters is refused with `VALIDATION_FAILED` and creates no row
+- [x] `(integration)` the emitted OpenAPI document carries one named component per auth request and response schema, with no inline duplicate left by `cleanupOpenApiDoc`
+
+## As built
+
+- **`asResponse: true`, not `returnHeaders`.** Every use case calls
+  `auth.api.*({ ..., asResponse: true })`; Better Auth 1.7.2 hands back a web
+  `Response` for success _and_ failure (a 4xx body `{ code, message }`, no
+  throw). The use case normalises it to `AuthApiResultType`
+  (`{ ok, status, body, setCookie }`); the controller copies `setCookie` onto
+  the Fastify reply, sets its own success status, and on `!ok` maps `body.code`
+  to one `ERROR_CODES` entry.
+- **The library's error codes map as:**
+  `USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL` -> `EMAIL_TAKEN` (409),
+  `INVALID_EMAIL_OR_PASSWORD` -> `INVALID_CREDENTIALS` (401), anything else -> a
+  bare 500. Done once, in `entrypoint/auth-error.ts`.
+- **Body shape is checked at the entrypoint** with `schema.safeParse` and a
+  `CodedException('VALIDATION_FAILED', ...)` on failure -- the same pattern
+  `system.gateway.ts` uses for socket messages -- rather than a global
+  `ZodValidationPipe`, which stays out of scope until more than auth has a body
+  (architecture-api.md rule 26).
+- **`GetSessionUseCase` is exported** from `AuthModule` so task 03's guard and
+  task 05's handshake read the session through the same use case (auth.md
+  rule 32, architecture-api.md rule 25).
+- **`AuthInstanceType` and `AUTH_INSTANCE` both live in `auth.tokens.ts`** at the
+  module root, so `application/` can type the injected instance without importing
+  `infrastructure/`.
+- sign-up responds 201, sign-in / sign-out / session 200; the DTO classes carry
+  no top-level `.meta({ id })` and `cleanupOpenApiDoc` hoists `AuthUser` on its
+  own.
 
 ## References
 

@@ -13,6 +13,13 @@ export const ERROR_CODES = {
   INTERNAL_ERROR: 'INTERNAL_ERROR',
   // A request body / query / param that failed its schema.
   VALIDATION_FAILED: 'VALIDATION_FAILED',
+  // Auth (roadmap item 03). Declared here before being thrown: EMAIL_TAKEN and
+  // INVALID_CREDENTIALS in task 02's controller, TOO_MANY_ATTEMPTS in task 04's
+  // throttler, REGISTRATION_CLOSED in task 03's sign-up guard.
+  EMAIL_TAKEN: 'EMAIL_TAKEN',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  TOO_MANY_ATTEMPTS: 'TOO_MANY_ATTEMPTS',
+  REGISTRATION_CLOSED: 'REGISTRATION_CLOSED',
 } as const;
 
 export type ErrorCodeType = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

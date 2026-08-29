@@ -3,7 +3,12 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
 import { ENV, type EnvType } from '../../config/env.js';
+import { GetSessionUseCase } from './application/get-session.use-case.js';
+import { SignInUseCase } from './application/sign-in.use-case.js';
+import { SignOutUseCase } from './application/sign-out.use-case.js';
+import { SignUpUseCase } from './application/sign-up.use-case.js';
 import { AUTH_INSTANCE } from './auth.tokens.js';
+import { AuthController } from './entrypoint/auth.controller.js';
 import { createAuthInstance } from './infrastructure/auth.instance.js';
 
 // The auth module (stack-api.md rule 30: `auth` holds the library and nothing
@@ -18,6 +23,7 @@ import { createAuthInstance } from './infrastructure/auth.instance.js';
 // AUTH_INSTANCE without re-importing this module.
 @Global()
 @Module({
+  controllers: [AuthController],
   providers: [
     {
       provide: AUTH_INSTANCE,
@@ -30,8 +36,12 @@ import { createAuthInstance } from './infrastructure/auth.instance.js';
         return createAuthInstance(drizzle({ client }));
       },
     },
+    SignUpUseCase,
+    SignInUseCase,
+    SignOutUseCase,
+    GetSessionUseCase,
   ],
-  exports: [AUTH_INSTANCE],
+  exports: [AUTH_INSTANCE, GetSessionUseCase],
 })
 export class AuthModule implements OnModuleDestroy {
   private static client: ReturnType<typeof postgres> | undefined;
