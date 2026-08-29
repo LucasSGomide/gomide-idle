@@ -123,6 +123,46 @@
 - `requirements.md` `FR.10.1`, `FR.10.3`, `FR.11.3`, `FR.11.6`, `FR.12.2`,
   `FR.13.3`, `FR.14.3`, `FR.15.4`, `UN.16`.
 
+## As built
+
+What the seven slices settled that the twelve steps did not:
+
+- **Shell chrome became its own folder, `routes/-shell/`.** Step 5 put the top
+  bar "in `__root.tsx`" and Technical Detail names only `__root.tsx` and
+  `index.tsx` under `routes/`. As built the bar, footer, language switcher,
+  wordmark, error block, error boundary, root error view and out-of-date screen
+  are nine modules under `routes/-shell/` — a `-`-prefixed folder TanStack Router
+  keeps out of the route tree. Shell chrome is neither a feature nor generic
+  enough for `ui/`, and `__root.tsx` holding all of it would be unreadable. Later
+  screens inherit this location.
+- **The error boundary is two mechanisms, not one.** Step 9 reads as a single
+  thing. `architecture-web.md` rule 23 needs both TanStack Router's
+  `errorComponent` (a route component throwing during render) and a hand-written
+  `ErrorBoundary` class (throws outside that path — an event-handler re-render, a
+  shell child). The top bar and footer sit outside both, which is what keeps them
+  on screen in either case.
+- **Orval's client resolves an envelope, so consumers unwrap it.** The mutator
+  (`lib/api/fetcher.ts`) returns `{ status, data, headers }`, not the bare body.
+  The footer reads `server_meta` through `features/server-meta/use-server-meta.ts`,
+  which re-exports the generated hook with a `select` that strips the envelope —
+  so even shell chrome goes through a `features/` hook (`architecture-web.md`
+  rule 14) rather than calling the generated hook directly as step 10 implies.
+- **The token generator sits outside `src/` and emits a second export.** It lives
+  in `scripts/theme/`, not one of the six folders. `theme.css` is a Tailwind v4
+  `@theme` block — it *is* the Tailwind config, so step 3 needs no separate
+  config file. `theme.ts` also emits `themeColorHex`, a `0x`-integer colour
+  subset for PixiJS text styles (`stack-web.md` rule 54), which none of the
+  twelve steps mention.
+- **Non-generated CSS lives in `lib/styles/app.css`, apart from `theme.css`.**
+  `app.css` imports Tailwind, imports the generated `theme.css`, and adds the
+  `@font-face` and `color-scheme` base layer — the parts a theme regenerate must
+  not clobber. Step 3 folded the fonts into this slice without saying where the
+  hand-written CSS goes.
+- **The socket guard is split in two.** `transport/socket.ts` opens the
+  connection; `transport/protocol-guard.tsx` is the `useProtocolGuard` hook
+  `__root.tsx` calls. Step 11 described one file; the transport/React seam forced
+  the split, keeping `.tsx` and React out of `socket.ts`.
+
 ## Blockers:
 
 - The footer is a **New pattern** and [`design.md`](../design.md) describes no
