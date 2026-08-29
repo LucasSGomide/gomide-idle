@@ -2,7 +2,7 @@
 
 .PHONY: help install env dev \
         db-up db-down db-reset db-studio migrate migrate-generate \
-        lint fmt fmt-check typecheck build depcruise gen-open-api \
+        lint fmt fmt-check typecheck build depcruise gen-open-api generate \
         test test-unit test-integration check clean
 
 help:  ## print this help
@@ -62,11 +62,14 @@ typecheck:  ## type-check every package
 build:  ## build every package
 	pnpm -r build
 
-depcruise:  ## check dependency boundaries (dependency-cruiser)
-	pnpm --filter @gomide/api depcruise
+depcruise:  ## check dependency boundaries (dependency-cruiser, api + web)
+	pnpm depcruise
 
 gen-open-api:  ## regenerate apps/api/openapi.json from the running contract
 	pnpm --filter @gomide/api generate:openapi
+
+generate:  ## regenerate every generated file (OpenAPI, theme, route tree, Orval client)
+	pnpm generate
 
 ## --- test ----------------------------------------------------------------
 
@@ -82,8 +85,13 @@ test-integration:  ## run only the API Postgres integration test project
 ## --- gates ---------------------------------------------------------------
 
 check: lint fmt-check typecheck depcruise test  ## run the full CI gate locally
-	$(MAKE) gen-open-api
-	git diff --exit-code apps/api/openapi.json
+	$(MAKE) generate
+	git diff --exit-code \
+		apps/api/openapi.json \
+		apps/web/src/theme.css \
+		apps/web/src/theme.ts \
+		apps/web/src/routeTree.gen.ts \
+		apps/web/src/lib/api/generated
 
 clean:  ## remove build output, coverage and tsbuildinfo (keeps node_modules)
 	pnpm -r exec -- rm -rf dist coverage

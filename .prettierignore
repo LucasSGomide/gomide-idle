@@ -13,6 +13,15 @@ apps/api/migrations/
 # Generated document, checked for drift by `make gen-open-api` / CI.
 apps/api/openapi.json
 
+# Generated web output — the theme (stack-web.md rule 45), the route tree
+# (rule 38) and Orval's client (rules 57-58). All regenerated and drift-checked
+# in CI; their formatting is the generator's, not Prettier's.
+apps/web/src/theme.css
+apps/web/src/theme.ts
+apps/web/src/routeTree.gen.ts
+apps/web/src/lib/api/generated/
+apps/web/test/fixtures/
+
 # Docs are hand-authored prose and the roadmap engine writes the tables in
 # docs/ — Prettier stays out of both (formats code and config only).
 *.md

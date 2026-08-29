@@ -5,9 +5,10 @@ on:
     branches: [main]
   pull_request:
 
-# The test step runs both Jest projects — the unit project and the integration
-# project, which starts one Postgres container via testcontainers (Docker is
-# available on ubuntu-latest by default).
+# The test step runs every package's tests: apps/api's two Jest projects (the
+# unit project and the Postgres integration project, which starts one container
+# via testcontainers — Docker is on ubuntu-latest by default) and apps/web's
+# Vitest suite, which fakes the network at the boundary with MSW.
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -30,16 +31,21 @@ jobs:
       - name: Lint (oxlint, every package)
         run: pnpm lint
 
-      - name: Regenerate the OpenAPI document and fail on any drift
+      - name: Regenerate every generated file and fail on any drift
         run: |
           pnpm generate
-          git diff --exit-code apps/api/openapi.json
+          git diff --exit-code \
+            apps/api/openapi.json \
+            apps/web/src/theme.css \
+            apps/web/src/theme.ts \
+            apps/web/src/routeTree.gen.ts \
+            apps/web/src/lib/api/generated
 
       - name: Type-check (every package)
         run: pnpm -r typecheck
 
-      - name: Dependency boundaries (dependency-cruiser, from apps/api)
-        run: pnpm --filter @gomide/api depcruise
+      - name: Dependency boundaries (dependency-cruiser, apps/api and apps/web)
+        run: pnpm depcruise
 
-      - name: Test (Jest unit + Postgres integration, every package)
-        run: pnpm test
+      - name: Test (Jest for apps/api and libs, Vitest for apps/web)
+        run: pnpm -r test

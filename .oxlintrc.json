@@ -11,7 +11,11 @@
     "**/coverage/**",
     "**/*.d.ts",
     "apps/api/migrations/**",
-    "apps/api/test/fixtures/**"
+    "apps/api/test/fixtures/**",
+    "apps/web/test/fixtures/**",
+    "apps/web/src/routeTree.gen.ts",
+    "apps/web/src/theme.ts",
+    "apps/web/src/lib/api/generated/**"
   ],
   "rules": {
     "no-console": "error"
