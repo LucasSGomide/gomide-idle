@@ -27,7 +27,11 @@ describe('the socket handshake: session check and Origin check (task 05/05)', ()
   const open: ClientSocket[] = [];
 
   beforeAll(async () => {
-    app = await createApiApp(makeTestEnv(), { logDestination: sink });
+    // This suite asserts on the lines themselves, so it asks for a level rather
+    // than taking makeTestEnv's silent default.
+    app = await createApiApp(makeTestEnv({ LOG_LEVEL: 'info' }), {
+      logDestination: sink,
+    });
     await app.listen(0, '127.0.0.1');
     url = (await app.getUrl())
       .replace('[::1]', '127.0.0.1')

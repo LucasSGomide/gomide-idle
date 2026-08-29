@@ -6,6 +6,7 @@ import {
 
 import { AppModule } from './app.module.js';
 import { type EnvType } from './config/env.js';
+import { NestPinoLogger } from './logging/nest-logger.js';
 import { createRootLogger } from './logging/pino.js';
 import { installRequestLogging } from './logging/request-logging.js';
 import { resolveObservability } from './observability/observability.js';
@@ -46,7 +47,9 @@ export async function createApiApp(
     // (FR.13.5, stack-api.md rule 49).
     new FastifyAdapter({ trustProxy: true }),
     {
-      logger: false,
+      // Nest's own boot output goes through the same pino instance as every
+      // other line rather than being discarded (rule 50 keeps one log shape).
+      logger: new NestPinoLogger(rootLogger),
       // Let bootstrap errors surface to the caller (main.ts catches and exits)
       // rather than NestFactory calling process.exit itself.
       abortOnError: false,

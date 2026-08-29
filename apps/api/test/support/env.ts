@@ -10,6 +10,11 @@ export function makeTestEnv(
     NODE_ENV: 'test',
     DATABASE_URL:
       process.env.DATABASE_URL ?? 'postgres://user:pass@127.0.0.1:5432/test',
+    // Nest's boot output now goes through pino rather than being discarded, so
+    // an app booted by a test would print its whole route map into the runner.
+    // A test that asserts on log lines builds its own root logger at an explicit
+    // level (log-shape.spec.ts), so silencing the default costs no coverage.
+    LOG_LEVEL: 'silent',
     ...overrides,
   });
 }
