@@ -1,6 +1,6 @@
 # 01 — The API foundation: workspace, contract and the server's half of the first path
 
-**Depends on:** — · **Status:** not-started · **Estimate:** 10
+**Depends on:** — · **Status:** done · **Estimate:** 10
 
 ## Context
 
@@ -112,6 +112,43 @@
   carried and never compared.
 - `naming.md` rules 10–12 — the DAO, the Drizzle table and the injection token.
 - `requirements.md` `UN.9`–`UN.15`, `UN.21`.
+
+## As built
+
+- **`.meta({ id })` could not go on the response DTO schema.** Technical Detail 3
+  and `stack-api.md` rule 47 assumed every `libs/contracts` schema carries it. A
+  top-level `.meta` id passed into `createZodDto` collides with
+  `cleanupOpenApiDoc`'s own hoist, so `serverMetaResponseSchema` carries none —
+  its OpenAPI component is named by the nestjs-zod DTO class (`ServerMetaResponse`)
+  instead. The socket schemas, which skip `createZodDto`, keep `.meta({ id })`.
+  Task 05's "schema carries an explicit `.meta({ id })`" criterion was accepted
+  against this substitute; `openapi-drift.spec.ts` is what proves the component is
+  named and never positional.
+- **The build id is read from the environment, not the seeded row.** The open
+  decision resolved this way: the first migration seeds `build_id = 'unknown'` as
+  a placeholder only, and `resolveBuildId(env.BUILD_ID, seeded)` overlays the
+  running process's id at read time, because one shared row cannot say which
+  instance answered. `server_meta` also gained a `CHECK (id = 1)` singleton
+  constraint so the row cannot be duplicated.
+- **The nestjs-zod peer-override test asserts the peer still admits the 11 line,
+  not that 12 works.** `stack-api.md` rule 41's undecided assertion landed as:
+  `nestjs-zod-peer.spec.ts` fails the day `nestjs-zod` drops its `@nestjs/{common,
+  swagger} ^11` peer — the moment the override starts bridging from a surface
+  that no longer exists and a human must re-check it.
+- **The socket integration tests run over the polling transport.** Jest's
+  `--experimental-vm-modules` loader mangles the websocket transport's binary
+  frames, so `socket-handshake.spec.ts` forces `transports: ['polling']`; every
+  assertion there is transport-agnostic. The polling client also throws inside
+  `engine.io-parser` if closed explicitly under that loader, so the tests let the
+  server-side close drop connections.
+- **dependency-cruiser is shelled out as a subprocess in its own test.**
+  `boundaries.spec.ts` runs the `depcruise` binary rather than importing it,
+  because dependency-cruiser's `#report` subpath imports do not resolve under
+  Jest's ESM loader.
+- **pnpm's release-age gate is off (`minimumReleaseAge: 0`).** It flags every
+  deliberately-pinned current package (NestJS 12, Drizzle `1.0.0-rc.4`, Jest 30)
+  and would need a per-package exclude list that goes stale on the next bump;
+  dependency review happens at PR time instead.
 
 ## Blockers:
 

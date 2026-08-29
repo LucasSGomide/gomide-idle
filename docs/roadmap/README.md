@@ -16,17 +16,16 @@ permanent ID, never renumbered**. Ordering lives in this table only.
 - The prose above the table is hand-written and says **why** the next item is
   next. The table sorts by estimate; that sort is not a priority.
 
-**Next up: [01](01-the-api-foundation.md).** The repository is documentation
-and nothing else, so 01 writes its first line of code and every other item
-waits on it. [02](02-the-web-foundation.md) is blocked on the OpenAPI document
-01 produces, and the **Deployment** feature (`requirements.md` `UN.17`–`UN.20`)
-still has no item.
+**Nothing is queued.** [01](01-the-api-foundation.md) and
+[02](02-the-web-foundation.md) shipped the API and web foundations end to end —
+the pnpm workspace, both stacks, the normalised error and log shapes, and the
+`server_meta` path from Postgres to a rendered screen. The next items —
+**Deployment** (`requirements.md` `UN.17`–`UN.20`) and **Account sign-up and
+login** — are referenced but not yet written.
 
 ## Ready
 
-| # | Item | Est | Depends on | Status |
-|---|---|---|---|---|
-| [01](01-the-api-foundation.md) | The API foundation: workspace, contract and the server's half of the first path | 10 | — | not-started |
+_(none)_
 
 ## Blocked
 
@@ -40,4 +39,5 @@ _(none)_
 
 | # | Item | Est | Depends on | Status |
 |---|---|---|---|---|
+| [01](01-the-api-foundation.md) | The API foundation: workspace, contract and the server's half of the first path | 10 | — | done |
 | [02](02-the-web-foundation.md) | The web foundation: shell, design system and the first rendered screen | 9 | 01 | done |
