@@ -2,6 +2,7 @@
 
 .PHONY: help install env dev \
         db-up db-down db-reset db-studio migrate migrate-generate \
+        dev-api dev-web dev-all \
         lint fmt fmt-check typecheck build depcruise gen-open-api generate \
         test test-unit test-integration check clean
 
@@ -19,9 +20,18 @@ env:  ## create .env from .env.example if it does not exist yet
 
 ## --- develop -------------------------------------------------------------
 
-dev:  ## start Postgres, then run the API in watch mode
+dev: dev-api  ## alias for dev-api (Postgres + API in watch mode)
+
+dev-api:  ## start Postgres, then run the API in watch mode
 	docker compose up -d --wait postgres
 	pnpm --filter @gomide/api dev
+
+dev-web:  ## run the web app in watch mode (Vite dev server)
+	pnpm --filter @gomide/web dev
+
+dev-all:  ## start Postgres, then run the API and web dev servers together
+	docker compose up -d --wait postgres
+	pnpm --parallel --filter @gomide/api --filter @gomide/web dev
 
 ## --- database ------------------------------------------------------------
 
